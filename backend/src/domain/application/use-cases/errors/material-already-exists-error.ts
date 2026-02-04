@@ -1,6 +1,6 @@
-import { UseCaseError } from "@/core/errors/use-case-error";
+import { UseCasesError } from "@/core/errors/use-cases-error";
 
-export class MaterialAlreadyExistsError extends Error implements UseCaseError {
+export class MaterialAlreadyExistsError extends Error implements UseCasesError {
   constructor(identifier: string) {
     super(`Material "${identifier}" already exists`)
   }

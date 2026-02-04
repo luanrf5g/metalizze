@@ -1,5 +1,6 @@
 import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 import { Material } from "@/domain/enterprise/entities/material";
+import { Slug } from "@/domain/enterprise/value-objects/slug";
 import { Prisma, Material as PrismaMaterial } from "@prisma/client";
 
 export class PrismaMaterialMapper {
@@ -7,7 +8,9 @@ export class PrismaMaterialMapper {
     return {
       id: material.id.toString(),
       name: material.name,
-      createdAt: material.createdAt
+      slug: material.slug.value,
+      createdAt: material.createdAt,
+      updatedAt: material.updatedAt,
     }
   }
 
@@ -15,7 +18,9 @@ export class PrismaMaterialMapper {
     return Material.create(
       {
         name: raw.name,
-        createdAt: raw.createdAt
+        slug: Slug.create(raw.slug),
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
       },
       new UniqueEntityId(raw.id)
     )

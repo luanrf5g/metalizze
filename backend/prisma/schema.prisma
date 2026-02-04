@@ -13,9 +13,33 @@ datasource db {
 }
 
 model Material {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  sheets Sheet[]
 
   @@map("materials")
+}
+
+model Sheet {
+  id        String  @id @default(uuid())
+  sku       String
+  width     Float
+  height    Float
+  thickness Float
+  quantity  Int     @default(0)
+  owner     String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  materialId String   @map("material_id")
+  material   Material @relation(fields: [materialId], references: [id])
+
+  @@unique([materialId, width, height, thickness, owner])
+  @@map("sheets")
 }

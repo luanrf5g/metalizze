@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { PrismaService } from '@/infra/database/prisma/prisma.service'
 import { AppModule } from '@/app.module'
-import { DatabaseModule } from '@/infra/database/database.module'
 
 describe('Create Material (E2E)', () => {
   let app: INestApplication
@@ -24,7 +23,7 @@ describe('Create Material (E2E)', () => {
     const response = await request(app.getHttpServer())
       .post('/materials')
       .send({
-        name: 'Aço E2E 01',
+        name: 'Aço Inox',
       })
 
     expect(response.statusCode).toBe(201)
@@ -34,6 +33,6 @@ describe('Create Material (E2E)', () => {
     expect(materialOnDatabase).toBeTruthy()
     // Normalizamos a texto na criação para a primeira letra ser maiuscula
     // e o restante ser minúscula então o correto é Aço E2e 01
-    expect(materialOnDatabase?.name).toBe('Aço E2e 01')
+    expect(materialOnDatabase?.slug).toBe('aco-inox')
   })
 })

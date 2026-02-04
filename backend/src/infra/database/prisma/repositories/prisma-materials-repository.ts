@@ -8,7 +8,7 @@ import { Injectable } from "@nestjs/common";
 export class PrismaMaterialsRepository implements MaterialsRepository {
   constructor(private prisma: PrismaService) { }
 
-  async create(material: Material): Promise<void> {
+  async create(material: Material) {
     const data = PrismaMaterialMapper.toPrisma(material)
 
     await this.prisma.material.create({
@@ -16,9 +16,19 @@ export class PrismaMaterialsRepository implements MaterialsRepository {
     })
   }
 
-  async findByName(name: string): Promise<Material | null> {
+  async findByName(name: string) {
     const material = await this.prisma.material.findUnique({
       where: { name }
+    })
+
+    if (!material) return null
+
+    return PrismaMaterialMapper.toDomain(material)
+  }
+
+  async findById(id: string) {
+    const material = await this.prisma.material.findUnique({
+      where: { id }
     })
 
     if (!material) return null
