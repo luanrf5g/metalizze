@@ -18,14 +18,10 @@ export class PrismaMaterialsRepository implements MaterialsRepository {
 
   async findByName(name: string): Promise<Material | null> {
     const material = await this.prisma.material.findUnique({
-      where: {
-        name
-      }
+      where: { name }
     })
 
-    if(!material) {
-      return null
-    }
+    if (!material) return null
 
     return PrismaMaterialMapper.toDomain(material)
   }
