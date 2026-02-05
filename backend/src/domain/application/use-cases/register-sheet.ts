@@ -4,6 +4,7 @@ import { Sheet } from "@/domain/enterprise/entities/sheet"
 import { SheetsRepository } from "../repositories/sheets-repository"
 import { MaterialsRepository } from "../repositories/materials-repository"
 import { UniqueEntityId } from "@/core/entities/unique-entity-id"
+import { Injectable } from "@nestjs/common"
 
 interface RegisterSheetUseCaseRequest {
   materialId: string,
@@ -21,6 +22,7 @@ type RegisterSheetUseCaseResponse = Either<
   }
 >
 
+@Injectable()
 export class RegisterSheetUseCase {
   constructor(
     private sheetsRepository: SheetsRepository,

@@ -42,7 +42,7 @@ beforeAll(async () => {
     process.env.DATABASE_URL = generateDatabaseUrlForDatabase(testDbName)
     execSync('npx prisma migrate deploy')
 
-    console.log(`🧪 [setup-e2e] created test database: ${testDbName}`)
+    // console.log(`🧪 [setup-e2e] created test database: ${testDbName}`)
   } catch (err: any) {
     console.error(
       'Failed to create test database. Ensure the DATABASE_URL user has CREATE DATABASE permission and that the server allows creating databases.',
@@ -70,7 +70,7 @@ afterAll(async () => {
       [testDbName],
     )
     await adminPool.query(`DROP DATABASE IF EXISTS "${testDbName}"`)
-    console.log(`🧪 [setup-e2e] dropped test database: ${testDbName}`)
+    // console.log(`🧪 [setup-e2e] dropped test database: ${testDbName}`)
   } finally {
     await adminPool.end()
   }

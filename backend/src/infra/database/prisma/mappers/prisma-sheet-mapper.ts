@@ -1,0 +1,37 @@
+import { UniqueEntityId } from "@/core/entities/unique-entity-id";
+import { Sheet } from "@/domain/enterprise/entities/sheet";
+import { Prisma, Sheet as PrismaSheet } from "@prisma/client";
+
+export class PrismaSheetMapper {
+  static toDomain(raw: PrismaSheet): Sheet {
+    return Sheet.create(
+      {
+        materialId: new UniqueEntityId(raw.materialId),
+        owner: raw.owner,
+        sku: raw.sku,
+        width: raw.width,
+        height: raw.height,
+        thickness: raw.thickness,
+        quantity: raw.quantity,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      new UniqueEntityId(raw.id)
+    )
+  }
+
+  static toPrisma(sheet: Sheet): Prisma.SheetUncheckedCreateInput {
+    return {
+      id: sheet.id.toString(),
+      materialId: sheet.materialId.toString(),
+      owner: sheet.owner,
+      sku: sheet.sku,
+      width: sheet.width,
+      height: sheet.height,
+      thickness: sheet.thickness,
+      quantity: sheet.quantity,
+      createdAt: sheet.createdAt,
+      updatedAt: sheet.updatedAt
+    }
+  }
+}
