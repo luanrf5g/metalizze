@@ -26,13 +26,12 @@ model Material {
 }
 
 model Sheet {
-  id        String  @id @default(uuid())
+  id        String @id @default(uuid())
   sku       String
   width     Float
   height    Float
   thickness Float
-  quantity  Int     @default(0)
-  owner     String?
+  quantity  Int    @default(0)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
@@ -40,6 +39,24 @@ model Sheet {
   materialId String   @map("material_id")
   material   Material @relation(fields: [materialId], references: [id])
 
-  @@unique([materialId, width, height, thickness, owner])
+  clientId String? @map("client_id")
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  @@unique([materialId, width, height, thickness, clientId])
   @@map("sheets")
+}
+
+model Client {
+  id       String  @id @default(uuid())
+  name     String
+  document String  @unique // CPF ou CNPJ
+  phone    String?
+  email    String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  sheets Sheet[] // um client pode ter várias chapas
+
+  @@map("clients")
 }

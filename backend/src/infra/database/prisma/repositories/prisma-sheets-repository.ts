@@ -32,7 +32,7 @@ export class PrismaSheetsRepository implements SheetsRepository {
     width: number,
     height: number,
     thickness: number,
-    owner: string | null
+    clientId: string | null
   ) {
     const sheet = await this.prismaService.sheet.findFirst({
       where: {
@@ -40,7 +40,7 @@ export class PrismaSheetsRepository implements SheetsRepository {
         width,
         height,
         thickness,
-        owner
+        clientId
       }
     })
 

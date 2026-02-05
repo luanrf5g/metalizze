@@ -19,15 +19,17 @@ export class InMemorySheetsRepository implements SheetsRepository {
     width: number,
     height: number,
     thickness: number,
-    owner: string | null
+    clientId: string | null
   ) {
     const sheet = this.items.find((item) => {
+      const itemClientId = item.clientId ? item.clientId.toString() : null
+
       return (
         item.materialId.toString() === materialId &&
         item.width === width &&
         item.height === height &&
         item.thickness === thickness &&
-        item.owner === owner
+        itemClientId === clientId
       )
     })
 

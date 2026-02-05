@@ -7,7 +7,7 @@ export class PrismaSheetMapper {
     return Sheet.create(
       {
         materialId: new UniqueEntityId(raw.materialId),
-        owner: raw.owner,
+        clientId: raw.clientId ? new UniqueEntityId(raw.clientId) : null,
         sku: raw.sku,
         width: raw.width,
         height: raw.height,
@@ -24,7 +24,7 @@ export class PrismaSheetMapper {
     return {
       id: sheet.id.toString(),
       materialId: sheet.materialId.toString(),
-      owner: sheet.owner,
+      clientId: sheet.clientId?.toString() ?? null,
       sku: sheet.sku,
       width: sheet.width,
       height: sheet.height,

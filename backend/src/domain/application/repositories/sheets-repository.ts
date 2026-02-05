@@ -8,6 +8,6 @@ export abstract class SheetsRepository {
     width: number,
     height: number,
     thickness: number,
-    owner: string | null
+    clientId: string | null
   ): Promise<Sheet | null>
 }

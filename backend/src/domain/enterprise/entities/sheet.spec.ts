@@ -13,7 +13,23 @@ describe('Sheet Entity', () => {
 
     expect(sheet).toBeTruthy()
     expect(sheet.quantity).toBe(0)
-    expect(sheet.owner).toBeNull()
+    expect(sheet.clientId).toBeNull()
+  })
+
+  it('should be able to create a sheet for a client', () => {
+    const clientId = new UniqueEntityId()
+
+    const sheet = Sheet.create({
+      materialId: new UniqueEntityId(),
+      clientId: clientId,
+      sku: 'TEST-SKU',
+      width: 1000,
+      height: 1000,
+      thickness: 1,
+      quantity: 5
+    })
+
+    expect(sheet.clientId).toEqual(clientId)
   })
 
   it('should be able to increase stock', () => {

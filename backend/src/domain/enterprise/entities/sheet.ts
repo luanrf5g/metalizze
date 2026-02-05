@@ -4,7 +4,7 @@ import { Optional } from "@/core/types/optional";
 
 export interface SheetProps {
   materialId: UniqueEntityId,
-  owner?: string | null,
+  clientId?: UniqueEntityId | null,
   sku: string,
   width: number,
   height: number,
@@ -16,7 +16,7 @@ export interface SheetProps {
 
 export class Sheet extends Entity<SheetProps> {
   get materialId() { return this.props.materialId }
-  get owner() { return this.props.owner }
+  get clientId() { return this.props.clientId }
   get sku() { return this.props.sku }
   get width() { return this.props.width }
   get height() { return this.props.height }
@@ -45,13 +45,13 @@ export class Sheet extends Entity<SheetProps> {
   }
 
   static create(
-    props: Optional<SheetProps, 'createdAt' | 'quantity' | 'owner'>,
+    props: Optional<SheetProps, 'createdAt' | 'quantity' | 'clientId'>,
     id?: UniqueEntityId
   ) {
     const sheet = new Sheet(
       {
         ...props,
-        owner: props.owner ?? null,
+        clientId: props.clientId ?? null,
         quantity: props.quantity ?? 0,
         createdAt: props.createdAt ?? new Date()
       },
