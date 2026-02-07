@@ -4,16 +4,6 @@ import { Slug } from "@/domain/enterprise/value-objects/slug";
 import { Prisma, Material as PrismaMaterial } from "@prisma/client";
 
 export class PrismaMaterialMapper {
-  static toPrisma(material: Material): Prisma.MaterialUncheckedCreateInput {
-    return {
-      id: material.id.toString(),
-      name: material.name,
-      slug: material.slug.value,
-      createdAt: material.createdAt,
-      updatedAt: material.updatedAt,
-    }
-  }
-
   static toDomain(raw: PrismaMaterial): Material {
     return Material.create(
       {
@@ -24,5 +14,15 @@ export class PrismaMaterialMapper {
       },
       new UniqueEntityId(raw.id)
     )
+  }
+
+  static toPrisma(material: Material): Prisma.MaterialUncheckedCreateInput {
+    return {
+      id: material.id.toString(),
+      name: material.name,
+      slug: material.slug.value,
+      createdAt: material.createdAt,
+      updatedAt: material.updatedAt,
+    }
   }
 }

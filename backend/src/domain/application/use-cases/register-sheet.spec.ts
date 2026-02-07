@@ -4,10 +4,13 @@ import { RegisterSheetUseCase } from "./register-sheet";
 import { makeMaterial } from "test/factories/make-material";
 import { InMemoryClientsRepository } from "test/repositories/in-memory-clients-repository";
 import { makeClient } from "test/factories/make-client";
+import { InMemoryInventoryMovementsRepository } from "test/repositories/in-memory-inventory-movements-repository";
+import { InventoryMovement } from "@/domain/enterprise/entities/inventory-movement";
 
 let inMemorySheetsRepository: InMemorySheetsRepository
 let inMemoryMaterialsRepository: InMemoryMaterialsRepository
 let inMemoryClientsRepository: InMemoryClientsRepository
+let inMemoryInventoryMovementsRepository: InMemoryInventoryMovementsRepository
 let sut: RegisterSheetUseCase
 
 describe('Register Sheet Use Case', () => {
@@ -15,10 +18,12 @@ describe('Register Sheet Use Case', () => {
     inMemoryMaterialsRepository = new InMemoryMaterialsRepository()
     inMemorySheetsRepository = new InMemorySheetsRepository()
     inMemoryClientsRepository = new InMemoryClientsRepository()
+    inMemoryInventoryMovementsRepository = new InMemoryInventoryMovementsRepository()
     sut = new RegisterSheetUseCase(
       inMemorySheetsRepository,
       inMemoryMaterialsRepository,
-      inMemoryClientsRepository
+      inMemoryClientsRepository,
+      inMemoryInventoryMovementsRepository
     )
   })
 
@@ -39,6 +44,9 @@ describe('Register Sheet Use Case', () => {
     if (result.isRight()) {
       expect(result.value.sheet.sku).toEqual('ACO-CARBONO-2.00-2000X1000')
       expect(inMemorySheetsRepository.items[0].quantity).toBe(10)
+      expect(inMemoryInventoryMovementsRepository.items).toHaveLength(1)
+      expect(inMemoryInventoryMovementsRepository.items[0].type).toBe('ENTRY')
+      expect(inMemoryInventoryMovementsRepository.items[0].quantity).toBe(10)
     }
   })
 

@@ -1,5 +1,5 @@
 import { SheetsRepository } from "@/domain/application/repositories/sheets-repository";
-import { Sheet } from "@/domain/enterprise/entities/sheet";
+import { Sheet, SheetType } from "@/domain/enterprise/entities/sheet";
 
 export class InMemorySheetsRepository implements SheetsRepository {
   public items: Sheet[] = []
@@ -14,12 +14,21 @@ export class InMemorySheetsRepository implements SheetsRepository {
     this.items[itemIndex] = sheet
   }
 
+  async findById(id: string) {
+    const sheet = this.items.find((item) => item.id.toString() === id)
+
+    if (!sheet) return null
+
+    return sheet
+  }
+
   async findByDetails(
     materialId: string,
     width: number,
     height: number,
     thickness: number,
-    clientId: string | null
+    clientId: string | null,
+    type: SheetType
   ) {
     const sheet = this.items.find((item) => {
       const itemClientId = item.clientId ? item.clientId.toString() : null
@@ -29,7 +38,8 @@ export class InMemorySheetsRepository implements SheetsRepository {
         item.width === width &&
         item.height === height &&
         item.thickness === thickness &&
-        itemClientId === clientId
+        itemClientId === clientId,
+        item.type === type
       )
     })
 

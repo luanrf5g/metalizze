@@ -58,8 +58,10 @@ describe('Sheet Entity', () => {
       quantity: 5
     })
 
-    sheet.decreaseStock(10)
+    expect(() => {
+      sheet.decreaseStock(10)
+    }).toThrow('Stock cannot be negative')
 
-    expect(sheet.quantity).toBe(0)
+    expect(sheet.quantity).toBe(5)
   })
 })

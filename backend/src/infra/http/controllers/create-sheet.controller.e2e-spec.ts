@@ -37,7 +37,7 @@ describe('Create Sheet (E2E)', () => {
       height: 1000,
       thickness: 2,
       quantity: 10,
-      owner: null
+      clientId: null
     }
 
     const response = await request(app.getHttpServer())
@@ -47,13 +47,22 @@ describe('Create Sheet (E2E)', () => {
     expect(response.statusCode).toBe(201)
 
     const sheetOnDatabase = await prisma.sheet.findFirst({
+      where: { sku: 'ACO-CARBONO-2.00-2000X1000' }
+    })
+
+    const movementOnDatabase = await prisma.inventoryMovement.findFirst({
       where: {
-        sku: 'ACO-CARBONO-2.00-2000X1000'
+        sheetId: sheetOnDatabase?.id,
+        type: 'ENTRY'
       }
     })
 
     expect(sheetOnDatabase).toBeTruthy()
     expect(sheetOnDatabase?.quantity).toBe(10)
+
+    expect(movementOnDatabase).toBeTruthy()
+    expect(movementOnDatabase?.quantity).toBe(10)
+    expect(movementOnDatabase?.description).toContain('Entrada')
 
     await request(app.getHttpServer())
       .post('/sheets')

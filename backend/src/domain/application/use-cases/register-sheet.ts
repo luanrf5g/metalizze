@@ -6,6 +6,8 @@ import { MaterialsRepository } from "../repositories/materials-repository"
 import { UniqueEntityId } from "@/core/entities/unique-entity-id"
 import { Injectable } from "@nestjs/common"
 import { ClientsRepository } from "../repositories/clients-repository"
+import { InventoryMovementsRepository } from "../repositories/inventoryMovementsRepository"
+import { InventoryMovement } from "@/domain/enterprise/entities/inventory-movement"
 
 interface RegisterSheetUseCaseRequest {
   materialId: string,
@@ -14,6 +16,7 @@ interface RegisterSheetUseCaseRequest {
   height: number,
   thickness: number,
   quantity: number,
+  type?: 'STANDARD' | 'SCRAP'
 }
 
 type RegisterSheetUseCaseResponse = Either<
@@ -28,7 +31,8 @@ export class RegisterSheetUseCase {
   constructor(
     private sheetsRepository: SheetsRepository,
     private materialsRepository: MaterialsRepository,
-    private clientsRepository: ClientsRepository
+    private clientsRepository: ClientsRepository,
+    private inventoryMovementsRepository: InventoryMovementsRepository
   ) { }
 
   async execute({
@@ -37,7 +41,8 @@ export class RegisterSheetUseCase {
     height,
     thickness,
     quantity,
-    clientId = null
+    clientId = null,
+    type = 'STANDARD',
   }: RegisterSheetUseCaseRequest): Promise<RegisterSheetUseCaseResponse> {
     const material = await this.materialsRepository.findById(materialId)
 
@@ -62,13 +67,21 @@ export class RegisterSheetUseCase {
       width,
       height,
       thickness,
-      clientId
+      clientId,
+      type
     )
 
     if (existingSheet) {
       existingSheet.increaseStock(quantity)
-
       await this.sheetsRepository.save(existingSheet)
+
+      const movement = InventoryMovement.create({
+        sheetId: existingSheet.id,
+        type: 'ENTRY',
+        quantity,
+        description: 'Entrada de Estoque (Adição de Chapa).'
+      })
+      await this.inventoryMovementsRepository.create(movement)
 
       return right({
         sheet: existingSheet
@@ -86,9 +99,15 @@ export class RegisterSheetUseCase {
     const formattedThickness = thickness.toFixed(2)
     const baseSku = `${material.slug.value}-${formattedThickness}-${width}x${height}`.toUpperCase()
 
-    const sku = clientName
-      ? `${baseSku}-C:${formatOwnerName(clientName)}`
-      : baseSku
+    let finalSku = baseSku
+
+    if (clientId && clientName) {
+      finalSku = `${finalSku}-C:${formatOwnerName(clientName)}`
+    }
+
+    if (type === 'SCRAP') {
+      finalSku = `${finalSku}-SCRAP`
+    }
 
     const sheet = Sheet.create({
       materialId: new UniqueEntityId(materialId),
@@ -97,10 +116,18 @@ export class RegisterSheetUseCase {
       height,
       thickness,
       quantity,
-      sku
+      type,
+      sku: finalSku
     })
-
     await this.sheetsRepository.create(sheet)
+
+    const movement = InventoryMovement.create({
+      sheetId: sheet.id,
+      type: 'ENTRY',
+      quantity,
+      description: 'Entrada de Estoque (Nova Chapa).'
+    })
+    await this.inventoryMovementsRepository.create(movement)
 
     return right({
       sheet

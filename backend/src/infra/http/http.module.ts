@@ -6,18 +6,22 @@ import { CreateSheetController } from "./controllers/create-sheet.controller";
 import { RegisterSheetUseCase } from "@/domain/application/use-cases/register-sheet";
 import { CreateClientController } from "./controllers/create-client.controller";
 import { RegisterClientUseCase } from "@/domain/application/use-cases/register-client";
+import { ReduceSheetStockController } from "./controllers/reduce-sheet-stock.controller";
+import { ReduceSheetStockUseCase } from "@/domain/application/use-cases/reduce-sheet-stock";
 
 @Module({
   imports: [DatabaseModule],
   controllers: [
     CreateMaterialController,
     CreateSheetController,
-    CreateClientController
+    CreateClientController,
+    ReduceSheetStockController
   ],
   providers: [
     RegisterMaterialUseCase,
     RegisterSheetUseCase,
-    RegisterClientUseCase
+    RegisterClientUseCase,
+    ReduceSheetStockUseCase,
   ]
 })
 export class HttpModule { }

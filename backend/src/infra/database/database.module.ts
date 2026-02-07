@@ -6,6 +6,8 @@ import { SheetsRepository } from "@/domain/application/repositories/sheets-repos
 import { PrismaSheetsRepository } from "./prisma/repositories/prisma-sheets-repository";
 import { ClientsRepository } from "@/domain/application/repositories/clients-repository";
 import { PrismaClientsRepository } from "./prisma/repositories/prisma-clients-repository";
+import { InventoryMovementsRepository } from "@/domain/application/repositories/inventoryMovementsRepository";
+import { PrismaInventoryMovementsRepository } from "./prisma/repositories/prisma-inventory-movements-repository";
 
 @Module({
   providers: [
@@ -21,13 +23,18 @@ import { PrismaClientsRepository } from "./prisma/repositories/prisma-clients-re
     {
       provide: ClientsRepository,
       useClass: PrismaClientsRepository
+    },
+    {
+      provide: InventoryMovementsRepository,
+      useClass: PrismaInventoryMovementsRepository
     }
   ],
   exports: [
     PrismaService,
     MaterialsRepository,
     SheetsRepository,
-    ClientsRepository
+    ClientsRepository,
+    InventoryMovementsRepository
   ]
 })
 export class DatabaseModule { }

@@ -12,6 +12,16 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SheetType {
+  STANDARD
+  SCRAP
+}
+
+enum MovementType {
+  ENTRY
+  EXIT
+}
+
 model Material {
   id   String @id @default(uuid())
   name String @unique
@@ -33,6 +43,8 @@ model Sheet {
   thickness Float
   quantity  Int    @default(0)
 
+  type SheetType @default(STANDARD)
+
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
@@ -42,7 +54,9 @@ model Sheet {
   clientId String? @map("client_id")
   client   Client? @relation(fields: [clientId], references: [id])
 
-  @@unique([materialId, width, height, thickness, clientId])
+  movements InventoryMovement[]
+
+  @@unique([materialId, width, height, thickness, clientId, type])
   @@map("sheets")
 }
 
@@ -59,4 +73,17 @@ model Client {
   sheets Sheet[] // um client pode ter várias chapas
 
   @@map("clients")
+}
+
+model InventoryMovement {
+  id          String       @id @default(uuid())
+  type        MovementType
+  quantity    Int
+  description String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  sheetId String @map("sheet_id")
+  sheet   Sheet  @relation(fields: [sheetId], references: [id])
+
+  @@map("inventory_movements")
 }

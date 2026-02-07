@@ -2,6 +2,8 @@ import { Entity } from "@/core/entities/entity";
 import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 import { Optional } from "@/core/types/optional";
 
+export type SheetType = 'STANDARD' | 'SCRAP'
+
 export interface SheetProps {
   materialId: UniqueEntityId,
   clientId?: UniqueEntityId | null,
@@ -10,6 +12,7 @@ export interface SheetProps {
   height: number,
   thickness: number,
   quantity: number,
+  type: SheetType,
   createdAt: Date,
   updatedAt?: Date | null
 }
@@ -22,8 +25,11 @@ export class Sheet extends Entity<SheetProps> {
   get height() { return this.props.height }
   get thickness() { return this.props.thickness }
   get quantity() { return this.props.quantity }
+  get type() { return this.props.type }
   get createdAt() { return this.props.createdAt }
   get updatedAt() { return this.props.updatedAt }
+
+  get isScrap() { return this.props.type === 'SCRAP' }
 
   increaseStock(amount: number) {
     this.props.quantity += amount
@@ -32,11 +38,9 @@ export class Sheet extends Entity<SheetProps> {
 
   decreaseStock(amount: number) {
     if (this.props.quantity - amount < 0) {
-      this.props.quantity = 0
-    } else {
-      this.props.quantity -= amount
+      throw new Error('Stock cannot be negative')
     }
-
+    this.props.quantity -= amount
     this.touch()
   }
 
@@ -45,7 +49,7 @@ export class Sheet extends Entity<SheetProps> {
   }
 
   static create(
-    props: Optional<SheetProps, 'createdAt' | 'quantity' | 'clientId'>,
+    props: Optional<SheetProps, 'createdAt' | 'quantity' | 'clientId' | 'type'>,
     id?: UniqueEntityId
   ) {
     const sheet = new Sheet(
@@ -53,6 +57,7 @@ export class Sheet extends Entity<SheetProps> {
         ...props,
         clientId: props.clientId ?? null,
         quantity: props.quantity ?? 0,
+        type: props.type ?? 'STANDARD',
         createdAt: props.createdAt ?? new Date()
       },
       id
