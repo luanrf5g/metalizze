@@ -11,6 +11,8 @@ const reduceSheetStockBodySchema = z.object({
 
 type ReduceSheetStockBodySchema = z.infer<typeof reduceSheetStockBodySchema>
 
+const bodyValidationPipe = new ZodValidationPipe(reduceSheetStockBodySchema)
+
 @Controller('/sheets/:id/reduce-stock')
 export class ReduceSheetStockController {
   constructor(private reduceSheetStock: ReduceSheetStockUseCase) { }
@@ -19,8 +21,7 @@ export class ReduceSheetStockController {
   @HttpCode(204)
   async handle(
     @Param('id') sheetId: string,
-    @Body(new ZodValidationPipe(reduceSheetStockBodySchema))
-    body: ReduceSheetStockBodySchema
+    @Body(bodyValidationPipe) body: ReduceSheetStockBodySchema
   ) {
     const { quantity, description } = body
 
