@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { Client } from "@/domain/enterprise/entities/client";
 import { PrismaClientMapper } from "../mappers/prisma-client-mapper";
+import { PaginationParams } from "@/core/repositories/pagination-params";
 
 @Injectable()
 export class PrismaClientsRepository implements ClientsRepository {
@@ -47,4 +48,18 @@ export class PrismaClientsRepository implements ClientsRepository {
     return PrismaClientMapper.toDomain(client)
   }
 
+  async delete(id: string) {
+    await this.prisma.client.delete({
+      where: { id }
+    })
+  }
+
+  async findMany({ page }: PaginationParams) {
+    const clients = await this.prisma.client.findMany({
+      take: 15,
+      skip: (page - 1) * 15,
+    })
+
+    return clients.map(PrismaClientMapper.toDomain)
+  }
 }

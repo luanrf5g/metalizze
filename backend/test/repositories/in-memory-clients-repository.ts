@@ -1,3 +1,4 @@
+import { PaginationParams } from "@/core/repositories/pagination-params";
 import { ClientsRepository } from "@/domain/application/repositories/clients-repository";
 import { Client } from "@/domain/enterprise/entities/client";
 
@@ -30,4 +31,17 @@ export class InMemoryClientsRepository implements ClientsRepository {
     return client
   }
 
+  async delete(id: string) {
+    const itemIndex = this.items.findIndex((item) => item.id.toString() === id)
+
+    this.items.splice(itemIndex, 1)
+  }
+
+  async findMany({ page }: PaginationParams) {
+    const clients = this.items
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice((page - 1) * 15, page * 15)
+
+    return clients
+  }
 }

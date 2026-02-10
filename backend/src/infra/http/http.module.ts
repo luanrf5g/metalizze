@@ -10,6 +10,10 @@ import { ReduceSheetStockController } from "./controllers/reduce-sheet-stock.con
 import { ReduceSheetStockUseCase } from "@/domain/application/use-cases/reduce-sheet-stock";
 import { EditClientController } from "./controllers/edit-client.controller";
 import { EditClientUseCase } from "@/domain/application/use-cases/edit-client";
+import { GetClientByDocumentController } from "./controllers/get-client-by-document.controller";
+import { GetClientByDocumentUseCase } from "@/domain/application/use-cases/get-client-by-document";
+import { FetchClientsController } from "./controllers/fetch-clients.controller";
+import { FetchClientsUseCase } from "@/domain/application/use-cases/fetch-clients";
 
 @Module({
   imports: [DatabaseModule],
@@ -18,14 +22,18 @@ import { EditClientUseCase } from "@/domain/application/use-cases/edit-client";
     CreateSheetController,
     CreateClientController,
     ReduceSheetStockController,
-    EditClientController
+    EditClientController,
+    GetClientByDocumentController,
+    FetchClientsController
   ],
   providers: [
     RegisterMaterialUseCase,
     RegisterSheetUseCase,
     RegisterClientUseCase,
     ReduceSheetStockUseCase,
-    EditClientUseCase
+    EditClientUseCase,
+    GetClientByDocumentUseCase,
+    FetchClientsUseCase
   ]
 })
 export class HttpModule { }
