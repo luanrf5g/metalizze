@@ -14,6 +14,8 @@ import { GetClientByDocumentController } from "./controllers/get-client-by-docum
 import { GetClientByDocumentUseCase } from "@/domain/application/use-cases/get-client-by-document";
 import { FetchClientsController } from "./controllers/fetch-clients.controller";
 import { FetchClientsUseCase } from "@/domain/application/use-cases/fetch-clients";
+import { DeleteClientController } from "./controllers/delete-client.controller";
+import { DeleteClientUseCase } from "@/domain/application/use-cases/delete-client";
 
 @Module({
   imports: [DatabaseModule],
@@ -24,7 +26,8 @@ import { FetchClientsUseCase } from "@/domain/application/use-cases/fetch-client
     ReduceSheetStockController,
     EditClientController,
     GetClientByDocumentController,
-    FetchClientsController
+    FetchClientsController,
+    DeleteClientController
   ],
   providers: [
     RegisterMaterialUseCase,
@@ -33,7 +36,8 @@ import { FetchClientsUseCase } from "@/domain/application/use-cases/fetch-client
     ReduceSheetStockUseCase,
     EditClientUseCase,
     GetClientByDocumentUseCase,
-    FetchClientsUseCase
+    FetchClientsUseCase,
+    DeleteClientUseCase
   ]
 })
 export class HttpModule { }

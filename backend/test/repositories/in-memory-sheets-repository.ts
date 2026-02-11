@@ -14,6 +14,16 @@ export class InMemorySheetsRepository implements SheetsRepository {
     this.items[itemIndex] = sheet
   }
 
+  async delete(id: string) {
+    const filteredItems = this.items.filter((item) => item.id.toString() !== id)
+
+    this.items = filteredItems
+  }
+
+  async countByClientId(clientId: string) {
+    return this.items.filter((item) => item.clientId?.toString() === clientId).length
+  }
+
   async findById(id: string) {
     const sheet = this.items.find((item) => item.id.toString() === id)
 

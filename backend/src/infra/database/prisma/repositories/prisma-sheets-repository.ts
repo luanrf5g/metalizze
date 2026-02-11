@@ -6,12 +6,12 @@ import { PrismaService } from "../prisma.service";
 
 @Injectable()
 export class PrismaSheetsRepository implements SheetsRepository {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prisma: PrismaService) { }
 
   async create(sheet: Sheet) {
     const data = PrismaSheetMapper.toPrisma(sheet)
 
-    await this.prismaService.sheet.create({
+    await this.prisma.sheet.create({
       data
     })
   }
@@ -19,7 +19,7 @@ export class PrismaSheetsRepository implements SheetsRepository {
   async save(sheet: Sheet) {
     const data = PrismaSheetMapper.toPrisma(sheet)
 
-    await this.prismaService.sheet.update({
+    await this.prisma.sheet.update({
       where: {
         id: sheet.id.toString()
       },
@@ -27,8 +27,26 @@ export class PrismaSheetsRepository implements SheetsRepository {
     })
   }
 
+  async delete(id: string) {
+    await this.prisma.sheet.delete({
+      where: {
+        id
+      }
+    })
+  }
+
+  async countByClientId(clientId: string) {
+    const count = await this.prisma.sheet.count({
+      where: {
+        clientId
+      }
+    })
+
+    return count
+  }
+
   async findById(id: string) {
-    const sheet = await this.prismaService.sheet.findUnique({
+    const sheet = await this.prisma.sheet.findUnique({
       where: {
         id
       }
@@ -47,7 +65,7 @@ export class PrismaSheetsRepository implements SheetsRepository {
     clientId: string | null,
     type: SheetType
   ) {
-    const sheet = await this.prismaService.sheet.findFirst({
+    const sheet = await this.prisma.sheet.findFirst({
       where: {
         materialId,
         width,

@@ -36,7 +36,7 @@ describe('Get Client By Document (E2E)', () => {
       .expect(200)
 
     expect(response.body).toMatchObject({
-      props: expect.objectContaining({
+      client: expect.objectContaining({
         name: client.name,
         document: client.document,
         email: client.email,
