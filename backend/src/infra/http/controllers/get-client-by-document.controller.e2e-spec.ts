@@ -4,32 +4,29 @@ import { PrismaService } from "@/infra/database/prisma/prisma.service"
 import { INestApplication } from "@nestjs/common"
 import { Test } from "@nestjs/testing"
 import request from "supertest"
+import { ClientFactory, makeClient } from "test/factories/make-client"
 
 describe('Get Client By Document (E2E)', () => {
   let app: INestApplication
   let prisma: PrismaService
+  let clientFactory: ClientFactory
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, DatabaseModule]
+      imports: [AppModule, DatabaseModule],
+      providers: [ClientFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
 
     prisma = moduleRef.get(PrismaService)
+    clientFactory = moduleRef.get(ClientFactory)
 
     await app.init()
   })
 
   test('[GET] /clients/:document', async () => {
-    const client = await prisma.client.create({
-      data: {
-        name: 'John Doe',
-        document: '12345678901',
-        email: 'johndoe@example.com',
-        phone: '12345678901',
-      }
-    })
+    const client = await clientFactory.makePrismaClient({ document: '12345678900' })
 
     const response = await request(app.getHttpServer())
       .get(`/clients/${client.document}`)

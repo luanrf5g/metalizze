@@ -1,12 +1,13 @@
 import { EditClientUseCase } from "@/domain/application/use-cases/edit-client";
-import { BadRequestException, Body, Controller, HttpCode, Param, Put } from "@nestjs/common";
+import { BadRequestException, Body, Controller, HttpCode, NotFoundException, Param, Patch, Put } from "@nestjs/common";
 import z from "zod";
 import { ZodValidationPipe } from "../pipes/zod-validation-pipe";
+import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
 
 const editClientBodySchema = z.object({
-  name: z.string(),
-  email: z.email(),
-  phone: z.string()
+  name: z.string().optional(),
+  email: z.email().optional(),
+  phone: z.string().optional()
 })
 
 type EditClientBodySchema = z.infer<typeof editClientBodySchema>
@@ -17,15 +18,13 @@ const bodyValidationPipe = new ZodValidationPipe(editClientBodySchema)
 export class EditClientController {
   constructor(private editClient: EditClientUseCase) { }
 
-  @Put()
+  @Patch()
   @HttpCode(204)
   async handle(
     @Param('id') clientId: string,
     @Body(bodyValidationPipe) body: EditClientBodySchema
   ) {
     const { name, email, phone } = body
-
-    console.log('clientId', clientId)
 
     const result = await this.editClient.execute({
       clientId,
@@ -35,7 +34,14 @@ export class EditClientController {
     })
 
     if (result.isLeft()) {
-      throw new BadRequestException()
+      const error = result.value
+
+      switch (error.constructor) {
+        case ResourceNotFoundError:
+          throw new NotFoundException(error.message)
+        default:
+          throw new BadRequestException(error.message)
+      }
     }
   }
 }

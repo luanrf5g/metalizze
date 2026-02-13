@@ -6,9 +6,9 @@ import { ClientsRepository } from "../repositories/clients-repository";
 
 interface EditClientUseCaseRequest {
   clientId: string,
-  name: string,
-  email: string,
-  phone: string
+  name?: string,
+  email?: string | null,
+  phone?: string | null
 }
 
 type EditClientUseCaseResponse = Either<
@@ -34,9 +34,9 @@ export class EditClientUseCase {
       return left(new ResourceNotFoundError())
     }
 
-    client.name = name
-    client.email = email
-    client.phone = phone
+    if (name) client.name = name
+    if (email !== undefined) client.email = email
+    if (phone !== undefined) client.phone = phone
 
     await this.clientsRepository.save(client)
 

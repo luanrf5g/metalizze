@@ -24,6 +24,10 @@ export class InMemorySheetsRepository implements SheetsRepository {
     return this.items.filter((item) => item.clientId?.toString() === clientId).length
   }
 
+  async countByMaterialId(materialId: string) {
+    return this.items.filter((item) => item.materialId.toString() === materialId).length
+  }
+
   async findById(id: string) {
     const sheet = this.items.find((item) => item.id.toString() === id)
 

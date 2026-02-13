@@ -13,6 +13,7 @@ export function makeClient(
     {
       name: faker.person.fullName(),
       document: faker.helpers.replaceCreditCardSymbols('###########'),
+      email: faker.internet.email(),
       phone: faker.phone.number(),
       ...override
     },

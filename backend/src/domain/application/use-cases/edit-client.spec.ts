@@ -25,7 +25,6 @@ describe('Edit Client', () => {
       clientId: client.id.toString(),
       name: 'João Silva',
       email: 'joao.silva@example.com',
-      phone: '81999999999'
     })
 
     expect(result.isRight()).toBe(true)

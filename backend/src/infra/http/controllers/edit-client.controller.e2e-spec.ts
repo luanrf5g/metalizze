@@ -33,11 +33,9 @@ describe('Edit Client (E2E)', () => {
     const clientId = client.id.toString()
 
     const response = await request(app.getHttpServer())
-      .put(`/clients/${clientId}`)
+      .patch(`/clients/${clientId}`)
       .send({
-        name: 'João Silva',
         email: 'joao.silva@example.com',
-        phone: '81999999999'
       })
 
     expect(response.statusCode).toBe(204)
@@ -49,8 +47,6 @@ describe('Edit Client (E2E)', () => {
     })
 
     expect(clientOnDatabase).toBeTruthy()
-    expect(clientOnDatabase?.name).toEqual('João Silva')
-    expect(clientOnDatabase?.phone).toEqual('81999999999')
     expect(clientOnDatabase?.email).toEqual('joao.silva@example.com')
   })
 })

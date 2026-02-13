@@ -5,6 +5,7 @@ export abstract class SheetsRepository {
   abstract save(sheet: Sheet): Promise<void>
   abstract delete(id: string): Promise<void>
   abstract countByClientId(clientId: string): Promise<number>
+  abstract countByMaterialId(materialId: string): Promise<number>
   abstract findById(id: string): Promise<Sheet | null>
   abstract findByDetails(
     materialId: string,

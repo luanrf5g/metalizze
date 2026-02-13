@@ -16,6 +16,10 @@ import { FetchClientsController } from "./controllers/fetch-clients.controller";
 import { FetchClientsUseCase } from "@/domain/application/use-cases/fetch-clients";
 import { DeleteClientController } from "./controllers/delete-client.controller";
 import { DeleteClientUseCase } from "@/domain/application/use-cases/delete-client";
+import { FetchMaterialsController } from "./controllers/fetch-materials.controller";
+import { FetchMaterialsUseCase } from "@/domain/application/use-cases/fetch-materials";
+import { GetMaterialByIdController } from "./controllers/get-material-by-id.controller";
+import { GetMaterialByIdUseCase } from "@/domain/application/use-cases/get-material-by-id";
 
 @Module({
   imports: [DatabaseModule],
@@ -27,7 +31,9 @@ import { DeleteClientUseCase } from "@/domain/application/use-cases/delete-clien
     EditClientController,
     GetClientByDocumentController,
     FetchClientsController,
-    DeleteClientController
+    DeleteClientController,
+    FetchMaterialsController,
+    GetMaterialByIdController
   ],
   providers: [
     RegisterMaterialUseCase,
@@ -37,7 +43,9 @@ import { DeleteClientUseCase } from "@/domain/application/use-cases/delete-clien
     EditClientUseCase,
     GetClientByDocumentUseCase,
     FetchClientsUseCase,
-    DeleteClientUseCase
+    DeleteClientUseCase,
+    FetchMaterialsUseCase,
+    GetMaterialByIdUseCase
   ]
 })
 export class HttpModule { }

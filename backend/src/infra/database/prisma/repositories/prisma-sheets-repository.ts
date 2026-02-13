@@ -21,7 +21,7 @@ export class PrismaSheetsRepository implements SheetsRepository {
 
     await this.prisma.sheet.update({
       where: {
-        id: sheet.id.toString()
+        id: data.id
       },
       data
     })
@@ -39,6 +39,16 @@ export class PrismaSheetsRepository implements SheetsRepository {
     const count = await this.prisma.sheet.count({
       where: {
         clientId
+      }
+    })
+
+    return count
+  }
+
+  async countByMaterialId(materialId: string) {
+    const count = await this.prisma.sheet.count({
+      where: {
+        materialId
       }
     })
 
