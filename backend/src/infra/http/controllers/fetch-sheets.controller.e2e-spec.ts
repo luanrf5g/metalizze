@@ -45,14 +45,12 @@ describe('Fetch Sheets (E2E)', () => {
     const materialNoise = await materialFactory.makePrismaMaterial({ name: 'Material Ruido' })
     const clientTarget = await clientFactory.makePrismaClient({ name: 'Cliente Alvo' })
 
-    // A chapa que queremos encontrar
     await sheetFactory.makePrismaSheet({
       materialId: materialTarget.id,
       clientId: clientTarget.id,
       type: 'STANDARD',
     })
 
-    // Chapas "ruído" para testar se o filtro ignora
     await sheetFactory.makePrismaSheet({ materialId: materialNoise.id })
     await sheetFactory.makePrismaSheet({ materialId: materialTarget.id, type: 'SCRAP' })
 

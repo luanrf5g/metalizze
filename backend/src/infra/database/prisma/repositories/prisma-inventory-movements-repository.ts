@@ -1,4 +1,4 @@
-import { InventoryMovementsRepository } from "@/domain/application/repositories/inventoryMovementsRepository";
+import { FindManyInventoryMovements, InventoryMovementsRepository } from "@/domain/application/repositories/inventory-movements-repository";
 import { PrismaInventoryMovementMapper } from "../mappers/prisma-inventory-movement-mapper";
 import { PrismaService } from "../prisma.service";
 import { InventoryMovement } from "@/domain/enterprise/entities/inventory-movement";
@@ -14,5 +14,20 @@ export class PrismaInventoryMovementsRepository implements InventoryMovementsRep
     await this.prisma.inventoryMovement.create({
       data
     })
+  }
+
+  async findMany({ page, sheetId }: FindManyInventoryMovements) {
+    const movements = await this.prisma.inventoryMovement.findMany({
+      where: {
+        sheetId: sheetId ?? undefined
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 20,
+      skip: (page - 1) * 20,
+    })
+
+    return movements.map(PrismaInventoryMovementMapper.toDomain)
   }
 }

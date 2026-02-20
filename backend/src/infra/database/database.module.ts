@@ -6,7 +6,7 @@ import { SheetsRepository } from "@/domain/application/repositories/sheets-repos
 import { PrismaSheetsRepository } from "./prisma/repositories/prisma-sheets-repository";
 import { ClientsRepository } from "@/domain/application/repositories/clients-repository";
 import { PrismaClientsRepository } from "./prisma/repositories/prisma-clients-repository";
-import { InventoryMovementsRepository } from "@/domain/application/repositories/inventoryMovementsRepository";
+import { InventoryMovementsRepository } from "@/domain/application/repositories/inventory-movements-repository";
 import { PrismaInventoryMovementsRepository } from "./prisma/repositories/prisma-inventory-movements-repository";
 
 @Module({

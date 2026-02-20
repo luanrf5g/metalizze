@@ -6,7 +6,7 @@ import { MaterialsRepository } from "../repositories/materials-repository"
 import { UniqueEntityId } from "@/core/entities/unique-entity-id"
 import { Injectable } from "@nestjs/common"
 import { ClientsRepository } from "../repositories/clients-repository"
-import { InventoryMovementsRepository } from "../repositories/inventoryMovementsRepository"
+import { InventoryMovementsRepository } from "../repositories/inventory-movements-repository"
 import { InventoryMovement } from "@/domain/enterprise/entities/inventory-movement"
 import { SkuGenerator } from "../services/sku-generator"
 

@@ -28,31 +28,26 @@ describe('Delete Sheet (E2E)', () => {
   })
 
   test('[DELETE] /sheets/:id', async () => {
-    // 1. Preparação
     const material = await materialFactory.makePrismaMaterial()
     const sheet = await sheetFactory.makePrismaSheet({
       materialId: material.id,
     })
 
-    // Verifica se a chapa realmente está ativa (deletedAt == null)
     let sheetOnDatabase = await prisma.sheet.findUnique({
       where: { id: sheet.id.toString() },
     })
     expect(sheetOnDatabase?.deletedAt).toBeNull()
 
-    // 2. Ação
     const response = await request(app.getHttpServer())
       .delete(`/sheets/${sheet.id.toString()}`)
       .send()
 
-    // 3. Verificação
     expect(response.statusCode).toBe(204)
 
     sheetOnDatabase = await prisma.sheet.findUnique({
       where: { id: sheet.id.toString() },
     })
 
-    // A chapa ainda deve existir no banco, MAS com o deletedAt preenchido (Soft Delete)
     expect(sheetOnDatabase).toBeTruthy()
     expect(sheetOnDatabase?.deletedAt).toEqual(expect.any(Date))
   })

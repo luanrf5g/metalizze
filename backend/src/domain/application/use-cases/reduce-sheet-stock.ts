@@ -3,7 +3,7 @@ import { Either, left, right } from "@/core/logic/Either";
 import { InsufficientStockError } from "./errors/insufficient-stock-error";
 import { Sheet } from "@/domain/enterprise/entities/sheet";
 import { SheetsRepository } from "../repositories/sheets-repository";
-import { InventoryMovementsRepository } from "../repositories/inventoryMovementsRepository";
+import { InventoryMovementsRepository } from "../repositories/inventory-movements-repository";
 import { InventoryMovement } from "@/domain/enterprise/entities/inventory-movement";
 import { Injectable } from "@nestjs/common";
 

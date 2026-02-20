@@ -31,7 +31,6 @@ describe('Edit Sheet (E2E)', () => {
   })
 
   test('[PUT] /sheets/:id', async () => {
-    // 1. Preparação
     const oldMaterial = await materialFactory.makePrismaMaterial({ name: 'Aco Velho' })
     const newMaterial = await materialFactory.makePrismaMaterial({ name: 'Aco Novo' })
     const client = await clientFactory.makePrismaClient({ name: 'John Doe' })
@@ -44,7 +43,6 @@ describe('Edit Sheet (E2E)', () => {
       type: 'STANDARD',
     })
 
-    // 2. Ação
     const response = await request(app.getHttpServer())
       .put(`/sheets/${sheet.id.toString()}`)
       .send({
@@ -55,7 +53,6 @@ describe('Edit Sheet (E2E)', () => {
         type: 'SCRAP',
       })
 
-    // 3. Verificação
     expect(response.statusCode).toBe(204)
 
     const sheetOnDatabase = await prisma.sheet.findUnique({
@@ -69,7 +66,6 @@ describe('Edit Sheet (E2E)', () => {
     expect(sheetOnDatabase?.clientId).toBe(client.id.toString())
     expect(sheetOnDatabase?.type).toBe('SCRAP')
 
-    // O mais importante: O SKU deve ter sido recalculado com as novas regras!
     expect(sheetOnDatabase?.sku).toContain('ACO-NOVO')
     expect(sheetOnDatabase?.sku).toContain('2000X1500')
     expect(sheetOnDatabase?.sku).toContain('JOHNDOE')
