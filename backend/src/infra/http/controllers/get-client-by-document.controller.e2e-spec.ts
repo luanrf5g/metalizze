@@ -1,14 +1,12 @@
 import { AppModule } from "@/app.module"
 import { DatabaseModule } from "@/infra/database/database.module"
-import { PrismaService } from "@/infra/database/prisma/prisma.service"
 import { INestApplication } from "@nestjs/common"
 import { Test } from "@nestjs/testing"
 import request from "supertest"
-import { ClientFactory, makeClient } from "test/factories/make-client"
+import { ClientFactory } from "test/factories/make-client"
 
 describe('Get Client By Document (E2E)', () => {
   let app: INestApplication
-  let prisma: PrismaService
   let clientFactory: ClientFactory
 
   beforeAll(async () => {
@@ -19,7 +17,6 @@ describe('Get Client By Document (E2E)', () => {
 
     app = moduleRef.createNestApplication()
 
-    prisma = moduleRef.get(PrismaService)
     clientFactory = moduleRef.get(ClientFactory)
 
     await app.init()

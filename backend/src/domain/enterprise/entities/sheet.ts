@@ -15,11 +15,12 @@ export interface SheetProps {
   type: SheetType,
   createdAt: Date,
   updatedAt?: Date | null
+  deletedAt?: Date | null
 }
 
 export class Sheet extends Entity<SheetProps> {
   get materialId() { return this.props.materialId }
-  get clientId() { return this.props.clientId }
+  get clientId() { return this.props.clientId ?? null }
   get sku() { return this.props.sku }
   get width() { return this.props.width }
   get height() { return this.props.height }
@@ -28,8 +29,44 @@ export class Sheet extends Entity<SheetProps> {
   get type() { return this.props.type }
   get createdAt() { return this.props.createdAt }
   get updatedAt() { return this.props.updatedAt }
+  get deletedAt() { return this.props.deletedAt }
 
   get isScrap() { return this.props.type === 'SCRAP' }
+
+  set materialId(materialId: UniqueEntityId) {
+    this.props.materialId = materialId
+    this.touch()
+  }
+
+  set clientId(clientId: UniqueEntityId | null) {
+    this.props.clientId = clientId
+    this.touch()
+  }
+
+  set sku(sku: string) {
+    this.props.sku = sku
+    this.touch()
+  }
+
+  set width(width: number) {
+    this.props.width = width
+    this.touch()
+  }
+
+  set height(height: number) {
+    this.props.height = height
+    this.touch()
+  }
+
+  set thickness(thickness: number) {
+    this.props.thickness = thickness
+    this.touch()
+  }
+
+  set type(type: SheetType) {
+    this.props.type = type
+    this.touch()
+  }
 
   increaseStock(amount: number) {
     this.props.quantity += amount
@@ -41,6 +78,11 @@ export class Sheet extends Entity<SheetProps> {
       throw new Error('Stock cannot be negative')
     }
     this.props.quantity -= amount
+    this.touch()
+  }
+
+  public delete() {
+    this.props.deletedAt = new Date()
     this.touch()
   }
 

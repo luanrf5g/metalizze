@@ -8,6 +8,7 @@ import { Injectable } from "@nestjs/common"
 import { ClientsRepository } from "../repositories/clients-repository"
 import { InventoryMovementsRepository } from "../repositories/inventoryMovementsRepository"
 import { InventoryMovement } from "@/domain/enterprise/entities/inventory-movement"
+import { SkuGenerator } from "../services/sku-generator"
 
 interface RegisterSheetUseCaseRequest {
   materialId: string,
@@ -88,26 +89,14 @@ export class RegisterSheetUseCase {
       })
     }
 
-    const formatOwnerName = (name: string) => {
-      return name
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, '')
-    }
-
-    const formattedThickness = thickness.toFixed(2)
-    const baseSku = `${material.slug.value}-${formattedThickness}-${width}x${height}`.toUpperCase()
-
-    let finalSku = baseSku
-
-    if (clientId && clientName) {
-      finalSku = `${finalSku}-C:${formatOwnerName(clientName)}`
-    }
-
-    if (type === 'SCRAP') {
-      finalSku = `${finalSku}-SCRAP`
-    }
+    const finalSku = SkuGenerator.generate({
+      materialSlug: material.slug.value,
+      width,
+      height,
+      thickness,
+      type,
+      clientName
+    })
 
     const sheet = Sheet.create({
       materialId: new UniqueEntityId(materialId),

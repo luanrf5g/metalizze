@@ -1,6 +1,5 @@
 import { AppModule } from '@/app.module'
 import { DatabaseModule } from '@/infra/database/database.module'
-import { PrismaService } from '@/infra/database/prisma/prisma.service'
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
@@ -8,7 +7,6 @@ import { MaterialFactory } from 'test/factories/make-material'
 
 describe('Fetch Materials (E2E)', () => {
   let app: INestApplication
-  let prisma: PrismaService
   let materialFactory: MaterialFactory
 
   beforeAll(async () => {
@@ -19,7 +17,6 @@ describe('Fetch Materials (E2E)', () => {
 
     app = moduleRef.createNestApplication()
 
-    prisma = moduleRef.get(PrismaService)
     materialFactory = moduleRef.get(MaterialFactory)
 
     await app.init()

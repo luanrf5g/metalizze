@@ -13,8 +13,10 @@ export class PrismaSheetMapper {
         height: raw.height,
         thickness: raw.thickness,
         quantity: raw.quantity,
+        type: raw.type,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
+        deletedAt: raw.deletedAt,
       },
       new UniqueEntityId(raw.id)
     )
@@ -30,8 +32,10 @@ export class PrismaSheetMapper {
       height: sheet.height,
       thickness: sheet.thickness,
       quantity: sheet.quantity,
+      type: sheet.type,
       createdAt: sheet.createdAt,
-      updatedAt: sheet.updatedAt
+      updatedAt: sheet.updatedAt,
+      deletedAt: sheet.deletedAt
     }
   }
 }

@@ -13,21 +13,21 @@ describe('Fetch Materials Use Case', () => {
 
   it('should be able to fetch materials', async () => {
     await materialsRepository.create(
-      makeMaterial({ createdAt: new Date(2022, 0, 20) })
+      makeMaterial({ createdAt: new Date(2026, 0, 20) })
     )
     await materialsRepository.create(
-      makeMaterial({ createdAt: new Date(2022, 0, 18) })
+      makeMaterial({ createdAt: new Date(2026, 0, 18) })
     )
     await materialsRepository.create(
-      makeMaterial({ createdAt: new Date(2022, 0, 23) })
+      makeMaterial({ createdAt: new Date(2026, 0, 23) })
     )
 
     const result = await sut.execute({ page: 1 })
 
     expect(result.value?.materials).toEqual([
-      expect.objectContaining({ createdAt: new Date(2022, 0, 23) }),
-      expect.objectContaining({ createdAt: new Date(2022, 0, 20) }),
-      expect.objectContaining({ createdAt: new Date(2022, 0, 18) })
+      expect.objectContaining({ createdAt: new Date(2026, 0, 23) }),
+      expect.objectContaining({ createdAt: new Date(2026, 0, 20) }),
+      expect.objectContaining({ createdAt: new Date(2026, 0, 18) })
     ])
   })
 

@@ -1,4 +1,11 @@
+import { PaginationParams } from "@/core/repositories/pagination-params";
 import { Sheet, SheetType } from "@/domain/enterprise/entities/sheet";
+
+export interface FindManySheetsParams extends PaginationParams {
+  materialId?: string | null,
+  clientId?: string | null,
+  type?: 'STANDARD' | 'SCRAP' | null
+}
 
 export abstract class SheetsRepository {
   abstract create(sheet: Sheet): Promise<void>
@@ -15,4 +22,5 @@ export abstract class SheetsRepository {
     clientId: string | null,
     type: SheetType
   ): Promise<Sheet | null>
+  abstract findMany(params: FindManySheetsParams): Promise<Sheet[]>
 }

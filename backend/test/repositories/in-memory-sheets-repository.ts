@@ -1,4 +1,4 @@
-import { SheetsRepository } from "@/domain/application/repositories/sheets-repository";
+import { FindManySheetsParams, SheetsRepository } from "@/domain/application/repositories/sheets-repository";
 import { Sheet, SheetType } from "@/domain/enterprise/entities/sheet";
 
 export class InMemorySheetsRepository implements SheetsRepository {
@@ -52,7 +52,7 @@ export class InMemorySheetsRepository implements SheetsRepository {
         item.width === width &&
         item.height === height &&
         item.thickness === thickness &&
-        itemClientId === clientId,
+        itemClientId === clientId &&
         item.type === type
       )
     })
@@ -60,5 +60,26 @@ export class InMemorySheetsRepository implements SheetsRepository {
     if (!sheet) return null
 
     return sheet
+  }
+
+  async findMany({ page, materialId, clientId, type }: FindManySheetsParams) {
+    const sheets = this.items.filter((item) => {
+      if (materialId && item.materialId.toString() !== materialId) {
+        return false
+      }
+      if (clientId && item.clientId?.toString() !== clientId) {
+        return false
+      }
+      if (type && item.type !== type) {
+        return false
+      }
+      if (item.deletedAt) {
+        return false
+      }
+
+      return true
+    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice((page - 1) * 20, page * 20)
+
+    return sheets
   }
 }

@@ -4,35 +4,44 @@ import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { MaterialFactory } from 'test/factories/make-material'
+import { SheetFactory } from 'test/factories/make-sheet'
 
-describe('Edit Material (E2E)', () => {
+describe('Get Sheet By Id (E2E)', () => {
   let app: INestApplication
   let materialFactory: MaterialFactory
+  let sheetFactory: SheetFactory
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory]
+      providers: [SheetFactory, MaterialFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
 
     materialFactory = moduleRef.get(MaterialFactory)
+    sheetFactory = moduleRef.get(SheetFactory)
 
     await app.init()
   })
 
-  test('[PATCH] /materials/:id', async () => {
-    const material = await materialFactory.makePrismaMaterial({ name: 'Aço Inox' })
+  test('[GET] /sheets/:id', async () => {
+    const material = await materialFactory.makePrismaMaterial({ name: 'Carbono' })
 
-    const materialId = material.id.toString()
+    const sheet = await sheetFactory.makePrismaSheet({
+      materialId: material.id
+    })
 
     const response = await request(app.getHttpServer())
-      .patch(`/materials/${materialId}`)
-      .send({
-        name: 'Aço Carbono'
-      })
+      .get(`/sheets/${sheet.id.toString()}`)
+      .send()
 
-    expect(response.statusCode).toBe(204)
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toMatchObject({
+      sheet: {
+        id: sheet.id.toString(),
+        sku: sheet.sku
+      }
+    })
   })
 })

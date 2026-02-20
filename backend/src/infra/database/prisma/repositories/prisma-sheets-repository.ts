@@ -1,4 +1,4 @@
-import { SheetsRepository } from "@/domain/application/repositories/sheets-repository";
+import { FindManySheetsParams, SheetsRepository } from "@/domain/application/repositories/sheets-repository";
 import { Sheet, SheetType } from "@/domain/enterprise/entities/sheet";
 import { Injectable } from "@nestjs/common";
 import { PrismaSheetMapper } from "../mappers/prisma-sheet-mapper";
@@ -89,5 +89,27 @@ export class PrismaSheetsRepository implements SheetsRepository {
     if (!sheet) return null
 
     return PrismaSheetMapper.toDomain(sheet)
+  }
+
+  async findMany({ page, materialId, clientId, type }: FindManySheetsParams) {
+    const sheets = await this.prisma.sheet.findMany({
+      where: {
+        materialId: materialId ?? undefined,
+        clientId: clientId ?? undefined,
+        type: type ?? undefined,
+        deletedAt: null
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 15,
+      skip: (page - 1) * 15,
+      include: {
+        material: true,
+        client: true
+      }
+    })
+
+    return sheets.map(PrismaSheetMapper.toDomain)
   }
 }

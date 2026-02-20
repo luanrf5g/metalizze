@@ -20,32 +20,56 @@ import { FetchMaterialsController } from "./controllers/fetch-materials.controll
 import { FetchMaterialsUseCase } from "@/domain/application/use-cases/fetch-materials";
 import { GetMaterialByIdController } from "./controllers/get-material-by-id.controller";
 import { GetMaterialByIdUseCase } from "@/domain/application/use-cases/get-material-by-id";
+import { EditMaterialController } from "./controllers/edit-material.controller";
+import { EditMaterialUseCase } from "@/domain/application/use-cases/edit-material";
+import { DeleteMaterialController } from "./controllers/delete-material.controller";
+import { DeleteMaterialUseCase } from "@/domain/application/use-cases/delete-material";
+import { GetSheetByIdController } from "./controllers/get-sheet-by-id.controller";
+import { GetSheetByIdUseCase } from "@/domain/application/use-cases/get-sheet-by-id";
+import { FetchSheetsController } from "./controllers/fetch-sheets.controller";
+import { EditSheetController } from "./controllers/edit-sheet.controller";
+import { DeleteSheetUseCase } from "@/domain/application/use-cases/delete-sheet";
+import { FetchSheetsUseCase } from "@/domain/application/use-cases/fetch-sheets";
+import { EditSheetUseCase } from "@/domain/application/use-cases/edit-sheet";
+import { DeleteSheetController } from "./controllers/delete-sheet.controller";
 
 @Module({
   imports: [DatabaseModule],
   controllers: [
     CreateMaterialController,
-    CreateSheetController,
+    FetchMaterialsController,
+    GetMaterialByIdController,
+    EditMaterialController,
+    DeleteMaterialController,
     CreateClientController,
-    ReduceSheetStockController,
+    FetchClientsController,
     EditClientController,
     GetClientByDocumentController,
-    FetchClientsController,
     DeleteClientController,
-    FetchMaterialsController,
-    GetMaterialByIdController
+    CreateSheetController,
+    GetSheetByIdController,
+    ReduceSheetStockController,
+    FetchSheetsController,
+    EditSheetController,
+    DeleteSheetController
   ],
   providers: [
     RegisterMaterialUseCase,
-    RegisterSheetUseCase,
-    RegisterClientUseCase,
-    ReduceSheetStockUseCase,
-    EditClientUseCase,
-    GetClientByDocumentUseCase,
-    FetchClientsUseCase,
-    DeleteClientUseCase,
     FetchMaterialsUseCase,
-    GetMaterialByIdUseCase
+    GetMaterialByIdUseCase,
+    EditMaterialUseCase,
+    DeleteMaterialUseCase,
+    RegisterClientUseCase,
+    FetchClientsUseCase,
+    GetClientByDocumentUseCase,
+    EditClientUseCase,
+    DeleteClientUseCase,
+    RegisterSheetUseCase,
+    GetSheetByIdUseCase,
+    ReduceSheetStockUseCase,
+    FetchSheetsUseCase,
+    EditSheetUseCase,
+    DeleteSheetUseCase
   ]
 })
 export class HttpModule { }

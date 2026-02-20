@@ -13,15 +13,15 @@ describe('Fetch Clients Use Case', () => {
 
   it('should be able to fetch recent clients', async () => {
     await clientsRepository.create(
-      makeClient({ createdAt: new Date(2022, 0, 20) })
+      makeClient({ createdAt: new Date(2026, 0, 20) })
     )
 
     await clientsRepository.create(
-      makeClient({ createdAt: new Date(2022, 0, 18) })
+      makeClient({ createdAt: new Date(2026, 0, 18) })
     )
 
     await clientsRepository.create(
-      makeClient({ createdAt: new Date(2022, 0, 23) })
+      makeClient({ createdAt: new Date(2026, 0, 23) })
     )
 
     const result = await sut.execute({
@@ -29,9 +29,9 @@ describe('Fetch Clients Use Case', () => {
     })
 
     expect(result.value?.clients).toEqual([
-      expect.objectContaining({ createdAt: new Date(2022, 0, 23) }),
-      expect.objectContaining({ createdAt: new Date(2022, 0, 20) }),
-      expect.objectContaining({ createdAt: new Date(2022, 0, 18) }),
+      expect.objectContaining({ createdAt: new Date(2026, 0, 23) }),
+      expect.objectContaining({ createdAt: new Date(2026, 0, 20) }),
+      expect.objectContaining({ createdAt: new Date(2026, 0, 18) }),
     ])
   })
 
