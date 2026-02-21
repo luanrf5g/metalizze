@@ -17,7 +17,8 @@ interface RegisterSheetUseCaseRequest {
   height: number,
   thickness: number,
   quantity: number,
-  type?: 'STANDARD' | 'SCRAP'
+  type?: 'STANDARD' | 'SCRAP',
+  description?: string
 }
 
 type RegisterSheetUseCaseResponse = Either<
@@ -44,6 +45,7 @@ export class RegisterSheetUseCase {
     quantity,
     clientId = null,
     type = 'STANDARD',
+    description
   }: RegisterSheetUseCaseRequest): Promise<RegisterSheetUseCaseResponse> {
     const material = await this.materialsRepository.findById(materialId)
 
@@ -80,7 +82,7 @@ export class RegisterSheetUseCase {
         sheetId: existingSheet.id,
         type: 'ENTRY',
         quantity,
-        description: 'Entrada de Estoque (Adição de Chapa).'
+        description: description ?? 'Entrada de Estoque (Adição de Chapa).'
       })
       await this.inventoryMovementsRepository.create(movement)
 

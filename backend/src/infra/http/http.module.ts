@@ -34,6 +34,8 @@ import { EditSheetUseCase } from "@/domain/application/use-cases/edit-sheet";
 import { DeleteSheetController } from "./controllers/delete-sheet.controller";
 import { FetchInventoryMovementsController } from "./controllers/fetch-inventory-movements.controller";
 import { FetchInventoryMovementsUseCase } from "@/domain/application/use-cases/fetch-inventory-movements";
+import { RegisterSheetCutController } from "./controllers/register-sheet-cut.controller";
+import { RegisterSheetCutUseCase } from "@/domain/application/use-cases/register-sheet-cut";
 
 @Module({
   imports: [DatabaseModule],
@@ -54,7 +56,8 @@ import { FetchInventoryMovementsUseCase } from "@/domain/application/use-cases/f
     FetchSheetsController,
     EditSheetController,
     DeleteSheetController,
-    FetchInventoryMovementsController
+    FetchInventoryMovementsController,
+    RegisterSheetCutController
   ],
   providers: [
     RegisterMaterialUseCase,
@@ -73,7 +76,8 @@ import { FetchInventoryMovementsUseCase } from "@/domain/application/use-cases/f
     FetchSheetsUseCase,
     EditSheetUseCase,
     DeleteSheetUseCase,
-    FetchInventoryMovementsUseCase
+    FetchInventoryMovementsUseCase,
+    RegisterSheetCutUseCase
   ]
 })
 export class HttpModule { }
