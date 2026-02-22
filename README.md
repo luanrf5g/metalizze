@@ -1,40 +1,118 @@
-# Metalizze - Sistema de Gestão de Estoque e Orçamentos
+# 🏭 Metalizze - ERP & Gestão de Produção
 
-O **Metalizze** é uma solução completa para oficinas de corte a laser, focada em rastreabilidade unitária de chapas, gestão genealógica de retalhos (Pai/Filho) e precificação dinâmica baseada no custo de reposição.
+O **Metalizze** é um sistema de nível ERP (Enterprise Resource Planning) desenvolvido especificamente para gerenciar o chão de fábrica de oficinas de corte a laser. Ele automatiza o controle de estoque de matéria-prima (chapas), rastreia a geração de retalhos (scraps) de forma inteligente e mantém um log de auditoria financeiro rigoroso de todas as movimentações.
 
-## 🏗 Arquitetura
+---
 
-O projeto é um **Monorepo** dividido em:
+## 🚀 Tecnologias Utilizadas
 
-- **`backend/`**: API REST desenvolvida com **NestJS**, seguindo os princípios de **Clean Architecture** e **DDD (Domain-Driven Design)**.
-- **`frontend/`**: Interface Web e Mobile (Tablet) desenvolvida com **Next.js**.
+### Backend (API Restful)
+- **Framework:** [NestJS](https://nestjs.com/)
+- **ORM:** [Prisma ORM](https://www.prisma.io/)
+- **Banco de Dados:** PostgreSQL via [Supabase](https://supabase.com/)
+- **Validação:** [Zod](https://zod.dev/)
+- **Testes:** [Vitest](https://vitest.dev/) & [Supertest](https://github.com/ladjs/supertest)
+- **Arquitetura:** Clean Architecture e Domain-Driven Design (DDD)
 
-## 🛠 Tech Stack
+### Frontend (Interface Web)
+- **Framework:** [Next.js (App Router)](https://nextjs.org/)
+- **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
+- **Componentes:** [shadcn/ui](https://ui.shadcn.com/)
+- **HTTP Client:** [Axios](https://axios-http.com/)
+- **Ícones:** [Lucide React](https://lucide.dev/)
 
-- **Linguagem:** TypeScript
-- **Backend:** NestJS, Zod, Pattern Either (Functional Error Handling)
-- **Database:** PostgreSQL (Supabase), Prisma ORM
-- **Frontend:** Next.js, TailwindCSS, Shadcn/ui, Tanstack Query
-- **Testing:** Jest (Unit), Supertest (E2E)
+---
 
-## 🏛 Estrutura do Backend (Clean Architecture)
+## ✨ Principais Funcionalidades
 
-O backend segue a estrita separação de responsabilidades:
+- **Gestão de Materiais e Clientes:** Cadastro e controle com geração automática de Slugs e integridade referencial.
+- **Estoque de Chapas:** Controle de entrada de chapas virgens com cálculo dinâmico de SKUs.
+- **Sistema de Corte Inteligente:** Baixa automática da chapa original ("Chapa Mãe") e geração dinâmica de chapas filhas ("Retalhos/Scraps"), com reaproveitamento de SKUs existentes no estoque.
+- **Log de Auditoria (Inventory Movements):** Registro imutável de todas as entradas e saídas, garantindo rastreabilidade total (quem, quando e por quê).
+- **Dashboard Moderno:** Interface administrativa responsiva (Light Mode), com menu lateral inteligente e preparada para uso em chãos de fábrica (visão para leitura de QR Code no mobile).
 
-- `src/core`: Classes base compartilhadas (Entity, Either, UniqueEntityID).
-- `src/domain`: Regras de negócio puras (Enterprise Logic e Use Cases).
-- `src/infra`: Implementações concretas (Database, HTTP Controllers, Gateways).
+---
 
-## 🚀 Como Rodar
+## ⚙️ Como Executar o Projeto Localmente
 
-### Pré-requisitos
-- Node.js (v20+)
-- Docker (opcional, para banco local)
-- Conta no Supabase
+Siga o passo a passo abaixo para rodar o ambiente de desenvolvimento completo na sua máquina.
 
-### Instalação
+### 1. Inicializando o Banco de Dados (Supabase)
+O projeto utiliza o Supabase localmente via Docker para simular o banco de dados e a infraestrutura.
+
+Na pasta raiz do projeto (`/metalizze`), inicie os containers do Supabase:
 ```bash
-# Backend
-cd backend
-npm install
-npm run start:dev
+npx supabase start
+```
+
+### 2. Configurando o Backend
+
+Na pasta raind do backend (`/backend`), onde se encontra o código da API siga os seguintes passos:
+
+  1. Instale as dependências:
+      ```bash
+      npm install
+      ```
+  2. Configuração das Variáveis de Ambiente: </br>
+  O repositório inclui um `.env.test` (que sobe nos commits) para servir de base.
+      - Crie um arquivo chamado `.env` na raiz.
+      - Copie o conteúdo de `.env.test` para dentro dele.
+      - Certifique-se de que a variável `DATABASE_URL` está preenchida com a URL de conexão local fornecida pelo Supabase no passo 1. Exemplo:
+
+      ```bash
+      DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
+      ```
+
+  3. Rodando as Migrações do Banco: </br>
+  Sincronize o banco de dados do Supabase com o esquema do Prisma, e logo após por garantida, rode o generate do client do Prisma:
+
+      ```bash
+      npx prisma migrate dev
+      npx prisma generate
+      ```
+
+  4. Inicie o servidor de desenvolvimento:
+
+      ```bash
+      npm run start:dev
+      ```
+      A API ficará disponível em `http://localhost:3000`
+
+### 3. Configurando o Frontend
+
+Abra um novo terminal e acesse a pasta do frontend:
+
+  1. Navegue para o diretório:
+
+      ```bash
+      cd frontend
+      ```
+  2. Instale as dependências:
+
+      ```bash
+      npm install
+      ```
+  3. Inicie o servidor do Next.js
+
+      ```bash
+      npm run dev
+      ```
+      A interface gráfica estará provavelmente disponível em `http://locahost:3001`
+
+---
+
+## 🧪 Rodando os testes
+
+O backend foi construído com foco na qualidade do código e segurança das regras de negócio. Para rodar a suíte de testes, utilize os comandos abaixo na pasta raiz do projeto:
+
+### Testes Unitários (Regras de Domínio e Use Cases):
+
+```bash
+npm run test
+```
+
+### Testes E2E (Integração de Rotas, Controllers e Banco de Dados):
+
+```bash
+npm run test:e2e
+```
