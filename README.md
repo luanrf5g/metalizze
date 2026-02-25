@@ -47,14 +47,14 @@ npx supabase start
 
 ### 2. Configurando o Backend
 
-Na pasta raind do backend (`/backend`), onde se encontra o código da API siga os seguintes passos:
+Na pasta raiz do backend (`/backend`), onde se encontra o código da API siga os seguintes passos:
 
   1. Instale as dependências:
       ```bash
       npm install
       ```
   2. Configuração das Variáveis de Ambiente: </br>
-  O repositório inclui um `.env.test` (que sobe nos commits) para servir de base.
+  O repositório inclui um `.env.test` para servir de base.
       - Crie um arquivo chamado `.env` na raiz.
       - Copie o conteúdo de `.env.test` para dentro dele.
       - Certifique-se de que a variável `DATABASE_URL` está preenchida com a URL de conexão local fornecida pelo Supabase no passo 1. Exemplo:
