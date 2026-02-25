@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
-import { Island_Moments } from "next/font/google"
 
 interface CreateMaterialModalProps {
   onSuccess: () => void
@@ -16,7 +15,6 @@ export function CreateMaterialModal({ onSuccess }: CreateMaterialModalProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(false)
 
   async function handleCreateMaterial(e: React.ChangeEvent) {
     e.preventDefault()
@@ -29,7 +27,6 @@ export function CreateMaterialModal({ onSuccess }: CreateMaterialModalProps) {
       onSuccess()
     } catch (error) {
       console.error('Erro ao criar material: ', error)
-      setError(true)
     } finally {
       setIsLoading(false)
     }
