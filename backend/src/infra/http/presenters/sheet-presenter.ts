@@ -8,6 +8,7 @@ export class SheetPresenter {
       materialId: sheet.materialId.toString(),
       clientId: sheet.clientId ? sheet.clientId.toString() : null,
       quantity: sheet.quantity,
+      createdAt: sheet.createdAt,
       type: sheet.type
     }
   }

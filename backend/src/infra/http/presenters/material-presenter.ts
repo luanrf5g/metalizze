@@ -5,7 +5,8 @@ export class MaterialPresenter {
     return {
       id: material.id.toString(),
       name: material.name,
-      slug: material.slug.value
+      slug: material.slug.value,
+      createdAt: material.createdAt
     }
   }
 }
