@@ -1,7 +1,11 @@
 export interface Sheet {
   id: string,
   materialId: string,
-  clientId: string | null,
+  client?: {
+    id: string,
+    name: string,
+    document: string
+  } | null,
   sku: string,
   width: number,
   height: number,

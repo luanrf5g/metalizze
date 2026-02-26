@@ -78,7 +78,7 @@ export default function SheetsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>SKU</TableHead>
-              <TableHead>Cliente</TableHead>
+              <TableHead>Cliente / Documento</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Entrada</TableHead>
               <TableHead>Quantidade</TableHead>
@@ -101,7 +101,16 @@ export default function SheetsPage() {
               sheets.map((sheet) => (
                 <TableRow key={sheet.id}>
                   <TableCell className='font-medium'>{sheet.sku}</TableCell>
-                  <TableCell>{sheet.clientId || 'JB Laser'}</TableCell>
+                  <TableCell>
+                    {sheet.client ? (
+                      <div className='flex flex-col'>
+                        <span className='font-medium text-zinc-900'>{sheet.client.name}</span>
+                        <span className='text-sm text-zinc-500'>{sheet.client.document}</span>
+                      </div>
+                    ) : (
+                      <span className='text-zinc-500 italic text-sm'>Estoque Próprio</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${
                       sheet.type === 'SCRAP'
