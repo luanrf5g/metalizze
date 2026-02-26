@@ -36,6 +36,9 @@ import { FetchInventoryMovementsController } from "./controllers/fetch-inventory
 import { FetchInventoryMovementsUseCase } from "@/domain/application/use-cases/fetch-inventory-movements";
 import { RegisterSheetCutController } from "./controllers/register-sheet-cut.controller";
 import { RegisterSheetCutUseCase } from "@/domain/application/use-cases/register-sheet-cut";
+import { GetDashboardMetricsController } from "./controllers/get-dashboard-metrics.controller";
+import { m } from "vitest/dist/reporters-w_64AS5f.js";
+import { GetDashboardMetricsUseCase } from "@/domain/application/use-cases/get-dashboard-metrics";
 
 @Module({
   imports: [DatabaseModule],
@@ -57,7 +60,8 @@ import { RegisterSheetCutUseCase } from "@/domain/application/use-cases/register
     EditSheetController,
     DeleteSheetController,
     FetchInventoryMovementsController,
-    RegisterSheetCutController
+    RegisterSheetCutController,
+    GetDashboardMetricsController
   ],
   providers: [
     RegisterMaterialUseCase,
@@ -77,7 +81,8 @@ import { RegisterSheetCutUseCase } from "@/domain/application/use-cases/register
     EditSheetUseCase,
     DeleteSheetUseCase,
     FetchInventoryMovementsUseCase,
-    RegisterSheetCutUseCase
+    RegisterSheetCutUseCase,
+    GetDashboardMetricsUseCase
   ]
 })
 export class HttpModule { }
