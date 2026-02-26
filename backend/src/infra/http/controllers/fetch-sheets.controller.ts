@@ -3,6 +3,7 @@ import { ZodValidationPipe } from "../pipes/zod-validation-pipe";
 import { BadRequestException, Controller, Get, Query } from "@nestjs/common";
 import { FetchSheetsUseCase } from "@/domain/application/use-cases/fetch-sheets";
 import { SheetPresenter } from "../presenters/sheet-presenter";
+import { SheetWithDetailsPresenter } from "../presenters/sheet-with-details-presenter";
 
 const fetchSheetsQuerySchema = z.object({
   page: z.string().optional().default('1').transform(Number).pipe(z.number().min(1)),
@@ -37,7 +38,7 @@ export class FetchSheetsController {
     const sheets = result.value.sheets
 
     return {
-      sheets: sheets.map(SheetPresenter.toHTTP)
+      sheets: sheets.map(SheetWithDetailsPresenter.toHTTP)
     }
   }
 }

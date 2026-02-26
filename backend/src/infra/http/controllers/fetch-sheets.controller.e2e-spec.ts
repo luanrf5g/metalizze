@@ -68,8 +68,11 @@ describe('Fetch Sheets (E2E)', () => {
     expect(response.body.sheets[0]).toEqual(
       expect.objectContaining({
         materialId: materialTarget.id.toString(),
-        clientId: clientTarget.id.toString(),
         type: 'STANDARD',
+        client: expect.objectContaining({
+          id: clientTarget.id.toString(),
+          name: 'Cliente Alvo'
+        })
       }),
     )
   })

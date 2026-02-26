@@ -3,6 +3,7 @@ import { Sheet, SheetType } from "@/domain/enterprise/entities/sheet";
 import { Injectable } from "@nestjs/common";
 import { PrismaSheetMapper } from "../mappers/prisma-sheet-mapper";
 import { PrismaService } from "../prisma.service";
+import { PrismaSheetWithDetailsMapper } from "../mappers/prisma-sheet-with-details-mapper";
 
 @Injectable()
 export class PrismaSheetsRepository implements SheetsRepository {
@@ -110,6 +111,6 @@ export class PrismaSheetsRepository implements SheetsRepository {
       }
     })
 
-    return sheets.map(PrismaSheetMapper.toDomain)
+    return sheets.map(PrismaSheetWithDetailsMapper.toDomain)
   }
 }

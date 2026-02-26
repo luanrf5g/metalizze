@@ -3,6 +3,7 @@ import { SheetsRepository } from "../repositories/sheets-repository";
 import { Either, right } from "@/core/logic/Either";
 import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
 import { Sheet } from "@/domain/enterprise/entities/sheet";
+import { SheetWithDetails } from "@/domain/enterprise/value-objects/sheet-with-details";
 
 interface FetchSheetsUseCaseRequest {
   page: number,
@@ -14,7 +15,7 @@ interface FetchSheetsUseCaseRequest {
 type FetchSheetsUseCaseResponse = Either<
   null,
   {
-    sheets: Sheet[]
+    sheets: SheetWithDetails[]
   }
 >
 
