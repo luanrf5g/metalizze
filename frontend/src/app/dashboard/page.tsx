@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Layers, Scissors, Box, Users } from "lucide-react"
 import { api } from "@/lib/api"
+import { InventoryMovementChart } from "@/components/InventoryMovementChat"
 
 // Tipagem do retorno da nossa rota /metrics
 interface DashboardMetrics {
@@ -118,6 +119,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        <InventoryMovementChart/>
       </div>
     </div>
   )
