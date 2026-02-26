@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
+import { toast } from "sonner"
+import { Check } from "lucide-react"
 
 interface CreateMaterialModalProps {
   onSuccess: () => void
@@ -25,8 +27,14 @@ export function CreateMaterialModal({ onSuccess }: CreateMaterialModalProps) {
       setName("")
       setOpen(false)
       onSuccess()
+      toast.success("Material salvo com sucesso!", {
+        duration: 2000
+      })
     } catch (error) {
       console.error('Erro ao criar material: ', error)
+      toast.error('Erro ao criar o material. Verifique os Dados', {
+        duration: 2000
+      })
     } finally {
       setIsLoading(false)
     }

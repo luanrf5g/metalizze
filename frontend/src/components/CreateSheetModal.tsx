@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./ui/select";
 import { Input } from "./ui/input";
 import { Client } from "@/types/clients";
+import { toast } from "sonner";
 
 interface CreateSheetModalProps {
   onSuccess: () => void
@@ -48,9 +49,14 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
       setQuantity("")
       setOpen(false)
       onSuccess()
+      toast.success("Chapa cadastrada com sucesso!", {
+        duration: 2000
+      })
     } catch (error) {
       console.log('Erro ao cadastrar uma nova chapa.')
-      alert('Erro ao tentar cadastrar um chapa nova.')
+      toast.error("Erro ao tentar cadastrar a chapa. Verifique os dados.", {
+        duration: 2000
+      })
     } finally {
       setIsLoading(false)
     }
