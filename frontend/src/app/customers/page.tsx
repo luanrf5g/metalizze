@@ -7,6 +7,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateMaterialModal } from "@/components/CreateMaterialModal";
 import { Client } from "@/types/clients";
+import { CreateClientModal } from "@/components/CreateClientModal";
 
 export default function MaterialsPage() {
   const [clients, setClients] = useState<Client[]>([])
@@ -36,8 +37,13 @@ export default function MaterialsPage() {
   return (
     <div className='p-8 max-x-6xl mx-auto space-y-6'>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
-        <CreateMaterialModal onSuccess={fetchClients} />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Clientes</h1>
+          <p className="text-muted-foreground mt-1">
+            Banco de clientes cadastrados.
+          </p>
+        </div>
+        <CreateClientModal onSuccess={fetchClients} />
       </div>
 
       {hasError && (

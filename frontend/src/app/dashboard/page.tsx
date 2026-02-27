@@ -9,7 +9,7 @@ import { InventoryMovementChart } from "@/components/InventoryMovementChat"
 // Tipagem do retorno da nossa rota /metrics
 interface DashboardMetrics {
   totalStandardSheets: number;
-  totalScrapsSheets: number;
+  totalScrapSheets: number;
   totalMaterials: number;
   totalClients: number;
 }
@@ -20,7 +20,7 @@ export default function DashboardPage() {
 
   async function fetchMetrics() {
     try {
-      const response = await api.get('/metrics')
+      const response = await api.get('/metrics/cards')
       setMetrics(response.data.metrics)
     } catch (error) {
       console.error("Erro ao buscar métricas do dashboard:", error)
@@ -34,7 +34,7 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 max-w-8xl mx-auto space-y-8">
 
       {/* Cabeçalho da Página */}
       <div>
@@ -75,7 +75,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {isLoading ? "..." : metrics?.totalScrapsSheets}
+              {isLoading ? "..." : metrics?.totalScrapSheets}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Pedaços para reaproveitamento
@@ -118,9 +118,8 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-
-        <InventoryMovementChart/>
       </div>
+        <InventoryMovementChart/>
     </div>
   )
 }
