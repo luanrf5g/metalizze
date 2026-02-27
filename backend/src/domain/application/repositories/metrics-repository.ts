@@ -1,10 +1,17 @@
-export interface DashboardMetrics {
+export interface DashboardCardsMetrics {
   totalStandardSheets: number,
-  totalScrapsSheets: number,
+  totalScrapSheets: number,
   totalMaterials: number,
   totalClients: number
 }
 
+export interface DashboardInventoryMovementsMetrics {
+  date: string,
+  entries: number,
+  exits: number
+}
+
 export abstract class MetricsRepository {
-  abstract getDashboardMetrics(): Promise<DashboardMetrics>
+  abstract getDashboardCardsMetrics(): Promise<DashboardCardsMetrics>
+  abstract getDashboardInventoryMovementsMetrics(days?: number): Promise<DashboardInventoryMovementsMetrics[]>
 }

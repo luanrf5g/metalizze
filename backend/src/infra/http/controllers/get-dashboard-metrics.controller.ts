@@ -1,24 +1,24 @@
-import { GetDashboardMetricsUseCase } from "@/domain/application/use-cases/get-dashboard-metrics";
+import { GetDashboardCardsMetricsUseCase } from "@/domain/application/use-cases/get-dashboard-cards-metrics";
 import { BadRequestException, Controller, Get } from "@nestjs/common";
 
-@Controller('/metrics')
+@Controller('/metrics/cards')
 export class GetDashboardMetricsController {
-  constructor(private getDashboardMetrics: GetDashboardMetricsUseCase) { }
+  constructor(private getDashboardCardsMetrics: GetDashboardCardsMetricsUseCase) { }
 
   @Get()
   async handle() {
-    const result = await this.getDashboardMetrics.execute()
+    const result = await this.getDashboardCardsMetrics.execute()
 
     if (result.isLeft()) {
       throw new BadRequestException("Unexpected error white fetching metrics")
     }
 
-    const metrics = result.value.metrics
+    const metrics = result.value.cardsMetrics
 
     return {
       metrics: {
         totalStandardSheets: metrics.totalStandardSheets,
-        totalScrapsSheets: metrics.totalScrapsSheets,
+        totalScrapSheets: metrics.totalScrapSheets,
         totalMaterials: metrics.totalMaterials,
         totalClients: metrics.totalClients
       }
