@@ -34,7 +34,7 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="p-8 max-w-8xl mx-auto space-y-8">
+    <div className="p-8 max-x-8xl mx-auto space-y-8">
 
       {/* Cabeçalho da Página */}
       <div>

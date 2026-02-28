@@ -106,17 +106,14 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
                 <SelectValue placeholder="Selecione um Material" />
               </SelectTrigger>
               <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Materiais</SelectLabel>
-                  {materials.map((material) => (
-                    <SelectItem
-                      key={material.id}
-                      value={material.id}
-                    >
-                      {material.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+                {materials.map((material) => (
+                  <SelectItem
+                    key={material.id}
+                    value={material.id}
+                  >
+                    {material.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
