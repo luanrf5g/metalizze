@@ -8,7 +8,7 @@ const editMaterialBodySchema = z.object({
   name: z.string().optional()
 })
 
-type EditMaterialBodySchame = z.infer<typeof editMaterialBodySchema>
+type EditMaterialBodySchema = z.infer<typeof editMaterialBodySchema>
 
 const bodyValidationPipe = new ZodValidationPipe(editMaterialBodySchema)
 
@@ -20,7 +20,7 @@ export class EditMaterialController {
   @HttpCode(204)
   async handle(
     @Param('id') materialId: string,
-    @Body(bodyValidationPipe) body: EditMaterialBodySchame
+    @Body(bodyValidationPipe) body: EditMaterialBodySchema
   ) {
     const { name } = body
 

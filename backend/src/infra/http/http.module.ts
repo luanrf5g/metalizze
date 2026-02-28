@@ -40,6 +40,8 @@ import { GetDashboardMetricsController } from "./controllers/get-dashboard-metri
 import { GetDashboardCardsMetricsUseCase } from "@/domain/application/use-cases/get-dashboard-cards-metrics";
 import { GetInventoryMovementsMetricsController } from "./controllers/get-inventory-movements-metrics.controller";
 import { GetInventoryMovementsMetricsUseCase } from "@/domain/application/use-cases/get-inventory-movements-metrics";
+import { RegisterInventoryMovementController } from "./controllers/register-inventory-movement.controller";
+import { RegisterInventoryMovementUseCase } from "@/domain/application/use-cases/register-inventory-movements";
 
 @Module({
   imports: [DatabaseModule],
@@ -63,7 +65,8 @@ import { GetInventoryMovementsMetricsUseCase } from "@/domain/application/use-ca
     FetchInventoryMovementsController,
     RegisterSheetCutController,
     GetDashboardMetricsController,
-    GetInventoryMovementsMetricsController
+    GetInventoryMovementsMetricsController,
+    RegisterInventoryMovementController
   ],
   providers: [
     RegisterMaterialUseCase,
@@ -85,7 +88,8 @@ import { GetInventoryMovementsMetricsUseCase } from "@/domain/application/use-ca
     FetchInventoryMovementsUseCase,
     RegisterSheetCutUseCase,
     GetDashboardCardsMetricsUseCase,
-    GetInventoryMovementsMetricsUseCase
+    GetInventoryMovementsMetricsUseCase,
+    RegisterInventoryMovementUseCase
   ]
 })
 export class HttpModule { }
