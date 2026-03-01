@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { AppShell } from "@/components/AppShell";
 
-const inter = Inter({ subsets: ["latin"]})
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Metalizze ERP | Gestão de Produção",
@@ -17,15 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-zinc-50 text-zinc-950 flex min-h-screen`}>
-        <Sidebar />
-
-        <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
-          <div className="flex-1 overflow-y-auto">
-            {children}
-          </div>
-        </main>
+    <html lang="pt-BR">
+      <body className={`${inter.className} bg-zinc-50 text-zinc-950`}>
+        <AppShell>
+          {children}
+        </AppShell>
         <Toaster richColors position="bottom-right" />
       </body>
     </html>

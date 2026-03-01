@@ -29,6 +29,8 @@ O **Metalizze** é um sistema de nível ERP (Enterprise Resource Planning) desen
 - **Estoque de Chapas:** Controle de entrada de chapas virgens com cálculo dinâmico de SKUs.
 - **Sistema de Corte Inteligente:** Baixa automática da chapa original ("Chapa Mãe") e geração dinâmica de chapas filhas ("Retalhos/Scraps"), com reaproveitamento de SKUs existentes no estoque.
 - **Log de Auditoria (Inventory Movements):** Registro imutável de todas as entradas e saídas, garantindo rastreabilidade total (quem, quando e por quê).
+- **Autenticação e Autorização:** Sistema JWT (RS256) com RBAC (Admin, Operador, Visualizador) e permissões granulares por módulo.
+- **Gestão de Usuários:** Tela administrativa para criação, edição, ativação/desativação e exclusão de usuários com controle de permissões.
 - **Dashboard Moderno:** Interface administrativa responsiva (Light Mode), com menu lateral inteligente e preparada para uso em chãos de fábrica (visão para leitura de QR Code no mobile).
 
 ---
@@ -62,6 +64,20 @@ Na pasta raiz do backend (`/backend`), onde se encontra o código da API siga os
       ```bash
       DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
       ```
+      - Gere as chaves JWT (RS256) e adicione ao `.env`:
+
+      ```bash
+      # Gerar par de chaves RSA
+      openssl genpkey -algorithm RSA -out private.pem -pkeyopt rsa_keygen_bits:2048
+      openssl rsa -in private.pem -pubout -out public.pem
+
+      # Converter para base64 e adicionar ao .env
+      echo "JWT_PRIVATE_KEY=$(base64 -w 0 private.pem)" >> .env
+      echo "JWT_PUBLIC_KEY=$(base64 -w 0 public.pem)" >> .env
+
+      # Limpar arquivos temporários
+      rm private.pem public.pem
+      ```
 
   3. Rodando as Migrações do Banco: </br>
   Sincronize o banco de dados do Supabase com o esquema do Prisma, e logo após por garantida, rode o generate do client do Prisma:
@@ -71,7 +87,19 @@ Na pasta raiz do backend (`/backend`), onde se encontra o código da API siga os
       npx prisma generate
       ```
 
-  4. Inicie o servidor de desenvolvimento:
+  4. Populando Dados Iniciais (Seeder):
+  Execute o seed para criar o usuário administrador e materiais base:
+
+      ```bash
+      npx prisma db seed
+      ```
+
+      > **Credenciais do Admin padrão:**
+      > - E-mail: `admin@metalizze.com`
+      > - Senha: `admin123`
+      > - 5 materiais base serão criados: Aço Carbono, Aço Inox, Alumínio, Latão, Cobre
+
+  5. Inicie o servidor de desenvolvimento:
 
       ```bash
       npm run start:dev
