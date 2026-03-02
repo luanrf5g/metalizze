@@ -16,8 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Estoque (Chapas)', href: '/', icon: Layers },
+  { name: 'Visão Geral', href: '/', icon: LayoutDashboard },
+  { name: 'Estoque (Chapas)', href: '/sheets', icon: Layers },
   { name: 'Retalhos', href: '/scraps', icon: BoxSelect },
   { name: 'Ordens de Corte', href: '/cut-orders', icon: Scissors },
   { name: 'Materiais', href: '/materials', icon: Component },

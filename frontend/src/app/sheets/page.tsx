@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { api } from '@/lib/api'
 import { Sheet } from '@/types/sheet'
 import { useEffect, useState } from 'react'
-import { translateSheetType, formatDate } from '@/lib/formatters'
+import { translateSheetType, formatDate, formatDocument } from '@/lib/formatters'
 import { CreateSheetModal } from '@/components/CreateSheetModal'
 
 export default function SheetsPage() {
@@ -105,7 +105,7 @@ export default function SheetsPage() {
                     {sheet.client ? (
                       <div className='flex flex-col'>
                         <span className='font-medium text-zinc-900'>{sheet.client.name}</span>
-                        <span className='text-sm text-zinc-500'>{sheet.client.document}</span>
+                        <span className='text-sm text-zinc-500'>{formatDocument(sheet.client.document)}</span>
                       </div>
                     ) : (
                       <span className='text-zinc-500 italic text-sm'>Estoque Próprio</span>

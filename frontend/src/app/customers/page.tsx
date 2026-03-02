@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { CreateMaterialModal } from "@/components/CreateMaterialModal";
 import { Client } from "@/types/clients";
 import { CreateClientModal } from "@/components/CreateClientModal";
+import { formatDocument } from "@/lib/formatters";
 
 export default function MaterialsPage() {
   const [clients, setClients] = useState<Client[]>([])
@@ -82,7 +83,7 @@ export default function MaterialsPage() {
               clients.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell className="font-bold">{client.name}</TableCell>
-                  <TableCell>{client.document}</TableCell>
+                  <TableCell>{formatDocument(client.document)}</TableCell>
                   <TableCell>{client.id}</TableCell>
                 </TableRow>
               ))
