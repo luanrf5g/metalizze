@@ -32,13 +32,12 @@ export function Sidebar() {
 
   return (
     // Fundo branco com borda sutil em zinc-200 para separar do resto da tela
-    <aside className="hidden md:flex flex-col w-64 bg-white text-zinc-950 min-h-screen border-r border-zinc-200">
-
+    <aside className="w-18 md:flex flex-col md:w-64 bg-white text-zinc-950 min-h-screen border-r border-zinc-200 transition-all duration-100 ease-in-out overflow-hidden">
       {/* Logotipo / Nome do Sistema */}
       <div className="h-16 flex items-center px-6 border-b border-zinc-200">
         <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
           <div className="w-6 h-6 bg-zinc-900 rounded-md"></div> {/* Logo mais escuro para dar contraste */}
-          <span className="text-zinc-900">Metalizze</span>
+          <span className="hidden md:flex text-zinc-900">Metalizze</span>
         </div>
       </div>
 
@@ -59,7 +58,9 @@ export function Sidebar() {
               )}
             >
               <Icon className="w-5 h-5" />
-              {item.name}
+              <span className="hidden md:flex">
+                {item.name}
+              </span>
             </Link>
           )
         })}
@@ -67,12 +68,12 @@ export function Sidebar() {
 
       {/* Perfil do Usuário */}
       <div className="p-4 border-t border-zinc-200">
-        <div className="flex items-center gap-3 px-3 py-2">
+        <div className="flex items-center justify-center md:justify-start md:px-3 gap-3 py-2">
           {/* Avatar com alto contraste */}
           <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center">
             <span className="text-xs font-bold text-zinc-50">OP</span>
           </div>
-          <div className="flex-1">
+          <div className="hidden md:flex flex-col">
             <p className="text-sm font-semibold text-zinc-900">Operador</p>
             <p className="text-xs text-zinc-500">oficina@metalizze.com</p>
           </div>

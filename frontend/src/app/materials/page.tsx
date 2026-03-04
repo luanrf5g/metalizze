@@ -5,9 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/formatters";
 import { Material } from "@/types/material";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Ellipsis, ListChevronsUpDown, PenIcon, PenLineIcon, Search, Trash2Icon, TrashIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateMaterialModal } from "@/components/CreateMaterialModal";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import Link from "next/link";
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([])
@@ -31,6 +34,8 @@ export default function MaterialsPage() {
   useEffect(() => {
     fetchMaterials()
   }, [])
+
+  async function handleModifyMaterial() {}
 
   return (
     <div className='p-8 max-x-6xl mx-auto space-y-6'>

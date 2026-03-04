@@ -7,6 +7,7 @@ import { Sheet } from '@/types/sheet'
 import { useEffect, useState } from 'react'
 import { translateSheetType, formatDate, formatDocument } from '@/lib/formatters'
 import { CreateSheetModal } from '@/components/CreateSheetModal'
+import { useSearchParams } from 'next/navigation'
 
 export default function SheetsPage() {
   const [sheets, setSheets] = useState<Sheet[]>([])
@@ -16,10 +17,12 @@ export default function SheetsPage() {
   async function fetchSheets() {
     setIsLoading(true)
     try {
-      let response = await api.get('/sheets');
+      let route = '/sheets'
 
-      if(activeFilter === 'STANDARD') response = await api.get('/sheets?type=STANDARD')
-      else if(activeFilter === 'SCRAP') response = await api.get('/sheets?type=SCRAP')
+      if(activeFilter === 'STANDARD') route = '/sheets?type=STANDARD'
+      else if(activeFilter === 'SCRAP') route = '/sheets?type=SCRAP'
+
+      let response = await api.get(route)
 
       setSheets(response.data.sheets)
     } catch (error) {
