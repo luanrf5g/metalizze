@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { api } from "@/lib/api"
 import { Sheet } from "@/types/sheet"
 import { Client } from "@/types/clients"
@@ -14,7 +15,8 @@ import { StepSheetSelection } from "@/components/cut-orders/StepSheetSelection"
 import { StepScraps, ScrapForm } from "@/components/cut-orders/StepScraps"
 import { StepSummary } from "@/components/cut-orders/StepSummary"
 
-export default function CutOrdersPage() {
+function CutOrdersWizard() {
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -55,20 +57,32 @@ export default function CutOrdersPage() {
 
   // Fetch data
   useEffect(() => {
+    let active = true;
+
     async function load() {
       try {
         const [sheetsRes, clientsRes] = await Promise.all([
           api.get('/sheets'),
           api.get('/clients'),
         ])
+        if (!active) return;
         setSheets(sheetsRes.data.sheets)
         setClients(clientsRes.data.clients)
+
+        // Auto-select sheet if passed in URL
+        const urlSheetId = searchParams.get('sheetId')
+        if (urlSheetId) {
+          handleSelectSheet(urlSheetId)
+        }
       } catch {
+        if (!active) return;
         toast.error("Erro ao carregar dados.")
       }
     }
     load()
-  }, [])
+
+    return () => { active = false; }
+  }, [searchParams, fetchSheetDetails]) // Added fetchSheetDetails to deps
 
   // Scrap helpers
   function addScrap() {
@@ -152,19 +166,11 @@ export default function CutOrdersPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-8">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-950">Operação de Corte</h1>
-        <p className="text-muted-foreground text-sm font-medium mt-1">
-          Registre uma ordem de corte ou utilização de um material.
-        </p>
-      </div>
-
+    <>
       <Stepper currentStep={currentStep} />
 
       {/* Card with carousel slides */}
-      <Card className="overflow-hidden border-zinc-200 shadow-sm bg-white">
+      <Card className="overflow-hidden border-zinc-200 shadow-sm bg-white mt-8">
         <CardContent className="p-0">
           <div className="overflow-hidden">
             <div
@@ -248,6 +254,28 @@ export default function CutOrdersPage() {
           </div>
         </CardContent>
       </Card>
+    </>
+  )
+}
+
+export default function CutOrdersPage() {
+  return (
+    <div className="p-8 max-w-3xl mx-auto space-y-2">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-950">Operação de Corte</h1>
+        <p className="text-muted-foreground text-sm font-medium mt-1">
+          Registre uma ordem de corte ou utilização de um material.
+        </p>
+      </div>
+
+      <Suspense fallback={
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+        </div>
+      }>
+        <CutOrdersWizard />
+      </Suspense>
     </div>
   )
 }

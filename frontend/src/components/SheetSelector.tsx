@@ -27,7 +27,7 @@ export function SheetSelector({ sheets, selectedSheetId, onSelectSheet }: SheetS
           role="combobox"
           type="button"
           aria-expanded={open}
-          className="w-full justify-between font-normal"
+          className="w-full justify-between font-normal overflow-hidden "
         >
           {selectedSheet ? `${selectedSheet.sku}` : 'Selecione uma chapa...'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
