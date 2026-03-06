@@ -10,6 +10,7 @@ import { InventoryMovements } from "@/types/movements";
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Pagination } from "@/components/Pagination";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function MovementsPage() {
   const [movements, setMovements] = useState<InventoryMovements[]>([])
@@ -18,6 +19,9 @@ export default function MovementsPage() {
 
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+
+  const { user } = useAuth()
+  const canCreate = user?.role === 'ADMIN' || user?.permissions?.['movements']?.write
 
   async function fetchMovements(currentPage: number = page) {
     setIsLoading(true)
@@ -48,7 +52,7 @@ export default function MovementsPage() {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400 pb-1">Movimentações</h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mt-1">Visualize todas as movimentações que tiveram no seu inventário.</p>
         </div>
-        <CreateMovementModal onSuccess={() => fetchMovements(page)}/>
+        {canCreate && <CreateMovementModal onSuccess={() => fetchMovements(page)} />}
       </div>
 
       {hasError && (
@@ -93,8 +97,7 @@ export default function MovementsPage() {
                     <TableCell className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{movement.sheetId}</TableCell>
                     <TableCell>
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${
-                          movement.type === 'ENTRY'
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${movement.type === 'ENTRY'
                             ? `bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300`
                             : `bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300`
                           }

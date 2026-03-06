@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const meResponse = await api.get('/auth/me')
         setUser(meResponse.data.user)
 
-        router.push('/dashboard')
+        router.push('/')
     }
 
     function logout() {

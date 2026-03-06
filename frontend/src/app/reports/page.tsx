@@ -2,26 +2,93 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
+import { useEffect, useState } from "react"
+import { api } from "@/lib/api"
+import { Loader2 } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircleIcon } from "lucide-react"
 
-const materialUsageData = [
-  { name: 'Aço Carbono 2mm', usadas: 400, retalhos: 45 },
-  { name: 'Aço Inox 1.5mm', usadas: 300, retalhos: 20 },
-  { name: 'Alumínio 3mm', usadas: 200, retalhos: 10 },
-  { name: 'Galvanizado 2mm', usadas: 278, retalhos: 39 },
-  { name: 'Cobre 1mm', usadas: 189, retalhos: 4 },
-];
-
-const productivityData = [
-  { name: 'Seg', ordens: 40 },
-  { name: 'Ter', ordens: 30 },
-  { name: 'Qua', ordens: 55 },
-  { name: 'Qui', ordens: 45 },
-  { name: 'Sex', ordens: 60 },
-  { name: 'Sáb', ordens: 20 },
-  { name: 'Dom', ordens: 5 },
-];
+type ProductivityData = { name: string; ordens: number }[]
+type MaterialUsageData = { name: string; usadas: number; retalhos: number }[]
 
 export default function ReportsPage() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
+
+  const [totalOrdersMonth, setTotalOrdersMonth] = useState(0)
+  const [totalOrdersCompared, setTotalOrdersCompared] = useState(0)
+
+  const [sheetsConsumedMonth, setSheetsConsumedMonth] = useState(0)
+  const [sheetsConsumedCompared, setSheetsConsumedCompared] = useState(0)
+
+  const [scrapsGeneratedMonth, setScrapsGeneratedMonth] = useState(0)
+  const [scrapsGeneratedCompared, setScrapsGeneratedCompared] = useState(0)
+
+  const [activeClients, setActiveClients] = useState(0)
+
+  const [productivityData, setProductivityData] = useState<ProductivityData>([])
+  const [materialUsageData, setMaterialUsageData] = useState<MaterialUsageData>([])
+
+  useEffect(() => {
+    async function fetchReportMetrics() {
+      setIsLoading(true)
+      setHasError(false)
+      try {
+        const response = await api.get('/metrics/reports')
+        const metrics = response.data.metrics
+
+        setTotalOrdersMonth(metrics.totalOrdersMonth)
+        setTotalOrdersCompared(metrics.totalOrdersComparedToLastMonth)
+
+        setSheetsConsumedMonth(metrics.sheetsConsumedMonth)
+        setSheetsConsumedCompared(metrics.sheetsConsumedComparedToLastMonth)
+
+        setScrapsGeneratedMonth(metrics.scrapsGeneratedMonth)
+        setScrapsGeneratedCompared(metrics.scrapsGeneratedComparedToLastMonth)
+
+        setActiveClients(metrics.activeClients)
+
+        setProductivityData(metrics.productivityData)
+        setMaterialUsageData(metrics.materialUsageData)
+      } catch (error) {
+        console.error("Erro ao buscar métricas de relatórios:", error)
+        setHasError(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchReportMetrics()
+  }, [])
+
+  function renderPercentageLabel(value: number) {
+    if (value > 0) return <div className="text-xs text-green-600 font-medium">+{value}% comparado ao mês passado</div>
+    if (value < 0) return <div className="text-xs text-red-600 font-medium">{value}% comparado ao mês passado</div>
+    return <div className="text-xs text-muted-foreground font-medium">Estável comparado ao mês passado</div>
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12 shrink-0 h-full">
+        <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+      </div>
+    )
+  }
+
+  if (hasError) {
+    return (
+      <div className="p-6 md:p-10">
+        <Alert variant="destructive">
+          <AlertCircleIcon className="h-4 w-4" />
+          <AlertTitle>Erro</AlertTitle>
+          <AlertDescription>
+            Erro ao carregar as métricas do relatório. Tente novamente mais tarde.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full p-6 md:p-10 w-full mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-700">
       <div className="shrink-0 mb-2">
@@ -29,45 +96,45 @@ export default function ReportsPage() {
           Relatórios Gerenciais
         </h1>
         <p className="text-zinc-500 dark:text-zinc-400 text-base font-medium mt-2">
-          Acompanhe os indicadores de produção, uso de chapas e eficiência.
+          Acompanhe os indicadores de produção, uso de chapas e eficiência do mês atual.
         </p>
       </div>
 
       <div className="shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total de Ordens (Mês)</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-blue-500 to-indigo-600">1,248</CardTitle>
+            <CardDescription>Ordens (Mês Atual)</CardDescription>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-blue-500 to-indigo-600">{totalOrdersMonth}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs text-green-600 font-medium">+12% comparado ao mês passado</div>
+            {renderPercentageLabel(totalOrdersCompared)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Chapas Consumidas</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-red-500 to-rose-600">3,092</CardTitle>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-red-500 to-rose-600">{sheetsConsumedMonth}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs text-red-600 font-medium">-4% comparado ao mês passado</div>
+            {renderPercentageLabel(sheetsConsumedCompared)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Retalhos Gerados</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-amber-500 to-orange-600">423</CardTitle>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-amber-500 to-orange-600">{scrapsGeneratedMonth}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs text-green-600 font-medium">+2% comparado ao mês passado</div>
+            {renderPercentageLabel(scrapsGeneratedCompared)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Clientes Ativos</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-indigo-600">142</CardTitle>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-indigo-600">{activeClients}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs text-muted-foreground">Estável desde o último trimestre</div>
+            <div className="text-xs text-muted-foreground">Total de cadastros no sistema</div>
           </CardContent>
         </Card>
       </div>
@@ -77,7 +144,7 @@ export default function ReportsPage() {
           <CardHeader className="shrink-0">
             <CardTitle>Uso de Materiais e Retalhos</CardTitle>
             <CardDescription>
-              Comparativo entre quantidade de chapas utilizadas e retalhos gerados.
+              Comparativo estático entre quantidade total de chapas utilizadas e retalhos gerados.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 min-h-0">
@@ -97,7 +164,7 @@ export default function ReportsPage() {
 
         <Card className="flex flex-col h-full overflow-hidden">
           <CardHeader className="shrink-0">
-            <CardTitle>Produtividade da Semana</CardTitle>
+            <CardTitle>Produtividade dos Últimos 7 Dias</CardTitle>
             <CardDescription>
               Volume de ordens de corte processadas por dia na última semana.
             </CardDescription>
@@ -109,7 +176,7 @@ export default function ReportsPage() {
                 <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis fontSize={12} tickLine={false} axisLine={false} />
                 <RechartsTooltip cursor={{ fill: '#f4f4f5' }} />
-                <Line type="monotone" dataKey="ordens" name="Ordens Finalizadas" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="ordens" name="Ordens Registradas" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

@@ -53,6 +53,8 @@ import { GetDashboardMetricsController } from "./controllers/get-dashboard-metri
 import { GetDashboardCardsMetricsUseCase } from "@/domain/application/use-cases/get-dashboard-cards-metrics";
 import { GetInventoryMovementsMetricsController } from "./controllers/get-inventory-movements-metrics.controller";
 import { GetInventoryMovementsMetricsUseCase } from "@/domain/application/use-cases/get-inventory-movements-metrics";
+import { GetReportsMetricsController } from "./controllers/get-reports-metrics.controller";
+import { GetReportsMetricsUseCase } from "@/domain/application/use-cases/get-reports-metrics";
 
 // Auth & Users
 import { AuthenticateController } from "./controllers/authenticate.controller";
@@ -97,6 +99,7 @@ import { DeleteUserUseCase } from "@/domain/application/use-cases/delete-user";
     // Metrics
     GetDashboardMetricsController,
     GetInventoryMovementsMetricsController,
+    GetReportsMetricsController,
     // Auth & Users
     AuthenticateController,
     GetMeController,
@@ -132,6 +135,7 @@ import { DeleteUserUseCase } from "@/domain/application/use-cases/delete-user";
     // Metrics
     GetDashboardCardsMetricsUseCase,
     GetInventoryMovementsMetricsUseCase,
+    GetReportsMetricsUseCase,
     // Auth & Users
     AuthenticateUserUseCase,
     GetCurrentUserUseCase,

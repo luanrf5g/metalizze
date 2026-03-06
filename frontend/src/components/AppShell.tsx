@@ -1,15 +1,23 @@
 'use client'
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { AuthProvider } from "./AuthProvider"
 import { Sidebar } from "./Sidebar"
 import { useAuth } from "./AuthProvider"
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
+    const router = useRouter()
     const { isAuthenticated, isLoading } = useAuth()
 
     const isLoginPage = pathname === '/login'
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated && !isLoginPage) {
+            router.push('/login')
+        }
+    }, [isLoading, isAuthenticated, isLoginPage, router])
 
     if (isLoginPage) {
         return <>{children}</>
@@ -25,7 +33,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
     if (isAuthenticated) {
         return (
-            <div className="flex min-h-screen">
+            <div className="flex h-screen w-full overflow-hidden">
                 <Sidebar />
                 <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
                     <div className="flex-1 overflow-y-auto">
@@ -36,7 +44,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
         )
     }
 
-    return <>{children}</>
+    return null
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
