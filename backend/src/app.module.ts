@@ -4,6 +4,7 @@ import { envSchema } from './infra/env/env'
 import { EnvModule } from './infra/env/env.module'
 import { DatabaseModule } from './infra/database/database.module'
 import { HttpModule } from './infra/http/http.module'
+import { AuthModule } from './infra/auth/auth.module'
 
 // IMPORTANT: Do not mutate `process.env` here. Use `EnvService` /
 // `ConfigService` through DI (preferred) to access configuration values
@@ -21,6 +22,7 @@ import { HttpModule } from './infra/http/http.module'
     }),
     EnvModule,
     DatabaseModule,
+    AuthModule,
     HttpModule,
   ],
 })

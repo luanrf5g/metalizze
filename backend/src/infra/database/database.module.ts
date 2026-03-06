@@ -10,6 +10,8 @@ import { InventoryMovementsRepository } from "@/domain/application/repositories/
 import { PrismaInventoryMovementsRepository } from "./prisma/repositories/prisma-inventory-movements-repository";
 import { MetricsRepository } from "@/domain/application/repositories/metrics-repository";
 import { PrismaMetricsRepository } from "./prisma/repositories/prisma-metrics-repository";
+import { UsersRepository } from "@/domain/application/repositories/users-repository";
+import { PrismaUsersRepository } from "./prisma/repositories/prisma-users-repository";
 
 @Module({
   providers: [
@@ -33,6 +35,10 @@ import { PrismaMetricsRepository } from "./prisma/repositories/prisma-metrics-re
     {
       provide: MetricsRepository,
       useClass: PrismaMetricsRepository
+    },
+    {
+      provide: UsersRepository,
+      useClass: PrismaUsersRepository
     }
   ],
   exports: [
@@ -41,7 +47,8 @@ import { PrismaMetricsRepository } from "./prisma/repositories/prisma-metrics-re
     SheetsRepository,
     ClientsRepository,
     InventoryMovementsRepository,
-    MetricsRepository
+    MetricsRepository,
+    UsersRepository
   ]
 })
 export class DatabaseModule { }

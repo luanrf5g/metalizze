@@ -11,12 +11,16 @@ import { CreateClientModal } from "@/components/CreateClientModal";
 import { formatDocument } from "@/lib/formatters";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const { user } = useAuth();
+  const canCreate = user?.role === 'ADMIN' || user?.permissions?.['clients']?.write;
 
   async function fetchClients() {
     setIsLoading(true)
@@ -59,7 +63,7 @@ export default function ClientsPage() {
               className="pl-9 bg-white/50 dark:bg-black/20"
             />
           </div>
-          <CreateClientModal onSuccess={fetchClients} />
+          {canCreate && <CreateClientModal onSuccess={fetchClients} />}
         </div>
       </div>
 
@@ -75,15 +79,15 @@ export default function ClientsPage() {
 
       <div className="glass-card overflow-hidden flex-1 min-h-0 flex flex-col p-1">
         <div className="overflow-auto hide-v-scroll flex-1 relative rounded-2xl">
-            <Table>
-              <TableHeader className="bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Documento</TableHead>
-                  <TableHead>Id</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <Table>
+            <TableHeader className="bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Documento</TableHead>
+                <TableHead>Id</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
@@ -91,10 +95,10 @@ export default function ClientsPage() {
                   </TableCell>
                 </TableRow>
               ) : clients.filter(c => {
-                    if (!searchQuery) return true;
-                    const query = searchQuery.toLowerCase();
-                    return c.name.toLowerCase().includes(query) || formatDocument(c.document).includes(query);
-                  }).length === 0 ? (
+                if (!searchQuery) return true;
+                const query = searchQuery.toLowerCase();
+                return c.name.toLowerCase().includes(query) || formatDocument(c.document).includes(query);
+              }).length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
                     Nenhum cliente encontrado.
@@ -102,10 +106,10 @@ export default function ClientsPage() {
                 </TableRow>
               ) : (
                 clients.filter(c => {
-                    if (!searchQuery) return true;
-                    const query = searchQuery.toLowerCase();
-                    return c.name.toLowerCase().includes(query) || formatDocument(c.document).includes(query);
-                  }).map((client) => (
+                  if (!searchQuery) return true;
+                  const query = searchQuery.toLowerCase();
+                  return c.name.toLowerCase().includes(query) || formatDocument(c.document).includes(query);
+                }).map((client) => (
                   <TableRow key={client.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
                     <TableCell className="font-semibold text-zinc-900 dark:text-zinc-100">{client.name}</TableCell>
                     <TableCell className="text-zinc-600 dark:text-zinc-400">{formatDocument(client.document)}</TableCell>
