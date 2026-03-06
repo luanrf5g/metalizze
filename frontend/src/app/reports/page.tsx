@@ -1,119 +1,120 @@
 'use client'
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Layers, Scissors, Box, Users } from "lucide-react"
-import { api } from "@/lib/api"
-import { InventoryMovementChart } from "@/components/InventoryMovementChat"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
 
-interface DashboardMetrics {
-  totalStandardSheets: number;
-  totalScrapSheets: number;
-  totalMaterials: number;
-  totalClients: number;
-}
+const materialUsageData = [
+  { name: 'Aço Carbono 2mm', usadas: 400, retalhos: 45 },
+  { name: 'Aço Inox 1.5mm', usadas: 300, retalhos: 20 },
+  { name: 'Alumínio 3mm', usadas: 200, retalhos: 10 },
+  { name: 'Galvanizado 2mm', usadas: 278, retalhos: 39 },
+  { name: 'Cobre 1mm', usadas: 189, retalhos: 4 },
+];
+
+const productivityData = [
+  { name: 'Seg', ordens: 40 },
+  { name: 'Ter', ordens: 30 },
+  { name: 'Qua', ordens: 55 },
+  { name: 'Qui', ordens: 45 },
+  { name: 'Sex', ordens: 60 },
+  { name: 'Sáb', ordens: 20 },
+  { name: 'Dom', ordens: 5 },
+];
 
 export default function ReportsPage() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  async function fetchMetrics() {
-    try {
-      const response = await api.get('/metrics/cards')
-      setMetrics(response.data.metrics)
-    } catch (error) {
-      console.error("Erro ao buscar métricas:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchMetrics()
-  }, [])
-
   return (
-    <div className="p-8 max-x-8xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Relatórios</h1>
-        <p className="text-muted-foreground mt-1">
-          Análise consolidada do estoque e operações.
+    <div className="flex flex-col h-full p-6 md:p-10 w-full mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-700">
+      <div className="shrink-0 mb-2">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400 pb-1">
+          Relatórios Gerenciais
+        </h1>
+        <p className="text-zinc-500 dark:text-zinc-400 text-base font-medium mt-2">
+          Acompanhe os indicadores de produção, uso de chapas e eficiência.
         </p>
       </div>
 
-      {/* Resumo em Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
-              Total Chapas
-            </CardTitle>
-            <Layers className="h-4 w-4 text-blue-600" />
+          <CardHeader className="pb-2">
+            <CardDescription>Total de Ordens (Mês)</CardDescription>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-blue-500 to-indigo-600">1,248</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? "..." : metrics?.totalStandardSheets}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Chapas inteiras em estoque
-            </p>
+            <div className="text-xs text-green-600 font-medium">+12% comparado ao mês passado</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
-              Total Retalhos
-            </CardTitle>
-            <Scissors className="h-4 w-4 text-amber-500" />
+          <CardHeader className="pb-2">
+            <CardDescription>Chapas Consumidas</CardDescription>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-red-500 to-rose-600">3,092</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? "..." : metrics?.totalScrapSheets}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Retalhos disponíveis
-            </p>
+            <div className="text-xs text-red-600 font-medium">-4% comparado ao mês passado</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
-              Materiais
-            </CardTitle>
-            <Box className="h-4 w-4 text-emerald-600" />
+          <CardHeader className="pb-2">
+            <CardDescription>Retalhos Gerados</CardDescription>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-amber-500 to-orange-600">423</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? "..." : metrics?.totalMaterials}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tipos cadastrados
-            </p>
+            <div className="text-xs text-green-600 font-medium">+2% comparado ao mês passado</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
-              Clientes
-            </CardTitle>
-            <Users className="h-4 w-4 text-purple-600" />
+          <CardHeader className="pb-2">
+            <CardDescription>Clientes Ativos</CardDescription>
+            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-indigo-600">142</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? "..." : metrics?.totalClients}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Clientes cadastrados
-            </p>
+            <div className="text-xs text-muted-foreground">Estável desde o último trimestre</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Gráfico de Movimentações */}
-      <InventoryMovementChart />
-    </div>
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="shrink-0">
+            <CardTitle>Uso de Materiais e Retalhos</CardTitle>
+            <CardDescription>
+              Comparativo entre quantidade de chapas utilizadas e retalhos gerados.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={materialUsageData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                <RechartsTooltip cursor={{ fill: '#f4f4f5' }} />
+                <Legend />
+                <Bar dataKey="usadas" name="Chapas Usadas" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="retalhos" name="Retalhos" fill="#d97706" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col h-full overflow-hidden">
+          <CardHeader className="shrink-0">
+            <CardTitle>Produtividade da Semana</CardTitle>
+            <CardDescription>
+              Volume de ordens de corte processadas por dia na última semana.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={productivityData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                <RechartsTooltip cursor={{ fill: '#f4f4f5' }} />
+                <Line type="monotone" dataKey="ordens" name="Ordens Finalizadas" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+    </div >
   )
 }

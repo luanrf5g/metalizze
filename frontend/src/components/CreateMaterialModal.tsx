@@ -7,7 +7,6 @@ import { Button } from "./ui/button"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
 import { toast } from "sonner"
-import { Check } from "lucide-react"
 
 interface CreateMaterialModalProps {
   onSuccess: () => void

@@ -34,12 +34,14 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="p-8 max-x-8xl mx-auto space-y-8">
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
       {/* Cabeçalho da Página */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400 pb-1">
+          Dashboard
+        </h1>
+        <p className="text-zinc-500 dark:text-zinc-400 text-base font-medium mt-2">
           Visão geral do seu estoque e cadastros.
         </p>
       </div>

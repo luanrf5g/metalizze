@@ -102,14 +102,15 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
           <div className="space-y-2">
             <Label htmlFor="material">Material</Label>
             <Select value={materialId} onValueChange={setMaterialId}>
-              <SelectTrigger className="w-full max-w-64">
+              <SelectTrigger className="w-full max-w-64 bg-white">
                 <SelectValue placeholder="Selecione um Material" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {materials.map((material) => (
                   <SelectItem
                     key={material.id}
                     value={material.id}
+                    className="hover:cursor-pointer"
                   >
                     {material.name}
                   </SelectItem>
@@ -179,10 +180,10 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
           <div className="space-y-2">
             <Label htmlFor="clientId">Cliente</Label>
             <Select value={clientId} onValueChange={setClientId}>
-              <SelectTrigger className="w-full max-w-64">
+              <SelectTrigger className="w-full max-w-64 bg-white">
                 <SelectValue placeholder="Selecione um Cliente" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectGroup>
                   <SelectLabel>Cliente</SelectLabel>
                   <SelectItem value="none">Estoque Próprio</SelectItem>
@@ -190,6 +191,7 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
                     <SelectItem
                       key={client.id}
                       value={client.id}
+                      className="hover:cursor-pointer"
                     >
                       {client.name}
                     </SelectItem>

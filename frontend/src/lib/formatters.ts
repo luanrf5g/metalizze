@@ -26,3 +26,20 @@ export function formatDate(dateString: string, complete: boolean = false) {
     year: 'numeric',
   }).format(date)
 }
+
+export function formatDocument(document: string) {
+
+
+  // Remove tudo que não é dígito
+  document = document.replace(/\D/g, "");
+
+  if (document.length === 11) {
+    // Aplica a máscara: 000.000.000-00
+    return document.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  } else if (document.length === 14) {
+    // Aplica a máscara: 00.000.000./0000-00
+    return document.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+  }
+
+  return document
+}

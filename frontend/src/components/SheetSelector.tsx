@@ -27,13 +27,13 @@ export function SheetSelector({ sheets, selectedSheetId, onSelectSheet }: SheetS
           role="combobox"
           type="button"
           aria-expanded={open}
-          className="w-full justify-between font-normal"
+          className="w-full justify-between font-normal overflow-hidden "
         >
           {selectedSheet ? `${selectedSheet.sku}` : 'Selecione uma chapa...'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full p-0 bg-white" align="start">
         <Command>
           <CommandInput placeholder="Buscar por SKU, material..."/>
 
@@ -70,6 +70,7 @@ export function SheetSelector({ sheets, selectedSheetId, onSelectSheet }: SheetS
                     onSelectSheet(sheet.id)
                     setOpen(false)
                   }}
+                  className="hover:cursor-pointer"
                 >
                   <Check
                     className={cn(

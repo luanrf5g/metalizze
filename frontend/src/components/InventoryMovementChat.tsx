@@ -150,14 +150,14 @@ export function InventoryMovementChart() {
 
                 <Area
                   dataKey="exits"
-                  type="natural"
+                  type="monotone"
                   fill="url(#fillExit)"
                   stroke="var(--color-exit)"
                   stackId="a"
                 />
                 <Area
                   dataKey="entries"
-                  type="natural"
+                  type="monotone"
                   fill="url(#fillEntry)"
                   stroke="var(--color-entry)"
                   stackId="a"
