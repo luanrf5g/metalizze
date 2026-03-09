@@ -15,7 +15,8 @@ interface EditSheetUseCaseRequest {
   width?: number,
   height?: number,
   thickness?: number,
-  type?: SheetType
+  type?: SheetType,
+  price?: number
 }
 
 type EditSheetUseCaseResponse = Either<
@@ -34,7 +35,7 @@ export class EditSheetUseCase {
   ) { }
 
   async execute({
-    sheetId, materialId, clientId, width, height, thickness, type
+    sheetId, materialId, clientId, width, height, thickness, type, price
   }: EditSheetUseCaseRequest): Promise<EditSheetUseCaseResponse> {
     const sheet = await this.sheetsRepository.findById(sheetId)
 
@@ -43,6 +44,7 @@ export class EditSheetUseCase {
     }
 
     if (type) sheet.type = type
+    if (price !== undefined) sheet.price = price
 
     if (clientId !== undefined) {
       sheet.clientId = clientId ? new UniqueEntityId(clientId) : null

@@ -47,6 +47,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
   const [editHeight, setEditHeight] = useState('')
   const [editThickness, setEditThickness] = useState('')
   const [editType, setEditType] = useState<'STANDARD' | 'SCRAP'>('STANDARD')
+  const [editPrice, setEditPrice] = useState('')
 
   const { user } = useAuth()
   const canEdit = user?.role === 'ADMIN' || user?.permissions?.['sheets']?.write
@@ -91,6 +92,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
     setEditHeight(String(sheet.height))
     setEditThickness(String(sheet.thickness))
     setEditType(sheet.type)
+    setEditPrice(String(sheet.price ?? 0))
     setIsEditing(true)
   }
 
@@ -112,6 +114,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
       if (Number(editHeight) !== sheet.height) payload.height = Number(editHeight)
       if (Number(editThickness) !== sheet.thickness) payload.thickness = Number(editThickness)
       if (editType !== sheet.type) payload.type = editType
+      if (Number(editPrice) !== sheet.price) payload.price = Number(editPrice)
 
       if (Object.keys(payload).length === 0) {
         toast.info('Nenhuma alteração detectada.')
@@ -335,13 +338,29 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
               <DollarSign className="h-5 w-5 text-emerald-500" />
               <h3 className="text-sm font-semibold text-zinc-500">Valor Unitário</h3>
             </div>
-            <p className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-              {formatCurrency(sheet.price)}
-            </p>
-            {sheet.quantity > 0 && sheet.price > 0 && (
-              <p className="text-xs text-zinc-500 mt-2">
-                Valor total em estoque: <strong>{formatCurrency(sheet.price * sheet.quantity)}</strong>
-              </p>
+            {isEditing ? (
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-extrabold text-zinc-900 dark:text-white">R$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editPrice}
+                  onChange={(e) => setEditPrice(e.target.value)}
+                  className="text-3xl font-extrabold text-zinc-900 dark:text-white bg-transparent border-b-2 border-emerald-400 focus:border-emerald-500 outline-none w-full appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+                />
+              </div>
+            ) : (
+              <>
+                <p className="text-3xl font-extrabold text-zinc-900 dark:text-white">
+                  {formatCurrency(sheet.price)}
+                </p>
+                {sheet.quantity > 0 && sheet.price > 0 && (
+                  <p className="text-xs text-zinc-500 mt-2">
+                    Valor total em estoque: <strong>{formatCurrency(sheet.price * sheet.quantity)}</strong>
+                  </p>
+                )}
+              </>
             )}
           </div>
 
