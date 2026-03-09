@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
+import { useAuth } from '@/components/AuthProvider'
 
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
@@ -28,6 +29,10 @@ export default function SheetsPage() {
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'STANDARD' | 'SCRAP'>('ALL')
   const [searchQuery, setSearchQuery] = useState('')
 
+  const { user } = useAuth()
+  const canCreate = user?.role === 'ADMIN' || user?.permissions?.['sheets']?.write
+  const canCut = user?.role === 'ADMIN' || user?.permissions?.['cut-orders']?.write
+
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
 
@@ -36,8 +41,8 @@ export default function SheetsPage() {
     try {
       let route = `/sheets?page=${currentPage}`
 
-      if(activeFilter === 'STANDARD') route += '&type=STANDARD'
-      else if(activeFilter === 'SCRAP') route += '&type=SCRAP'
+      if (activeFilter === 'STANDARD') route += '&type=STANDARD'
+      else if (activeFilter === 'SCRAP') route += '&type=SCRAP'
 
       const response = await api.get(route)
 
@@ -70,7 +75,7 @@ export default function SheetsPage() {
           <h1 className='text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400 pb-1'>Estoque de Chapas</h1>
           <p className='text-zinc-500 dark:text-zinc-400 text-sm font-medium mt-1'>Gerencie as chapas disponíveis no estoque.</p>
         </div>
-        <CreateSheetModal onSuccess={() => fetchSheets(page)} />
+        {canCreate && <CreateSheetModal onSuccess={() => fetchSheets(page)} />}
       </div>
 
       <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0'>
@@ -78,25 +83,22 @@ export default function SheetsPage() {
         <div className='flex p-1 bg-black/5 dark:bg-white/10 backdrop-blur-md rounded-xl w-full md:w-auto overflow-hidden'>
           <button
             onClick={() => setActiveFilter('ALL')}
-            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${
-              activeFilter === 'ALL' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-            }`}
+            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'ALL' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+              }`}
           >
             Tudo
           </button>
           <button
             onClick={() => setActiveFilter('STANDARD')}
-            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${
-              activeFilter === 'STANDARD' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-            }`}
+            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'STANDARD' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+              }`}
           >
             Chapas
           </button>
           <button
             onClick={() => setActiveFilter('SCRAP')}
-            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${
-              activeFilter === 'SCRAP' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-            }`}
+            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'SCRAP' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+              }`}
           >
             Retalhos
           </button>
@@ -140,7 +142,7 @@ export default function SheetsPage() {
                     Nenhuma chapa disponível nesta página.
                   </TableCell>
                 </TableRow>
-              ): (
+              ) : (
                 sheets.filter(s => {
                   if (!searchQuery) return true;
                   const query = searchQuery.toLowerCase();
@@ -161,11 +163,10 @@ export default function SheetsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${
-                        sheet.type === 'SCRAP'
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
-                          : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                      }`}>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${sheet.type === 'SCRAP'
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
+                        : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                        }`}>
                         {translateSheetType(sheet.type)}
                       </span>
                     </TableCell>
@@ -189,13 +190,17 @@ export default function SheetsPage() {
                               Ver detalhes
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-black/10 dark:bg-white/10" />
-                          <DropdownMenuItem asChild className="cursor-pointer font-medium text-blue-600 rounded-lg focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-900/30">
-                            <Link href={`/cut-orders?sheetId=${sheet.id}`}>
-                              <Scissors className="mr-2 h-4 w-4" />
-                              Cortar chapa
-                            </Link>
-                          </DropdownMenuItem>
+                          {canCut && (
+                            <>
+                              <DropdownMenuSeparator className="bg-black/10 dark:bg-white/10" />
+                              <DropdownMenuItem asChild className="cursor-pointer font-medium text-blue-600 rounded-lg focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-900/30">
+                                <Link href={`/cut-orders?sheetId=${sheet.id}`}>
+                                  <Scissors className="mr-2 h-4 w-4" />
+                                  Cortar chapa
+                                </Link>
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

@@ -68,7 +68,7 @@ export default function ScrapsPage() {
                     Nenhum retalho encontrado nesta página.
                   </TableCell>
                 </TableRow>
-              ): (
+              ) : (
                 scraps.map((scrap) => (
                   <TableRow key={scrap.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
                     <TableCell className='font-semibold text-zinc-900 dark:text-zinc-100' title={scrap.sku}>

@@ -138,11 +138,11 @@ function CutOrdersWizard() {
         description,
         generatedScraps: hasScraps
           ? scraps.map((s) => ({
-              width: Number(s.width),
-              height: Number(s.height),
-              quantity: Number(s.quantity),
-              clientId: s.clientId === "none" ? null : s.clientId,
-            }))
+            width: Number(s.width),
+            height: Number(s.height),
+            quantity: Number(s.quantity),
+            clientId: s.clientId === "none" ? null : s.clientId,
+          }))
           : [],
       }
 
