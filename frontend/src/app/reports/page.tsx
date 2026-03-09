@@ -62,9 +62,9 @@ export default function ReportsPage() {
   }, [])
 
   function renderPercentageLabel(value: number) {
-    if (value > 0) return <div className="text-xs text-green-600 font-medium">+{value}% comparado ao mês passado</div>
-    if (value < 0) return <div className="text-xs text-red-600 font-medium">{value}% comparado ao mês passado</div>
-    return <div className="text-xs text-muted-foreground font-medium">Estável comparado ao mês passado</div>
+    if (value > 0) return <div className="text-xs text-green-800 font-medium">+{value}% comparado ao mês passado</div>
+    if (value < 0) return <div className="text-xs text-red-800 font-medium">{value}% comparado ao mês passado</div>
+    return <div className="text-xs text-zinc-700 font-medium">Estável comparado ao mês passado</div>
   }
 
   if (isLoading) {
@@ -101,40 +101,40 @@ export default function ReportsPage() {
       </div>
 
       <div className="shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
           <CardHeader className="pb-2">
-            <CardDescription>Ordens (Mês Atual)</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-blue-500 to-indigo-600">{totalOrdersMonth}</CardTitle>
+            <CardDescription className="text-yellow-100">Ordens (Mês Atual)</CardDescription>
+            <CardTitle className="text-4xl">{totalOrdersMonth}</CardTitle>
           </CardHeader>
           <CardContent>
             {renderPercentageLabel(totalOrdersCompared)}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-orange-400 to-orange-600 text-white">
           <CardHeader className="pb-2">
-            <CardDescription>Chapas Consumidas</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-red-500 to-rose-600">{sheetsConsumedMonth}</CardTitle>
+            <CardDescription className="text-orange-100">Chapas Consumidas</CardDescription>
+            <CardTitle className="text-4xl">{sheetsConsumedMonth}</CardTitle>
           </CardHeader>
           <CardContent>
             {renderPercentageLabel(sheetsConsumedCompared)}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-cyan-400 to-cyan-600 text-white">
           <CardHeader className="pb-2">
-            <CardDescription>Retalhos Gerados</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-amber-500 to-orange-600">{scrapsGeneratedMonth}</CardTitle>
+            <CardDescription className="text-cyan-100">Retalhos Gerados</CardDescription>
+            <CardTitle className="text-4xl">{scrapsGeneratedMonth}</CardTitle>
           </CardHeader>
           <CardContent>
             {renderPercentageLabel(scrapsGeneratedCompared)}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-400 to-blue-600 text-white">
           <CardHeader className="pb-2">
-            <CardDescription>Clientes Ativos</CardDescription>
-            <CardTitle className="text-4xl bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-indigo-600">{activeClients}</CardTitle>
+            <CardDescription className="text-blue-100">Clientes Ativos</CardDescription>
+            <CardTitle className="text-4xl">{activeClients}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xs text-muted-foreground">Total de cadastros no sistema</div>
+            <div className="text-xs opacity-80">Total de cadastros no sistema</div>
           </CardContent>
         </Card>
       </div>
@@ -155,8 +155,8 @@ export default function ReportsPage() {
                 <YAxis fontSize={12} tickLine={false} axisLine={false} />
                 <RechartsTooltip cursor={{ fill: '#f4f4f5' }} />
                 <Legend />
-                <Bar dataKey="usadas" name="Chapas Usadas" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="retalhos" name="Retalhos" fill="#d97706" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="usadas" name="Chapas Usadas" fill="#fbbf24" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="retalhos" name="Retalhos" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -176,7 +176,7 @@ export default function ReportsPage() {
                 <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis fontSize={12} tickLine={false} axisLine={false} />
                 <RechartsTooltip cursor={{ fill: '#f4f4f5' }} />
-                <Line type="monotone" dataKey="ordens" name="Ordens Registradas" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="ordens" name="Ordens Registradas" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
