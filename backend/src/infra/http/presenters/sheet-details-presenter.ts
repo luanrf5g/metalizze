@@ -11,6 +11,7 @@ export class SheetDetailsPresenter {
       width: sheet.width,
       height: sheet.height,
       quantity: sheet.quantity,
+      price: sheet.price,
       type: sheet.type,
       created: sheet.createdAt
     }

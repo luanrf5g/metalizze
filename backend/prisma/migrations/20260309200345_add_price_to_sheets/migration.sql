@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "sheets" ADD COLUMN     "price" DOUBLE PRECISION DEFAULT 0;

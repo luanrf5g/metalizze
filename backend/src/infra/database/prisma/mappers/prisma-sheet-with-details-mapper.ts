@@ -13,6 +13,7 @@ export class PrismaSheetWithDetailsMapper {
       sku: raw.sku,
       materialId: new UniqueEntityId(raw.materialId),
       quantity: raw.quantity,
+      price: raw.price ?? 0,
       type: raw.type,
       createdAt: raw.createdAt,
       client: raw.client ? {

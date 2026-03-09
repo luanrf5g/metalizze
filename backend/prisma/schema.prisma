@@ -29,9 +29,9 @@ enum UserRole {
 }
 
 model User {
-  id       String   @id @default(uuid())
+  id       String @id @default(uuid())
   name     String
-  email    String   @unique
+  email    String @unique
   password String
 
   role        UserRole @default(OPERATOR)
@@ -64,6 +64,7 @@ model Sheet {
   height    Float
   thickness Float
   quantity  Int    @default(0)
+  price     Float? @default(0)
 
   type SheetType @default(STANDARD)
 

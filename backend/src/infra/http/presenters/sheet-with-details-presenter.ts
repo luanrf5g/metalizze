@@ -7,6 +7,7 @@ export class SheetWithDetailsPresenter {
       sku: sheet.sku,
       materialId: sheet.materialId.toString(),
       quantity: sheet.quantity,
+      price: sheet.price,
       type: sheet.type,
       createdAt: sheet.createdAt,
       client: sheet.client ? {

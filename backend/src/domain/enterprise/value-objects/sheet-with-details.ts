@@ -6,6 +6,7 @@ export interface SheetWithDetailsProps {
   sku: string,
   materialId: UniqueEntityId,
   quantity: number,
+  price: number,
   type: SheetType,
   createdAt: Date,
   client?: {
@@ -26,6 +27,7 @@ export class SheetWithDetails {
   get sku() { return this.props.sku }
   get materialId() { return this.props.materialId }
   get quantity() { return this.props.quantity }
+  get price() { return this.props.price }
   get type() { return this.props.type }
   get createdAt() { return this.props.createdAt }
   get client() { return this.props.client }

@@ -9,7 +9,10 @@ const createSheetBodySchema = z.object({
   height: z.number().positive(),
   thickness: z.number().positive(),
   quantity: z.number().int().min(1),
-  clientId: z.uuid().nullable().optional()
+  price: z.number().min(0).nullable().optional(),
+  clientId: z.uuid().nullable().optional(),
+  type: z.enum(['STANDARD', 'SCRAP']).optional(),
+  description: z.string().optional()
 })
 
 type CreateSheetBodySchema = z.infer<typeof createSheetBodySchema>
@@ -22,10 +25,10 @@ export class CreateSheetController {
   @HttpCode(201)
   @UsePipes(new ZodValidationPipe(createSheetBodySchema))
   async handle(@Body() body: CreateSheetBodySchema) {
-    const { materialId, width, height, thickness, quantity, clientId } = body
+    const { materialId, width, height, thickness, quantity, price, clientId, type, description } = body
 
     const result = await this.registerSheets.execute(
-      { materialId, width, height, thickness, quantity, clientId }
+      { materialId, width, height, thickness, quantity, price, clientId, type, description }
     )
 
     if (result.isLeft()) {

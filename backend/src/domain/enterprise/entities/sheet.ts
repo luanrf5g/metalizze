@@ -12,6 +12,7 @@ export interface SheetProps {
   height: number,
   thickness: number,
   quantity: number,
+  price?: number | null,
   type: SheetType,
   createdAt: Date,
   updatedAt?: Date | null
@@ -26,6 +27,7 @@ export class Sheet extends Entity<SheetProps> {
   get height() { return this.props.height }
   get thickness() { return this.props.thickness }
   get quantity() { return this.props.quantity }
+  get price() { return this.props.price ?? 0 }
   get type() { return this.props.type }
   get createdAt() { return this.props.createdAt }
   get updatedAt() { return this.props.updatedAt }
@@ -68,6 +70,19 @@ export class Sheet extends Entity<SheetProps> {
     this.touch()
   }
 
+  set price(price: number | null) {
+    this.props.price = price
+    this.touch()
+  }
+
+  updatePrice(newPrice: number) {
+    const currentPrice = this.props.price ?? 0
+    if (newPrice > currentPrice) {
+      this.props.price = newPrice
+      this.touch()
+    }
+  }
+
   increaseStock(amount: number) {
     this.props.quantity += amount
     this.touch()
@@ -91,7 +106,7 @@ export class Sheet extends Entity<SheetProps> {
   }
 
   static create(
-    props: Optional<SheetProps, 'createdAt' | 'quantity' | 'clientId' | 'type'>,
+    props: Optional<SheetProps, 'createdAt' | 'quantity' | 'clientId' | 'type' | 'price'>,
     id?: UniqueEntityId
   ) {
     const sheet = new Sheet(
@@ -99,6 +114,7 @@ export class Sheet extends Entity<SheetProps> {
         ...props,
         clientId: props.clientId ?? null,
         quantity: props.quantity ?? 0,
+        price: props.price ?? 0,
         type: props.type ?? 'STANDARD',
         createdAt: props.createdAt ?? new Date()
       },

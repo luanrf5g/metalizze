@@ -17,6 +17,7 @@ interface RegisterSheetUseCaseRequest {
   height: number,
   thickness: number,
   quantity: number,
+  price?: number | null,
   type?: 'STANDARD' | 'SCRAP',
   description?: string
 }
@@ -43,6 +44,7 @@ export class RegisterSheetUseCase {
     height,
     thickness,
     quantity,
+    price,
     clientId = null,
     type = 'STANDARD',
     description
@@ -76,6 +78,11 @@ export class RegisterSheetUseCase {
 
     if (existingSheet) {
       existingSheet.increaseStock(quantity)
+
+      if (price != null && price > 0) {
+        existingSheet.updatePrice(price)
+      }
+
       await this.sheetsRepository.save(existingSheet)
 
       const movement = InventoryMovement.create({
@@ -107,6 +114,7 @@ export class RegisterSheetUseCase {
       height,
       thickness,
       quantity,
+      price: price ?? 0,
       type,
       sku: finalSku
     })
@@ -116,7 +124,7 @@ export class RegisterSheetUseCase {
       sheetId: sheet.id,
       type: 'ENTRY',
       quantity,
-      description: 'Entrada de Estoque (Nova Chapa).'
+      description: description ?? 'Entrada de Estoque (Nova Chapa).'
     })
     await this.inventoryMovementsRepository.create(movement)
 
