@@ -11,7 +11,8 @@ import { Plus } from "lucide-react"
 
 const MODULES = [
     { key: 'dashboard', label: 'Dashboard' },
-    { key: 'sheets', label: 'Chapas / Retalhos' },
+    { key: 'sheets', label: 'Chapas' },
+    { key: 'cut-orders', label: 'Ordens de Corte' },
     { key: 'materials', label: 'Materiais' },
     { key: 'clients', label: 'Clientes' },
     { key: 'movements', label: 'Movimentações' },
@@ -80,11 +81,11 @@ export function CreateUserModal({ onSuccess }: Props) {
                     Novo Usuário
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg bg-white">
+            <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Criar Novo Usuário</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-4">
                     <div className="space-y-2">
                         <Label>Nome</Label>
                         <Input value={name} onChange={(e) => setName(e.target.value)} required />
@@ -102,7 +103,7 @@ export function CreateUserModal({ onSuccess }: Props) {
                         <select
                             value={role}
                             onChange={(e) => setRole(e.target.value as 'ADMIN' | 'OPERATOR' | 'VIEWER')}
-                            className="w-full border border-zinc-300 rounded-md px-3 py-2 text-sm"
+                            className="w-full border border-white/30 dark:border-white/20 bg-white/70 dark:bg-zinc-900/70 rounded-md px-3 py-2 text-sm"
                         >
                             <option value="ADMIN">Administrador</option>
                             <option value="OPERATOR">Operador</option>
@@ -116,15 +117,16 @@ export function CreateUserModal({ onSuccess }: Props) {
                             <div className="border rounded-md divide-y">
                                 {MODULES.map((mod) => (
                                     <div key={mod.key} className="flex items-center justify-between px-3 py-2">
-                                        <span className="text-sm font-medium text-zinc-700">{mod.label}</span>
+                                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{mod.label}</span>
                                         <div className="flex items-center gap-3">
                                             {(['read', 'write', 'delete'] as const).map((action) => (
-                                                <label key={action} className="flex items-center gap-1 text-xs text-zinc-500">
+                                                <label key={action} className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                                                     <input
                                                         type="checkbox"
-                                                        checked={permissions[mod.key]?.[action] || false}
-                                                        onChange={() => togglePermission(mod.key, action)}
-                                                        className="rounded"
+                                                        checked={role === 'VIEWER' ? action === 'read' : (permissions[mod.key]?.[action] || false)}
+                                                        onChange={() => role !== 'VIEWER' && togglePermission(mod.key, action)}
+                                                        disabled={role === 'VIEWER'}
+                                                        className="rounded cursor-pointer disabled:cursor-not-allowed"
                                                     />
                                                     {action === 'read' ? 'Ler' : action === 'write' ? 'Escr.' : 'Excl.'}
                                                 </label>
