@@ -50,72 +50,72 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Card 1: Chapas Originais */}
-        <Card>
+        <Card className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
+            <CardTitle className="text-sm font-medium">
               Chapas em Estoque
             </CardTitle>
-            <Layers className="h-4 w-4 text-blue-600" />
+            <Layers className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {isLoading ? "..." : metrics?.totalStandardSheets}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs opacity-80 mt-1">
               Quantidade de chapas inteiras
             </p>
           </CardContent>
         </Card>
 
         {/* Card 2: Retalhos (Scraps) */}
-        <Card>
+        <Card className="bg-gradient-to-br from-orange-400 to-orange-600 text-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
+            <CardTitle className="text-sm font-medium">
               Retalhos Disponíveis
             </CardTitle>
-            <Scissors className="h-4 w-4 text-amber-500" />
+            <Scissors className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {isLoading ? "..." : metrics?.totalScrapSheets}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs opacity-80 mt-1">
               Pedaços para reaproveitamento
             </p>
           </CardContent>
         </Card>
 
         {/* Card 3: Materiais */}
-        <Card>
+        <Card className="bg-gradient-to-br from-cyan-400 to-cyan-600 text-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
+            <CardTitle className="text-sm font-medium">
               Tipos de Material
             </CardTitle>
-            <Box className="h-4 w-4 text-emerald-600" />
+            <Box className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {isLoading ? "..." : metrics?.totalMaterials}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs opacity-80 mt-1">
               Materiais cadastrados no sistema
             </p>
           </CardContent>
         </Card>
 
         {/* Card 4: Clientes */}
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-400 to-blue-600 text-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-zinc-600">
+            <CardTitle className="text-sm font-medium">
               Clientes Ativos
             </CardTitle>
-            <Users className="h-4 w-4 text-purple-600" />
+            <Users className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {isLoading ? "..." : metrics?.totalClients}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs opacity-80 mt-1">
               Carteira de clientes registrados
             </p>
           </CardContent>
