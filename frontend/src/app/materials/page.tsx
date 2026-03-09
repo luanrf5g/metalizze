@@ -66,6 +66,7 @@ export default function MaterialsPage() {
           <Table className="min-w-[800px]">
             <TableHeader className="sticky top-0 z-10 bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
               <TableRow>
+                <TableHead className="w-[70px]">#</TableHead>
                 <TableHead>Id</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Slug</TableHead>
@@ -75,23 +76,24 @@ export default function MaterialsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                     Carregando estoque...
                   </TableCell>
                 </TableRow>
               ) : materials.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                     Lista de Materiais vazia. Cadastre um novo material para vincular às chapas.
                   </TableCell>
                 </TableRow>
               ) : (
-                materials.map((material) => (
+                materials.map((material, index) => (
                   <TableRow key={material.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{(index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className="text-zinc-500 dark:text-zinc-400 font-mono text-xs">{material.id}</TableCell>
                     <TableCell className="font-semibold text-zinc-900 dark:text-zinc-100">{material.name}</TableCell>
                     <TableCell>
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">
                         {material.slug}
                       </span>
                     </TableCell>

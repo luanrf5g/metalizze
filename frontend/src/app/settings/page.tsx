@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from "@/components/AuthProvider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 
 export default function SettingsPage() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'ADMIN'
+
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     toast.success("Configurações salvas com sucesso!")
@@ -22,34 +26,38 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="general" className="w-full">
+      <Tabs defaultValue={isAdmin ? "general" : "profile"} className="w-full">
         <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
           <TabsTrigger value="general">Geral</TabsTrigger>
           <TabsTrigger value="profile">Perfil</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="mt-6">
-          <form onSubmit={handleSave}>
+          <form onSubmit={isAdmin ? handleSave : (e) => e.preventDefault()}>
             <Card>
               <CardHeader>
                 <CardTitle>Configurações da Empresa</CardTitle>
                 <CardDescription>
-                  Informações básicas da sua oficina ou empresa.
+                  {isAdmin
+                    ? "Informações básicas da sua oficina ou empresa."
+                    : "Visualização das informações da empresa. Somente administradores podem alterar."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1">
                   <Label htmlFor="companyName">Nome da Empresa</Label>
-                  <Input id="companyName" defaultValue="Metalizze Soluções" />
+                  <Input id="companyName" defaultValue="Metalizze Soluções" disabled={!isAdmin} />
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="cnpj">CNPJ / Documento</Label>
-                  <Input id="cnpj" defaultValue="00.000.000/0001-00" />
+                  <Input id="cnpj" defaultValue="00.000.000/0001-00" disabled={!isAdmin} />
                 </div>
               </CardContent>
-              <CardFooter className="border-t px-6 py-4">
-                <Button type="submit">Salvar Alterações</Button>
-              </CardFooter>
+              {isAdmin && (
+                <CardFooter className="border-t px-6 py-4">
+                  <Button type="submit">Salvar Alterações</Button>
+                </CardFooter>
+              )}
             </Card>
           </form>
         </TabsContent>

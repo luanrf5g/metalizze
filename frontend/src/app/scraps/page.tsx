@@ -49,6 +49,7 @@ export default function ScrapsPage() {
           <Table className="min-w-[800px]">
             <TableHeader className="sticky top-0 z-10 bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
               <TableRow>
+                <TableHead className="w-[70px]">#</TableHead>
                 <TableHead>SKU do Retalho</TableHead>
                 <TableHead>Cliente / Documento</TableHead>
                 <TableHead>Data de Geração</TableHead>
@@ -58,19 +59,20 @@ export default function ScrapsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                     Buscando retalhos...
                   </TableCell>
                 </TableRow>
               ) : scraps.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                     Nenhum retalho encontrado nesta página.
                   </TableCell>
                 </TableRow>
               ) : (
-                scraps.map((scrap) => (
+                scraps.map((scrap, index) => (
                   <TableRow key={scrap.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 20 + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className='font-semibold text-zinc-900 dark:text-zinc-100' title={scrap.sku}>
                       {scrap.sku}
                     </TableCell>
@@ -87,7 +89,7 @@ export default function ScrapsPage() {
                     <TableCell className='text-zinc-500 dark:text-zinc-400 whitespace-nowrap'>
                       {formatDate(scrap.createdAt)}
                     </TableCell>
-                    <TableCell className='font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap'>{scrap.quantity}</TableCell>
+                    <TableCell className='font-bold text-zinc-900 dark:text-zinc-100 whitespace-nowrap'>{scrap.quantity}</TableCell>
                   </TableRow>
                 ))
               )}

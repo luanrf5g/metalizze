@@ -8,10 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { useAuth } from "./AuthProvider"
+import { Trash2Icon } from "lucide-react"
 
 const MODULES = [
     { key: 'dashboard', label: 'Dashboard' },
-    { key: 'sheets', label: 'Chapas / Retalhos' },
+    { key: 'sheets', label: 'Chapas' },
+    { key: 'cut-orders', label: 'Ordens de Corte' },
     { key: 'materials', label: 'Materiais' },
     { key: 'clients', label: 'Clientes' },
     { key: 'movements', label: 'Movimentações' },
@@ -32,6 +35,10 @@ export function EditUserModal({ user, onClose, onSuccess }: Props) {
         user.permissions || {}
     )
     const [isLoading, setIsLoading] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const { user: loggedUser } = useAuth()
+
+    const isAdmin = loggedUser?.role === 'ADMIN'
 
     function togglePermission(module: string, action: 'read' | 'write' | 'delete') {
         setPermissions((prev) => {
@@ -64,6 +71,28 @@ export function EditUserModal({ user, onClose, onSuccess }: Props) {
             toast.error(error.response?.data?.message || 'Erro ao atualizar usuário.')
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    async function handleDelete() {
+        if (!isAdmin) {
+            toast.error('Apenas administradores podem deletar usuários.')
+            return
+        }
+
+        const confirmed = confirm(`Tem certeza que deseja deletar o usuário "${user.name}"? Esta ação não pode ser desfeita.`)
+        if (!confirmed) return
+
+        setIsDeleting(true)
+
+        try {
+            await api.delete(`/users/${user.id}`)
+            toast.success('Usuário deletado com sucesso!')
+            onSuccess()
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Erro ao deletar usuário.')
+        } finally {
+            setIsDeleting(false)
         }
     }
 
@@ -122,10 +151,21 @@ export function EditUserModal({ user, onClose, onSuccess }: Props) {
                     )}
 
                     <div className="flex gap-3">
+                        {isAdmin && (
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={isDeleting || isLoading}
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-md text-sm font-medium transition-colors cursor-pointer"
+                            >
+                                <Trash2Icon size={16} />
+                                {isDeleting ? 'Deletando...' : 'Deletar'}
+                            </button>
+                        )}
                         <Button type="button" variant="outline" onClick={onClose} className="flex-1 cursor-pointer">
                             Cancelar
                         </Button>
-                        <Button type="submit" className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-white cursor-pointer" disabled={isLoading}>
+                        <Button type="submit" className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-white cursor-pointer" disabled={isLoading || isDeleting}>
                             {isLoading ? 'Salvando...' : 'Salvar'}
                         </Button>
                     </div>

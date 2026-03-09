@@ -9,11 +9,11 @@ import { api } from "@/lib/api"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 const chartConfig = {
-  entry: {
+  Entradas: {
     label: "Entradas (Chapas)",
     color: "var(--color-chart-6)",
   },
-  exit: {
+  Saídas: {
     label: "Saídas (Cortes)",
     color: "var(--color-chart-7)",
   },

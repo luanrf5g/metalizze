@@ -70,6 +70,7 @@ export default function MovementsPage() {
           <Table className="min-w-[800px]">
             <TableHeader className="sticky top-0 z-10 bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
               <TableRow>
+                <TableHead className="w-[70px]">#</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>ID Chapa</TableHead>
                 <TableHead>Tipo</TableHead>
@@ -80,26 +81,27 @@ export default function MovementsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-muted-foreground text-center">
+                  <TableCell colSpan={6} className="h-24 text-muted-foreground text-center">
                     Carregando movimentações...
                   </TableCell>
                 </TableRow>
               ) : movements.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     Sem movimentações realizadas no inventário nesta página.
                   </TableCell>
                 </TableRow>
               ) : (
-                movements.map((movement) => (
+                movements.map((movement, index) => (
                   <TableRow key={movement.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 20 + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className="max-w-[300px] truncate text-zinc-900 dark:text-zinc-100 font-medium">{movement.description}</TableCell>
                     <TableCell className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{movement.sheetId}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${movement.type === 'ENTRY'
-                            ? `bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300`
-                            : `bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300`
+                            ? `bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300`
+                            : `bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300`
                           }
                         `}
                       >

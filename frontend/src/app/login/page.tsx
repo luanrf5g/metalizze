@@ -35,7 +35,7 @@ export default function LoginPage() {
 
             <div className="w-full max-w-md px-4 z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 <div className="flex items-center justify-center gap-3 mb-8">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-zinc-800 to-zinc-950 rounded-xl shadow-lg flex items-center justify-center">
                         <span className="text-white font-bold text-2xl">M</span>
                     </div>
                     <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 drop-shadow-sm">Metalizze</h1>
@@ -59,7 +59,7 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="border-white/50 bg-white/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 shadow-sm transition-all"
+                                    className="border-white/50 bg-white/50 focus:bg-white focus:border-zinc-800 focus:ring-zinc-800/20 shadow-sm transition-all"
                                 />
                             </div>
 
@@ -72,7 +72,7 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    className="border-white/50 bg-white/50 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 shadow-sm transition-all"
+                                    className="border-white/50 bg-white/50 focus:bg-white focus:border-zinc-800 focus:ring-zinc-800/20 shadow-sm transition-all"
                                 />
                             </div>
 

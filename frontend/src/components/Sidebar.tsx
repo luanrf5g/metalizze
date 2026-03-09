@@ -43,9 +43,15 @@ function SidebarLinks({ isMobile = false }: { isMobile?: boolean }) {
 
   const isAdmin = user.role === 'ADMIN'
 
+  // Modules that are always visible to all users (no permission needed)
+  const DEFAULT_MODULES = new Set(['settings'])
+
   // Filter menu items based on permissions
   const visibleItems = menuItems.filter((item) => {
     if (isAdmin) return true
+
+    // Always show default modules to all users
+    if (DEFAULT_MODULES.has(item.module)) return true
 
     if (item.module === 'users') return false
 
@@ -122,7 +128,7 @@ function UserProfile({ isMobile = false }: { isMobile?: boolean }) {
   return (
     <div className={cn("p-4 border-t border-white/30 flex items-center justify-between group/profile transition-colors hover:bg-black/5 dark:hover:bg-white/5", isMobile ? "px-0" : "")}>
       <div className={cn("flex items-center gap-3 py-2", isMobile ? "justify-start" : "justify-center lg:justify-start lg:px-3")}>
-        <div className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md border border-white/20">
+        <div className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 flex items-center justify-center shadow-md border border-white/20">
           <span className="text-sm font-bold text-white">{initials}</span>
         </div>
         <div className={cn("flex-col", isMobile ? "flex" : "hidden lg:flex")}>
@@ -159,7 +165,7 @@ export function Sidebar() {
       <Sheet>
         <div className="md:hidden fixed top-0 left-0 w-full h-16 bg-white/40 backdrop-blur-2xl border-b border-white/40 flex items-center px-4 justify-between z-40">
           <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-md shadow-sm"></div>
+            <div className="w-6 h-6 bg-gradient-to-br from-zinc-800 to-zinc-950 rounded-md shadow-sm"></div>
             <span className="text-zinc-900">Metalizze</span>
           </div>
           <SheetTrigger asChild>
@@ -172,7 +178,7 @@ export function Sidebar() {
           <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
           <SheetDescription className="sr-only">Navegue pelas páginas do sistema Metalizze.</SheetDescription>
           <div className="flex items-center gap-2 font-bold text-2xl tracking-tight mb-8 mt-4">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-sm"></div>
+            <div className="w-8 h-8 bg-gradient-to-br from-zinc-800 to-zinc-950 rounded-xl shadow-sm"></div>
             <span className="text-zinc-900">Metalizze</span>
           </div>
           <SidebarLinks isMobile />
@@ -185,7 +191,7 @@ export function Sidebar() {
       <aside className="hidden md:flex flex-col w-20 lg:w-72 bg-white/30 backdrop-blur-3xl text-zinc-950 h-screen border-r border-white/40 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out shrink-0 z-30">
         <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-white/30 shrink-0">
           <div className="flex items-center gap-3 font-bold text-xl tracking-tight">
-            <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md shrink-0 flex items-center justify-center">
+            <div className="w-7 h-7 bg-gradient-to-br from-zinc-800 to-zinc-950 rounded-xl shadow-md shrink-0 flex items-center justify-center">
               <span className="text-white text-xs">M</span>
             </div>
             <span className="hidden lg:flex text-zinc-900 drop-shadow-sm">Metalizze</span>

@@ -121,6 +121,7 @@ export default function SheetsPage() {
           <Table className="min-w-[800px]">
             <TableHeader className="sticky top-0 z-10 bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
               <TableRow>
+                <TableHead className="w-[70px]">#</TableHead>
                 <TableHead>SKU</TableHead>
                 <TableHead>Cliente / Documento</TableHead>
                 <TableHead>Tipo</TableHead>
@@ -132,13 +133,13 @@ export default function SheetsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={7} className='h-24 text-center text-muted-foreground'>
                     Carregando estoque...
                   </TableCell>
                 </TableRow>
               ) : sheets.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={7} className='h-24 text-center text-muted-foreground'>
                     Nenhuma chapa disponível nesta página.
                   </TableCell>
                 </TableRow>
@@ -147,8 +148,9 @@ export default function SheetsPage() {
                   if (!searchQuery) return true;
                   const query = searchQuery.toLowerCase();
                   return s.sku.toLowerCase().includes(query) || (s.client?.name && s.client.name.toLowerCase().includes(query));
-                }).map((sheet) => (
+                }).map((sheet, index) => (
                   <TableRow key={sheet.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 20 + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className='font-medium text-zinc-900 dark:text-zinc-100' title={sheet.sku}>
                       {sheet.sku.split('-C:')[0]}
                     </TableCell>
@@ -164,8 +166,8 @@ export default function SheetsPage() {
                     </TableCell>
                     <TableCell>
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${sheet.type === 'SCRAP'
-                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
-                        : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'
                         }`}>
                         {translateSheetType(sheet.type)}
                       </span>
@@ -193,7 +195,7 @@ export default function SheetsPage() {
                           {canCut && (
                             <>
                               <DropdownMenuSeparator className="bg-black/10 dark:bg-white/10" />
-                              <DropdownMenuItem asChild className="cursor-pointer font-medium text-blue-600 rounded-lg focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-900/30">
+                              <DropdownMenuItem asChild className="cursor-pointer font-medium text-zinc-900 rounded-lg focus:text-zinc-900 focus:bg-zinc-100 dark:focus:bg-zinc-800">
                                 <Link href={`/cut-orders?sheetId=${sheet.id}`}>
                                   <Scissors className="mr-2 h-4 w-4" />
                                   Cortar chapa

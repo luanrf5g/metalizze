@@ -72,6 +72,7 @@ export default function UsersPage() {
                     <Table>
                         <TableHeader className="bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
                             <TableRow>
+                                <TableHead className="w-[70px]">#</TableHead>
                                 <TableHead>Nome</TableHead>
                                 <TableHead>E-mail</TableHead>
                                 <TableHead>Papel Funcional</TableHead>
@@ -81,23 +82,24 @@ export default function UsersPage() {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                                    <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                                         Carregando equipe...
                                     </TableCell>
                                 </TableRow>
                             ) : users.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                                    <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                                         Nenhum usuário encontrado no sistema.
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                users.map((user) => (
+                                users.map((user, index) => (
                                     <TableRow key={user.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
+                                        <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{(index + 1).toString().padStart(3, '0')}</TableCell>
                                         <TableCell className="font-semibold text-zinc-900 dark:text-zinc-100">
                                             <div className="flex items-center gap-2">
                                                 {user.role === 'ADMIN' ? (
-                                                    <ShieldCheckIcon className="w-5 h-5 text-indigo-500" />
+                                                    <ShieldCheckIcon className="w-5 h-5 text-zinc-900" />
                                                 ) : (
                                                     <UserIcon className="w-5 h-5 text-zinc-400" />
                                                 )}
@@ -107,9 +109,9 @@ export default function UsersPage() {
                                         <TableCell className="text-zinc-600 dark:text-zinc-400">{user.email}</TableCell>
                                         <TableCell>
                                             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${user.role === 'ADMIN'
-                                                    ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300'
+                                                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                                                     : user.role === 'OPERATOR'
-                                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300'
+                                                        ? 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200'
                                                         : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300'
                                                 }`}>
                                                 {translateRole(user.role)}

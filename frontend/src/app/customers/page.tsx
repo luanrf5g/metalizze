@@ -82,6 +82,7 @@ export default function ClientsPage() {
           <Table>
             <TableHeader className="bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
               <TableRow>
+                <TableHead className="w-[70px]">#</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Documento</TableHead>
                 <TableHead>Id</TableHead>
@@ -90,7 +91,7 @@ export default function ClientsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                     Carregando estoque...
                   </TableCell>
                 </TableRow>
@@ -100,7 +101,7 @@ export default function ClientsPage() {
                 return c.name.toLowerCase().includes(query) || formatDocument(c.document).includes(query);
               }).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={5} className='h-24 text-center text-muted-foreground'>
                     Nenhum cliente encontrado.
                   </TableCell>
                 </TableRow>
@@ -109,8 +110,9 @@ export default function ClientsPage() {
                   if (!searchQuery) return true;
                   const query = searchQuery.toLowerCase();
                   return c.name.toLowerCase().includes(query) || formatDocument(c.document).includes(query);
-                }).map((client) => (
+                }).map((client, index) => (
                   <TableRow key={client.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{(index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className="font-semibold text-zinc-900 dark:text-zinc-100">{client.name}</TableCell>
                     <TableCell className="text-zinc-600 dark:text-zinc-400">{formatDocument(client.document)}</TableCell>
                     <TableCell className="text-zinc-400 dark:text-zinc-500 text-xs font-mono">{client.id}</TableCell>

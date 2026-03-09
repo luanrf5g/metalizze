@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-b from-blue-500 to-indigo-600 text-white shadow-[inset_0_1px_rgba(255,255,255,0.4),0_2px_8px_rgba(37,99,235,0.4)] hover:shadow-[inset_0_1px_rgba(255,255,255,0.5),0_4px_12px_rgba(37,99,235,0.5)] border border-blue-600/50",
+        default: "bg-gradient-to-b from-zinc-800 to-zinc-900 text-white shadow-[inset_0_1px_rgba(255,255,255,0.15),0_2px_8px_rgba(0,0,0,0.3)] hover:shadow-[inset_0_1px_rgba(255,255,255,0.2),0_4px_12px_rgba(0,0,0,0.4)] border border-zinc-700/50",
         destructive:
           "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[inset_0_1px_rgba(255,255,255,0.3),0_2px_8px_rgba(239,68,68,0.4)] border border-red-600/50 hover:shadow-[0_4px_12px_rgba(239,68,68,0.5)]",
         outline:
@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-white/50 backdrop-blur-md text-zinc-900 border border-white/60 shadow-sm hover:bg-white/70 dark:bg-zinc-800/50 dark:text-white dark:border-white/10",
         ghost:
           "hover:bg-black/5 text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white",
-        link: "text-blue-600 underline-offset-4 hover:underline dark:text-blue-400",
+        link: "text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-300",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
