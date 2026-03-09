@@ -123,10 +123,9 @@ export function CreateUserModal({ onSuccess }: Props) {
                                                 <label key={action} className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                                                     <input
                                                         type="checkbox"
-                                                        checked={role === 'VIEWER' ? action === 'read' : (permissions[mod.key]?.[action] || false)}
-                                                        onChange={() => role !== 'VIEWER' && togglePermission(mod.key, action)}
-                                                        disabled={role === 'VIEWER'}
-                                                        className="rounded cursor-pointer disabled:cursor-not-allowed"
+                                                        checked={permissions[mod.key]?.[action] || false}
+                                                        onChange={() => togglePermission(mod.key, action)}
+                                                        className="rounded cursor-pointer"
                                                     />
                                                     {action === 'read' ? 'Ler' : action === 'write' ? 'Escr.' : 'Excl.'}
                                                 </label>
