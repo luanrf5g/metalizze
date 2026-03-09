@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Input } from "./ui/input";
 import { Client } from "@/types/clients";
 import { toast } from "sonner";
+import { Switch } from "./ui/switch";
+import { Textarea } from "./ui/textarea";
 
 interface CreateSheetModalProps {
   onSuccess: () => void
@@ -27,18 +29,34 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
   const [height, setHeight] = useState("")
   const [thickness, setThickness] = useState("")
   const [quantity, setQuantity] = useState("")
+  const [description, setDescription] = useState("")
+
+  // Price states
+  const [autoCalcPrice, setAutoCalcPrice] = useState(false)
+  const [unitPrice, setUnitPrice] = useState("")
+  const [totalPrice, setTotalPrice] = useState("")
+
+  const calculatedUnitPrice = autoCalcPrice && totalPrice && quantity
+    ? Number(totalPrice) / Number(quantity)
+    : unitPrice ? Number(unitPrice) : 0
 
   async function handleCreateSheet(e: React.ChangeEvent) {
     e.preventDefault()
     setIsLoading(true)
     try {
+      const finalPrice = autoCalcPrice
+        ? (totalPrice && quantity ? Number(totalPrice) / Number(quantity) : 0)
+        : (unitPrice ? Number(unitPrice) : 0)
+
       await api.post('/sheets', {
         materialId,
         clientId: clientId === 'none' ? null : clientId,
         width: Number(width),
         height: Number(height),
         thickness: Number(thickness),
-        quantity: Number(quantity)
+        quantity: Number(quantity),
+        price: finalPrice > 0 ? finalPrice : null,
+        description: description.trim() || undefined
       })
 
       setMaterialId("")
@@ -47,6 +65,10 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
       setHeight("")
       setThickness("")
       setQuantity("")
+      setUnitPrice("")
+      setTotalPrice("")
+      setDescription("")
+      setAutoCalcPrice(false)
       setOpen(false)
       onSuccess()
       toast.success("Chapa cadastrada com sucesso!", {
@@ -91,13 +113,13 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
         <Button className="hover:cursor-pointer">Adicionar Chapa</Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] flex flex-col">
         <DialogTitle>Adicionar Chapa</DialogTitle>
         <DialogDescription>
           Cadastre uma nova chapa para ser adicionada ao seu estoque.
         </DialogDescription>
 
-        <form onSubmit={handleCreateSheet} className="space-y-4 mt-4">
+        <form onSubmit={handleCreateSheet} className="space-y-4 mt-4 overflow-y-auto pr-1 flex-1">
           {/* Select for Materials */}
           <div className="space-y-2">
             <Label htmlFor="material">Material</Label>
@@ -199,6 +221,72 @@ export function CreateSheetModal({ onSuccess }: CreateSheetModalProps) {
                 </SelectGroup>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Price Section */}
+          <div className="space-y-3 rounded-lg border p-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Valor de Compra</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="auto-calc" className="text-xs text-zinc-500">
+                  Calcular pelo total da nota
+                </Label>
+                <Switch
+                  id="auto-calc"
+                  checked={autoCalcPrice}
+                  onCheckedChange={setAutoCalcPrice}
+                />
+              </div>
+            </div>
+
+            {autoCalcPrice ? (
+              <div className="space-y-2">
+                <div className="space-y-1">
+                  <Label htmlFor="totalPrice" className="text-xs text-zinc-500">Valor Total da Nota (R$)</Label>
+                  <Input
+                    id="totalPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Ex: 5000.00"
+                    value={totalPrice}
+                    onChange={(e) => setTotalPrice(e.target.value)}
+                  />
+                </div>
+                {totalPrice && quantity && Number(quantity) > 0 && (
+                  <p className="text-xs text-zinc-500">
+                    Valor unitário calculado: <strong className="text-zinc-900">
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(totalPrice) / Number(quantity))}
+                    </strong>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <Label htmlFor="unitPrice" className="text-xs text-zinc-500">Valor Unitário (R$)</Label>
+                <Input
+                  id="unitPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Ex: 250.00"
+                  value={unitPrice}
+                  onChange={(e) => setUnitPrice(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição (opcional)</Label>
+            <Textarea
+              id="description"
+              placeholder="Descrição para o movimento de estoque..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

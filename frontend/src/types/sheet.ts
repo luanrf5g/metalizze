@@ -11,6 +11,7 @@ export interface Sheet {
   height: number,
   thickness: number,
   quantity: number,
+  price?: number | null,
   type: 'STANDARD' | 'SCRAP',
   createdAt: string
 }

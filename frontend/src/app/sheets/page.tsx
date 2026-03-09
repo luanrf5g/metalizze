@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { api } from '@/lib/api'
 import { Sheet } from '@/types/sheet'
 import { useEffect, useState } from 'react'
-import { translateSheetType, formatDate, formatDocument } from '@/lib/formatters'
+import { translateSheetType, formatDate, formatDocument, formatCurrency } from '@/lib/formatters'
 import { CreateSheetModal } from '@/components/CreateSheetModal'
 import { Pagination } from '@/components/Pagination'
 import { MoreHorizontal, Eye, Scissors } from 'lucide-react'
@@ -127,19 +127,20 @@ export default function SheetsPage() {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Entrada</TableHead>
                 <TableHead>Quantidade</TableHead>
+                <TableHead>Preço Unit.</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
                     Carregando estoque...
                   </TableCell>
                 </TableRow>
               ) : sheets.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className='h-24 text-center text-muted-foreground'>
+                  <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
                     Nenhuma chapa disponível nesta página.
                   </TableCell>
                 </TableRow>
@@ -176,6 +177,7 @@ export default function SheetsPage() {
                       {formatDate(sheet.createdAt)}
                     </TableCell>
                     <TableCell className='font-bold text-zinc-900 dark:text-zinc-100 whitespace-nowrap'>{sheet.quantity} un</TableCell>
+                    <TableCell className='text-zinc-700 dark:text-zinc-300 whitespace-nowrap'>{formatCurrency(sheet.price)}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -187,7 +189,7 @@ export default function SheetsPage() {
                         <DropdownMenuContent align="end" className="glass-panel border-white/20 rounded-xl">
                           <DropdownMenuLabel className="font-semibold">Ações da Chapa</DropdownMenuLabel>
                           <DropdownMenuItem asChild className="cursor-pointer rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
-                            <Link href="#">
+                            <Link href={`/sheets/${sheet.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
                               Ver detalhes
                             </Link>
