@@ -58,13 +58,14 @@ model Material {
 }
 
 model Sheet {
-  id        String @id @default(uuid())
-  sku       String
-  width     Float
-  height    Float
-  thickness Float
-  quantity  Int    @default(0)
-  price     Float? @default(0)
+  id              String  @id @default(uuid())
+  sku             String
+  width           Float
+  height          Float
+  thickness       Float
+  quantity        Int     @default(0)
+  price           Float?  @default(0)
+  storageLocation String? @map("storage_location")
 
   type SheetType @default(STANDARD)
 

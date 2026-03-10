@@ -13,6 +13,7 @@ export interface SheetProps {
   thickness: number,
   quantity: number,
   price?: number | null,
+  storageLocation?: string | null,
   type: SheetType,
   createdAt: Date,
   updatedAt?: Date | null
@@ -28,6 +29,7 @@ export class Sheet extends Entity<SheetProps> {
   get thickness() { return this.props.thickness }
   get quantity() { return this.props.quantity }
   get price() { return this.props.price ?? 0 }
+  get storageLocation() { return this.props.storageLocation ?? null }
   get type() { return this.props.type }
   get createdAt() { return this.props.createdAt }
   get updatedAt() { return this.props.updatedAt }

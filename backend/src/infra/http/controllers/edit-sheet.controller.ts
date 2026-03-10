@@ -12,7 +12,8 @@ const editSchemaBodySchema = z.object({
   height: z.number().positive().optional(),
   thickness: z.number().positive().optional(),
   type: z.enum(SheetType).optional(),
-  price: z.number().min(0).optional()
+  price: z.number().min(0).optional(),
+  storageLocation: z.string().max(255).nullable().optional()
 })
 
 type EditSchemaBodySchema = z.infer<typeof editSchemaBodySchema>
@@ -29,7 +30,7 @@ export class EditSheetController {
     @Param('id') sheetId: string,
     @Body(bodyValidationPipe) body: EditSchemaBodySchema
   ) {
-    const { materialId, clientId, width, height, thickness, type, price } = body
+    const { materialId, clientId, width, height, thickness, type, price, storageLocation } = body
 
     const result = await this.editSheet.execute({
       sheetId,
@@ -39,7 +40,8 @@ export class EditSheetController {
       height,
       thickness,
       type,
-      price
+      price,
+      storageLocation
     })
 
     if (result.isLeft()) {

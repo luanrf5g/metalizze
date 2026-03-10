@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Pencil, Save, X, Package, Ruler, DollarSign } from 'lucide-react'
+import { ArrowLeft, Pencil, Save, X, Package, Ruler, DollarSign, MapPin } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -26,6 +27,7 @@ interface SheetDetails {
   height: number
   quantity: number
   price: number
+  storageLocation: string | null
   type: 'STANDARD' | 'SCRAP'
   created: string
 }
@@ -48,6 +50,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
   const [editThickness, setEditThickness] = useState('')
   const [editType, setEditType] = useState<'STANDARD' | 'SCRAP'>('STANDARD')
   const [editPrice, setEditPrice] = useState('')
+  const [editStorageLocation, setEditStorageLocation] = useState('')
 
   const { user } = useAuth()
   const canEdit = user?.role === 'ADMIN' || user?.permissions?.['sheets']?.write
@@ -93,6 +96,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
     setEditThickness(String(sheet.thickness))
     setEditType(sheet.type)
     setEditPrice(String(sheet.price ?? 0))
+    setEditStorageLocation(sheet.storageLocation ?? '')
     setIsEditing(true)
   }
 
@@ -115,6 +119,11 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
       if (Number(editThickness) !== sheet.thickness) payload.thickness = Number(editThickness)
       if (editType !== sheet.type) payload.type = editType
       if (Number(editPrice) !== sheet.price) payload.price = Number(editPrice)
+
+      const newStorageLocation = editStorageLocation.trim() || null
+      if (newStorageLocation !== (sheet.storageLocation ?? null)) {
+        payload.storageLocation = newStorageLocation
+      }
 
       if (Object.keys(payload).length === 0) {
         toast.info('Nenhuma alteração detectada.')
@@ -313,6 +322,31 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
                   <p className="text-xs text-zinc-500 mb-1">Cliente</p>
                   <p className="font-medium text-zinc-900 dark:text-white">{clientName ?? <span className="text-zinc-400 italic">Estoque Próprio</span>}</p>
                 </div>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Storage Location */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="h-5 w-5 text-zinc-500" />
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Local de Armazenamento</h2>
+            </div>
+            {isEditing ? (
+              <Textarea
+                placeholder="Ex: Guardada na prateleira 5, Está no chão ao lado do hack de chapas..."
+                value={editStorageLocation}
+                onChange={(e) => setEditStorageLocation(e.target.value)}
+                rows={3}
+                className="resize-none w-full"
+              />
+            ) : (
+              <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 p-4">
+                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                  {sheet.storageLocation ? sheet.storageLocation : <span className="text-zinc-400 italic">Não informado</span>}
+                </p>
               </div>
             )}
           </div>
