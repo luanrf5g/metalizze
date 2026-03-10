@@ -1,13 +1,13 @@
 import { EditClientUseCase } from "@/domain/application/use-cases/edit-client";
-import { BadRequestException, Body, Controller, HttpCode, NotFoundException, Param, Patch, Put } from "@nestjs/common";
+import { BadRequestException, Body, Controller, HttpCode, NotFoundException, Param, Patch } from "@nestjs/common";
 import z from "zod";
 import { ZodValidationPipe } from "../pipes/zod-validation-pipe";
 import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
 
 const editClientBodySchema = z.object({
   name: z.string().optional(),
-  email: z.email().optional(),
-  phone: z.string().optional()
+  email: z.string().email().nullable().optional(),
+  phone: z.string().nullable().optional()
 })
 
 type EditClientBodySchema = z.infer<typeof editClientBodySchema>

@@ -6,6 +6,8 @@ export class ClientPresenter {
       id: client.id.toString(),
       name: client.name,
       document: client.document,
+      email: client.email,
+      phone: client.phone
     }
   }
 }
