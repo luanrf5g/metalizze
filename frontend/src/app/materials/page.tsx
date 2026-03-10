@@ -5,12 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/formatters";
 import { Material } from "@/types/material";
-import { AlertCircleIcon, Ellipsis, ListChevronsUpDown, PenIcon, PenLineIcon, Search, Trash2Icon, TrashIcon } from "lucide-react";
+import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateMaterialModal } from "@/components/CreateMaterialModal";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function MaterialsPage() {
@@ -38,8 +35,6 @@ export default function MaterialsPage() {
   useEffect(() => {
     fetchMaterials()
   }, [])
-
-  async function handleModifyMaterial() { }
 
   return (
     <div className='p-6 md:p-10 w-full h-full mx-auto flex flex-col animate-in fade-in zoom-in-95 duration-700'>

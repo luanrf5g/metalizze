@@ -152,10 +152,9 @@ export default function ClientsPage() {
             <TableHeader className="bg-zinc-50/80 backdrop-blur-md dark:bg-zinc-900/80">
               <TableRow>
                 <TableHead className="w-16">#</TableHead>
-                <TableHead className="min-w-[200px]">Nome</TableHead>
-                <TableHead className="w-[180px]">Documento</TableHead>
-                <TableHead className="w-[140px]">Telefone</TableHead>
-                <TableHead className="min-w-[200px]">E-mail</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Documento</TableHead>
+                <TableHead>Telefone</TableHead>
                 <TableHead className="text-center w-20">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -187,10 +186,7 @@ export default function ClientsPage() {
                     <TableCell className="font-semibold text-zinc-900 dark:text-zinc-100">{client.name}</TableCell>
                     <TableCell className="text-zinc-600 dark:text-zinc-400 font-mono text-sm">{formatDocument(client.document)}</TableCell>
                     <TableCell className="text-zinc-600 dark:text-zinc-400 text-sm">
-                      {client.phone ? formatPhone(client.phone) : <span className="text-zinc-400 text-xs italic">-</span>}
-                    </TableCell>
-                    <TableCell className="text-zinc-600 dark:text-zinc-400 text-sm">
-                      {client.email || <span className="text-zinc-400 text-xs italic">-</span>}
+                      {client.phone ? formatPhone(client.phone) : <span className="text-zinc-400 text-xs italic">Não informado</span>}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
