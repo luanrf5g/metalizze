@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { Loader2 } from "lucide-react"
+import { Loader2, TrendingDown, TrendingUp } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
 
@@ -62,8 +62,8 @@ export default function ReportsPage() {
   }, [])
 
   function renderPercentageLabel(value: number) {
-    if (value > 0) return <div className="text-xs text-green-800 font-medium">+{value}% comparado ao mês passado</div>
-    if (value < 0) return <div className="text-xs text-red-800 font-medium">{value}% comparado ao mês passado</div>
+    if (value > 0) return <div className="text-xs text-white font-medium flex gap-2"><TrendingUp className="w-4 h-4"/> +{value}% comparado ao mês passado</div>
+    if (value < 0) return <div className="text-xs text-white font-medium flex gap-2"><TrendingDown className="w-4 h-4"/> {value}% comparado ao mês passado </div>
     return <div className="text-xs text-zinc-700 font-medium">Estável comparado ao mês passado</div>
   }
 

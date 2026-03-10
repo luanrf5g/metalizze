@@ -28,8 +28,6 @@ export function formatDate(dateString: string, complete: boolean = false) {
 }
 
 export function formatDocument(document: string) {
-
-
   // Remove tudo que não é dígito
   document = document.replace(/\D/g, "");
 
@@ -50,4 +48,15 @@ export function formatCurrency(value: number | null | undefined) {
     style: 'currency',
     currency: 'BRL',
   }).format(value)
+}
+
+export function formatPhone(phone: string) {
+  phone = phone.replace(/\D/g, "")
+
+  if(phone.length === 11) {
+    // Aplica a máscara: (00) 0.0000-0000
+    return phone.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, "($1) $2.$3-$4")
+  } else if(phone.length === 9) {
+    return phone.replace(/(\d{1})(\d{4})(\d{4})/, "$1.$2-$3")
+  }
 }
