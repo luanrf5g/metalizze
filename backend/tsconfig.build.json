@@ -4,13 +4,10 @@
     "outDir": "./dist",
     "types": ["node"]
   },
+  "include": ["src/**/*.ts"],
   "exclude": [
-    "node_modules",
-    "test",
-    "dist",
     "**/*.spec.ts",
     "**/*.test.ts",
-    "**/__tests__/**",
-    "vitest.config.*"
+    "**/*.e2e-spec.ts"
   ]
 }
