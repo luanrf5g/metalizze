@@ -77,6 +77,11 @@ export class Sheet extends Entity<SheetProps> {
     this.touch()
   }
 
+  set storageLocation(storageLocation: string | null) {
+    this.props.storageLocation = storageLocation
+    this.touch()
+  }
+
   updatePrice(newPrice: number) {
     const currentPrice = this.props.price ?? 0
     if (newPrice > currentPrice) {

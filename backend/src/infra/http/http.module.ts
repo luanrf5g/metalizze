@@ -69,10 +69,12 @@ import { EditUserController } from "./controllers/edit-user.controller";
 import { EditUserUseCase } from "@/domain/application/use-cases/edit-user";
 import { DeleteUserController } from "./controllers/delete-user.controller";
 import { DeleteUserUseCase } from "@/domain/application/use-cases/delete-user";
+import { HealthController } from "./controllers/health.controller";
 
 @Module({
   imports: [DatabaseModule, AuthModule],
   controllers: [
+    HealthController,
     // Material
     CreateMaterialController,
     FetchMaterialsController,

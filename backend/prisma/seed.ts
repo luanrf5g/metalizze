@@ -33,34 +33,7 @@ async function main() {
 
     console.log('Admin user created/updated:', admin.email)
 
-    const materialA = await prisma.material.upsert({
-        where: { slug: 'aco-carbono' },
-        update: {},
-        create: {
-            name: 'Aço Carbono',
-            slug: 'aco-carbono',
-        },
-    })
-
-    const materialB = await prisma.material.upsert({
-        where: { slug: 'aco-inox' },
-        update: {},
-        create: {
-            name: 'Aço Inox',
-            slug: 'aco-inox',
-        },
-    })
-
-    const materialC = await prisma.material.upsert({
-        where: { slug: 'aluminio' },
-        update: {},
-        create: {
-            name: 'Alumínio',
-            slug: 'aluminio',
-        },
-    })
-
-    console.log('Basic materials seeded.')
+    console.log('Only admin user seeded.')
 }
 
 main()
