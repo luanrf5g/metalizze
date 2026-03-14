@@ -7,7 +7,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      'http://localhost:3000',
+      'http://localhost:3001',
       'https://metalizze.vercel.app'
     ],
     credentials: true,
@@ -17,6 +17,15 @@ async function bootstrap() {
   const envService = app.get(EnvService);
   const port = envService.get('PORT') ?? 3000
 
-  await app.listen(port, '0.0.0.0');
+  const isProduction = envService.get('NODE_ENV') === 'production'
+
+  if (isProduction) {
+    await app.listen(port, '0.0.0.0');
+    console.log(`🚀 Metalizze API rodando em PRODUÇÃO na porta ${port}`);
+  } else {
+    await app.listen(port);
+    console.log(`💻 Metalizze API rodando LOCALMENTE em http://localhost:${port}`);
+  }
 }
+
 bootstrap();

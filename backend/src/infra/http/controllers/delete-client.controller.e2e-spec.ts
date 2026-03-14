@@ -6,6 +6,7 @@ import { Test } from "@nestjs/testing"
 import { ClientFactory } from "test/factories/make-client"
 import { MaterialFactory } from "test/factories/make-material"
 import { SheetFactory } from "test/factories/make-sheet"
+import { UserFactory } from "test/factories/make-user"
 import request from 'supertest'
 
 describe('Delete Client (E2E)', () => {
@@ -14,11 +15,13 @@ describe('Delete Client (E2E)', () => {
   let clientFactory: ClientFactory
   let materialFactory: MaterialFactory
   let sheetFactory: SheetFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory, SheetFactory, ClientFactory]
+      providers: [MaterialFactory, SheetFactory, ClientFactory, UserFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -27,8 +30,11 @@ describe('Delete Client (E2E)', () => {
     materialFactory = moduleRef.get(MaterialFactory)
     clientFactory = moduleRef.get(ClientFactory)
     sheetFactory = moduleRef.get(SheetFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[DELETE] /clients/:id', async () => {
@@ -38,6 +44,7 @@ describe('Delete Client (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .delete(`/clients/${clientId}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send()
 
     expect(response.statusCode).toBe(204)
@@ -64,6 +71,7 @@ describe('Delete Client (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .delete(`/clients/${clientId}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send()
 
     expect(response.statusCode).toBe(409)

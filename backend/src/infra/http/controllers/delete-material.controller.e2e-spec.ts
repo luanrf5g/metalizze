@@ -6,17 +6,20 @@ import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { MaterialFactory } from 'test/factories/make-material'
 import { SheetFactory } from 'test/factories/make-sheet'
+import { UserFactory } from 'test/factories/make-user'
 
 describe('Delete Material (E2E)', () => {
   let app: INestApplication
   let prisma: PrismaService
   let materialFactory: MaterialFactory
   let sheetFactory: SheetFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory, SheetFactory]
+      providers: [MaterialFactory, SheetFactory, UserFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -24,8 +27,11 @@ describe('Delete Material (E2E)', () => {
     prisma = moduleRef.get(PrismaService)
     materialFactory = moduleRef.get(MaterialFactory)
     sheetFactory = moduleRef.get(SheetFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[DELETE] /materials/:id', async () => {
@@ -35,6 +41,7 @@ describe('Delete Material (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .delete(`/materials/${materialId}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send()
 
     expect(response.statusCode).toBe(204)
@@ -56,6 +63,7 @@ describe('Delete Material (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .delete(`/materials/${materialId}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send()
 
     expect(response.statusCode).toBe(409)

@@ -7,6 +7,7 @@ import { DatabaseModule } from '@/infra/database/database.module'
 import { SheetFactory } from 'test/factories/make-sheet'
 import { MaterialFactory } from 'test/factories/make-material'
 import { ClientFactory } from 'test/factories/make-client'
+import { UserFactory } from 'test/factories/make-user'
 
 describe('Edit Sheet (E2E)', () => {
   let app: INestApplication
@@ -14,11 +15,13 @@ describe('Edit Sheet (E2E)', () => {
   let materialFactory: MaterialFactory
   let clientFactory: ClientFactory
   let sheetFactory: SheetFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory, ClientFactory, SheetFactory],
+      providers: [MaterialFactory, ClientFactory, SheetFactory, UserFactory],
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -26,8 +29,11 @@ describe('Edit Sheet (E2E)', () => {
     materialFactory = moduleRef.get(MaterialFactory)
     clientFactory = moduleRef.get(ClientFactory)
     sheetFactory = moduleRef.get(SheetFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[PUT] /sheets/:id', async () => {
@@ -45,6 +51,7 @@ describe('Edit Sheet (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .put(`/sheets/${sheet.id.toString()}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send({
         materialId: newMaterial.id.toString(),
         clientId: client.id.toString(),

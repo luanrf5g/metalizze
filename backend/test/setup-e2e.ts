@@ -2,9 +2,10 @@ import { config } from 'dotenv'
 import { randomUUID } from 'node:crypto'
 import { execSync } from 'node:child_process'
 import { Pool } from 'pg'
+import { afterAll, beforeAll } from 'vitest'
 
-config({ path: '.env', override: true })
-config({ path: '.env.test', override: true })
+config({ path: '.env' })
+config({ path: '.env.test' })
 
 function generateDatabaseUrlForDatabase(dbName: string) {
   if (!process.env.DATABASE_URL) {

@@ -6,17 +6,20 @@ import request from 'supertest'
 import { InventoryMovementFactory } from 'test/factories/make-inventory-movement'
 import { MaterialFactory } from 'test/factories/make-material'
 import { SheetFactory } from 'test/factories/make-sheet'
+import { UserFactory } from 'test/factories/make-user'
 
 describe('Fetch Inventory Movements (E2E)', () => {
   let app: INestApplication
   let materialFactory: MaterialFactory
   let sheetFactory: SheetFactory
   let movementFactory: InventoryMovementFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory, SheetFactory, InventoryMovementFactory]
+      providers: [MaterialFactory, SheetFactory, InventoryMovementFactory, UserFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -24,8 +27,11 @@ describe('Fetch Inventory Movements (E2E)', () => {
     materialFactory = moduleRef.get(MaterialFactory)
     sheetFactory = moduleRef.get(SheetFactory)
     movementFactory = moduleRef.get(InventoryMovementFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[GET] /movements', async () => {
@@ -37,6 +43,7 @@ describe('Fetch Inventory Movements (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/movements')
+      .set('Authorization', `Bearer ${authToken}`)
       .query({ sheetId: sheet.id.toString() })
       .send()
 

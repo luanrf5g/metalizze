@@ -4,24 +4,30 @@ import { PrismaService } from "@/infra/database/prisma/prisma.service"
 import { INestApplication } from "@nestjs/common"
 import { Test } from "@nestjs/testing"
 import { MaterialFactory } from "test/factories/make-material"
+import { UserFactory } from "test/factories/make-user"
 import request from 'supertest'
 
 describe('Create Sheet (E2E)', () => {
   let app: INestApplication
   let prisma: PrismaService
   let materialFactory: MaterialFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory]
+      providers: [MaterialFactory, UserFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
     prisma = moduleRef.get(PrismaService)
     materialFactory = moduleRef.get(MaterialFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[POST] /sheets', async () => {
@@ -42,6 +48,7 @@ describe('Create Sheet (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .post('/sheets')
+      .set('Authorization', `Bearer ${authToken}`)
       .send(sheetToInsert)
 
     expect(response.statusCode).toBe(201)
@@ -66,6 +73,7 @@ describe('Create Sheet (E2E)', () => {
 
     await request(app.getHttpServer())
       .post('/sheets')
+      .set('Authorization', `Bearer ${authToken}`)
       .send({
         ...sheetToInsert,
         quantity: 5,

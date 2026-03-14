@@ -25,5 +25,6 @@ import { AuthModule } from './infra/auth/auth.module'
     AuthModule,
     HttpModule,
   ],
+  exports: [DatabaseModule, AuthModule],
 })
 export class AppModule { }

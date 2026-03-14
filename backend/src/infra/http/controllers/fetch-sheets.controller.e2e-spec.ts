@@ -7,25 +7,31 @@ import { DatabaseModule } from '@/infra/database/database.module'
 import { SheetFactory } from 'test/factories/make-sheet'
 import { MaterialFactory } from 'test/factories/make-material'
 import { ClientFactory } from 'test/factories/make-client'
+import { UserFactory } from 'test/factories/make-user'
 
 describe('Fetch Sheets (E2E)', () => {
   let app: INestApplication
   let materialFactory: MaterialFactory
   let clientFactory: ClientFactory
   let sheetFactory: SheetFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory, ClientFactory, SheetFactory],
+      providers: [MaterialFactory, ClientFactory, SheetFactory, UserFactory],
     }).compile()
 
     app = moduleRef.createNestApplication()
     materialFactory = moduleRef.get(MaterialFactory)
     clientFactory = moduleRef.get(ClientFactory)
     sheetFactory = moduleRef.get(SheetFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[GET] /sheets', async () => {
@@ -34,7 +40,10 @@ describe('Fetch Sheets (E2E)', () => {
     await sheetFactory.makePrismaSheet({ materialId: material.id })
     await sheetFactory.makePrismaSheet({ materialId: material.id })
 
-    const response = await request(app.getHttpServer()).get('/sheets').send()
+    const response = await request(app.getHttpServer())
+      .get('/sheets')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send()
 
     expect(response.statusCode).toBe(200)
     expect(response.body.sheets.length).toBeGreaterThanOrEqual(2)
@@ -56,6 +65,7 @@ describe('Fetch Sheets (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .get('/sheets')
+      .set('Authorization', `Bearer ${authToken}`)
       .query({
         materialId: materialTarget.id.toString(),
         clientId: clientTarget.id.toString(),

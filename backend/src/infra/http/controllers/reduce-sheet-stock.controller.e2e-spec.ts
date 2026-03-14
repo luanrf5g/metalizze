@@ -5,6 +5,7 @@ import { INestApplication } from "@nestjs/common"
 import { Test } from "@nestjs/testing"
 import { MaterialFactory } from "test/factories/make-material"
 import { SheetFactory } from "test/factories/make-sheet"
+import { UserFactory } from "test/factories/make-user"
 import request from 'supertest'
 
 describe('Reduce Sheet Stock (E2E)', () => {
@@ -12,11 +13,13 @@ describe('Reduce Sheet Stock (E2E)', () => {
   let prisma: PrismaService
   let materialFactory: MaterialFactory
   let sheetFactory: SheetFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [MaterialFactory, SheetFactory]
+      providers: [MaterialFactory, SheetFactory, UserFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -24,8 +27,11 @@ describe('Reduce Sheet Stock (E2E)', () => {
     prisma = moduleRef.get(PrismaService)
     materialFactory = moduleRef.get(MaterialFactory)
     sheetFactory = moduleRef.get(SheetFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[POST] /sheets/:id/reduce-stock', async () => {
@@ -40,6 +46,7 @@ describe('Reduce Sheet Stock (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .post(`/sheets/${sheetId}/reduce-stock`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send({
         quantity: 3,
         description: 'Corte do pedido #999',
@@ -78,6 +85,7 @@ describe('Reduce Sheet Stock (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .post(`/sheets/${sheetId}/reduce-stock`)
+      .set('Authorization', `Bearer ${authToken}`)
       .send({
         quantity: 5,
       })

@@ -6,17 +6,20 @@ import { SheetFactory } from "test/factories/make-sheet"
 import { Test } from "@nestjs/testing"
 import { AppModule } from "@/app.module"
 import { DatabaseModule } from "@/infra/database/database.module"
+import { UserFactory } from "test/factories/make-user"
 
 describe('Register Sheet Cut (E2E)', () => {
   let app: INestApplication
   let prisma: PrismaService
   let materialFactory: MaterialFactory
   let sheetFactory: SheetFactory
+  let userFactory: UserFactory
+  let authToken: string
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [SheetFactory, MaterialFactory]
+      providers: [SheetFactory, MaterialFactory, UserFactory]
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -24,8 +27,11 @@ describe('Register Sheet Cut (E2E)', () => {
     prisma = moduleRef.get(PrismaService)
     materialFactory = moduleRef.get(MaterialFactory)
     sheetFactory = moduleRef.get(SheetFactory)
+    userFactory = moduleRef.get(UserFactory)
 
     await app.init()
+
+    authToken = (await userFactory.makeAuthenticatedUser()).accessToken
   })
 
   test('[POST] /sheets/cut', async () => {
@@ -41,6 +47,7 @@ describe('Register Sheet Cut (E2E)', () => {
 
     const response = await request(app.getHttpServer())
       .post('/sheets/cut')
+      .set('Authorization', `Bearer ${authToken}`)
       .send({
         sheetId: motherSheet.id.toString(),
         quantityToCut: 2,
