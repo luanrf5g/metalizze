@@ -97,6 +97,19 @@ export class RegisterSheetCutUseCase {
           clientName
         })
 
+        // Calcula o preço proporcional do retalho com base na área da chapa mãe
+        const motherArea = motherSheet.width * motherSheet.height
+        const scrapArea = scrap.width * scrap.height
+
+        let scrapPrice: number | undefined
+
+        const motherPrice = motherSheet.price ?? 0
+
+        if (motherArea > 0 && scrapArea > 0 && motherPrice > 0) {
+          const proportion = scrapArea / motherArea
+          scrapPrice = motherPrice * proportion
+        }
+
         const newScrapSheet = Sheet.create({
           materialId: motherSheet.materialId,
           clientId: scrap.clientId ? new UniqueEntityId(scrap.clientId) : null,
@@ -105,6 +118,7 @@ export class RegisterSheetCutUseCase {
           height: scrap.height,
           thickness: motherSheet.thickness,
           quantity: scrap.quantity,
+          price: scrapPrice,
           type: 'SCRAP'
         })
 

@@ -7,7 +7,7 @@ export class PrismaMetricsRepository implements MetricsRepository {
   constructor(private prisma: PrismaService) { }
 
   async getDashboardCardsMetrics() {
-    const [standardSheets, scrapSheets, totalMaterials, totalClients] = await Promise.all([
+    const [standardSheets, scrapSheets, totalMaterials, totalClients, sheets] = await Promise.all([
       this.prisma.sheet.aggregate({
         _sum: { quantity: true },
         where: { type: 'STANDARD', deletedAt: null }
@@ -20,14 +20,25 @@ export class PrismaMetricsRepository implements MetricsRepository {
 
       this.prisma.material.count(),
 
-      this.prisma.client.count()
+      this.prisma.client.count(),
+
+      this.prisma.sheet.findMany({
+        where: { deletedAt: null },
+        select: { quantity: true, price: true }
+      })
     ])
+
+    const totalStockValue = sheets.reduce((acc, sheet) => {
+      const price = sheet.price ?? 0
+      return acc + price * sheet.quantity
+    }, 0)
 
     return {
       totalStandardSheets: standardSheets._sum.quantity || 0,
       totalScrapSheets: scrapSheets._sum.quantity || 0,
       totalMaterials,
-      totalClients
+      totalClients,
+      totalStockValue
     }
   }
 

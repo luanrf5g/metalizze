@@ -71,6 +71,39 @@ describe('Register Sheet Cut Use Case', () => {
     expect(inventoryMovementsRepository.items[1].type).toBe('ENTRY')
   })
 
+  it('should calculate scrap price proportionally to mother sheet area', async () => {
+    const material = makeMaterial()
+    await materialsRepository.create(material)
+
+    // Chapa mãe: 2000 x 1000 com preço 450 por unidade
+    const motherSheet = makeSheet({
+      materialId: material.id,
+      quantity: 1,
+      width: 2000,
+      height: 1000,
+      thickness: 2,
+      price: 450,
+    })
+    await sheetsRepository.create(motherSheet)
+
+    const result = await sut.execute({
+      sheetId: motherSheet.id.toString(),
+      quantityToCut: 1,
+      generatedScraps: [
+        // Retalho: 200 x 200 = 2% da área da chapa mãe
+        { width: 200, height: 200, quantity: 1 },
+      ],
+    })
+
+    expect(result.isRight()).toBeTruthy()
+
+    const scrapSheet = sheetsRepository.items.find((s) => s.type === 'SCRAP')
+    expect(scrapSheet).toBeTruthy()
+
+    // 2% de 450 = 9
+    expect(scrapSheet!.price).toBeCloseTo(9, 5)
+  })
+
   it('should ADD quantity to and EXISTING scrap instead of creating a new one', async () => {
     const material = makeMaterial()
     await materialsRepository.create(material)

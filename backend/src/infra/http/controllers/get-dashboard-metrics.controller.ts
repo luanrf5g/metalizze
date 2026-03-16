@@ -20,7 +20,8 @@ export class GetDashboardMetricsController {
         totalStandardSheets: metrics.totalStandardSheets,
         totalScrapSheets: metrics.totalScrapSheets,
         totalMaterials: metrics.totalMaterials,
-        totalClients: metrics.totalClients
+        totalClients: metrics.totalClients,
+        totalStockValue: metrics.totalStockValue
       }
     }
   }
