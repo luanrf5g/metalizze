@@ -1,21 +1,23 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, ResponsiveContainer } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { InventoryMetrics } from "@/types/inventory-metrics"
 import { api } from "@/lib/api"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 const chartConfig = {
-  Entradas: {
-    label: "Entradas (Chapas)",
-    color: "var(--color-chart-6)",
+  entries: {
+    label: "Entradas",
+    // Verde para entradas
+    color: "#16a34a",
   },
-  Saídas: {
-    label: "Saídas (Cortes)",
-    color: "var(--color-chart-7)",
+  exits: {
+    label: "Saídas",
+    // Vermelho para saídas
+    color: "#ef4444",
   },
 } satisfies ChartConfig
 
@@ -66,7 +68,7 @@ export function InventoryMovementChart() {
 
         {/* Botões de Filtro Iguais aos da sua imagem */}
         <div className="flex p-1 rounded-md mt-4 sm:mt-0">
-          <Select>
+          <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
               className="hidden w-40 rounded-lg sm:ml-auto sm:flex"
               aria-label="Select a value"
@@ -100,24 +102,33 @@ export function InventoryMovementChart() {
             </span>
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-75 w-full">
-            {/* ResponsiveContainer garante que o gráfico se adapte à tela */}
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredData} margin={{ top: 10, left: 16, right: 16, bottom: 0 }}>
+          <>
+            <ChartContainer config={chartConfig} className="h-75 w-full">
+              {/* ResponsiveContainer garante que o gráfico se adapte à tela */}
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={filteredData} margin={{ top: 10, left: 16, right: 16, bottom: 0 }}>
 
                 {/* Definição dos Gradientes (O escurecimento embaixo da linha) */}
                 <defs>
                   <linearGradient id="fillEntry" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-entry)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--color-entry)" stopOpacity={0.1}/>
+                    <stop offset="5%" stopColor="var(--color-entries)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--color-entries)" stopOpacity={0.1}/>
                   </linearGradient>
                   <linearGradient id="fillExit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-exit)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--color-exit)" stopOpacity={0.1}/>
+                    <stop offset="5%" stopColor="var(--color-exits)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--color-exits)" stopOpacity={0.1}/>
                   </linearGradient>
                 </defs>
 
                 <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  allowDecimals={false}
+                  width={30}
+                  className="text-xs text-muted-foreground"
+                />
                 <XAxis
                   dataKey="date"
                   tickLine={false}
@@ -149,22 +160,38 @@ export function InventoryMovementChart() {
                 />
 
                 <Area
-                  dataKey="exits"
-                  type="monotone"
-                  fill="url(#fillExit)"
-                  stroke="var(--color-exit)"
-                  stackId="a"
-                />
-                <Area
                   dataKey="entries"
                   type="monotone"
                   fill="url(#fillEntry)"
-                  stroke="var(--color-entry)"
-                  stackId="a"
+                  stroke="none"
+                />
+                <Area
+                  dataKey="exits"
+                  type="monotone"
+                  fill="url(#fillExit)"
+                  stroke="none"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </ChartContainer>
+
+            <div className="mt-3 flex items-center justify-center gap-4 text-xs">
+              <div className="flex items-center gap-1.5 ">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: chartConfig.entries.color }}
+                />
+                <span className="text-muted-foreground">{chartConfig.entries.label}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: chartConfig.exits.color }}
+                />
+                <span className="text-muted-foreground">{chartConfig.exits.label}</span>
+              </div>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
