@@ -2,7 +2,8 @@ export interface DashboardCardsMetrics {
   totalStandardSheets: number,
   totalScrapSheets: number,
   totalMaterials: number,
-  totalClients: number
+  totalClients: number,
+  totalStockValue: number
 }
 
 export interface DashboardInventoryMovementsMetrics {

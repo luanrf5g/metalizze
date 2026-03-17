@@ -1,27 +1,25 @@
-import { GetDashboardCardsMetricsUseCase } from "@/domain/application/use-cases/get-dashboard-cards-metrics";
-import { BadRequestException, Controller, Get } from "@nestjs/common";
+import { GetDashboardCardsMetricsUseCase } from '@/domain/application/use-cases/get-dashboard-cards-metrics'
+import { CurrentUser } from '@/infra/auth/decorators/current-user.decorator'
+import type { UserPayload } from '@/infra/auth/decorators/current-user.decorator'
+import { BadRequestException, Controller, Get } from '@nestjs/common'
 
 @Controller('/metrics/cards')
 export class GetDashboardMetricsController {
   constructor(private getDashboardCardsMetrics: GetDashboardCardsMetricsUseCase) { }
 
   @Get()
-  async handle() {
-    const result = await this.getDashboardCardsMetrics.execute()
+  async handle(@CurrentUser() userPayload: UserPayload) {
+    const role = userPayload.role as 'ADMIN' | 'OPERATOR' | 'VIEWER'
+    const result = await this.getDashboardCardsMetrics.execute(role)
 
     if (result.isLeft()) {
-      throw new BadRequestException("Unexpected error white fetching metrics")
+      throw new BadRequestException('Unexpected error while fetching metrics')
     }
 
     const metrics = result.value.cardsMetrics
 
     return {
-      metrics: {
-        totalStandardSheets: metrics.totalStandardSheets,
-        totalScrapSheets: metrics.totalScrapSheets,
-        totalMaterials: metrics.totalMaterials,
-        totalClients: metrics.totalClients
-      }
+      metrics,
     }
   }
 }

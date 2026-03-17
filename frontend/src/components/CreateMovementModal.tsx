@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { SheetSelector } from "./SheetSelector"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
+import { AlertTriangle } from "lucide-react"
 
 interface CreateMovementModalProps {
   onSuccess: () => void
@@ -22,6 +23,7 @@ export function CreateMovementModal({ onSuccess }: CreateMovementModalProps) {
   const [sheets, setSheets] = useState<Sheet[]>([])
 
   const [sheetId, setSheetId] = useState("")
+  const [selectedSheet, setSelectedSheet] = useState<Sheet | null>(null)
   const [type, setType] = useState<"ENTRY" | "EXIT">("ENTRY")
   const [quantity, setQuantity] = useState("")
   const [description, setDescription] = useState("")
@@ -83,8 +85,34 @@ export function CreateMovementModal({ onSuccess }: CreateMovementModalProps) {
             <SheetSelector
               sheets={sheets}
               selectedSheetId={sheetId}
-              onSelectSheet={setSheetId}
+              onSelectSheet={(id) => {
+                setSheetId(id)
+                const sheet = sheets.find((s) => s.id === id) ?? null
+                setSelectedSheet(sheet)
+
+                // Se a chapa selecionada não tiver estoque, força o tipo para ENTRADA
+                if (sheet && sheet.quantity === 0) {
+                  setType("ENTRY")
+                }
+              }}
             />
+            {selectedSheet && (
+              <>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Disponíveis: {selectedSheet.quantity}
+                </p>
+                {selectedSheet.quantity === 0 && (
+                  <div className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 text-amber-500" />
+                    <p>
+                      Esta chapa está com <span className="font-semibold">0 unidades em estoque</span>.
+                      Apenas movimentações de <span className="font-semibold">entrada</span> são permitidas;
+                      o tipo <span className="font-semibold">saída</span> foi desabilitado.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* Inputs for Type and Quantity */}
@@ -103,7 +131,11 @@ export function CreateMovementModal({ onSuccess }: CreateMovementModalProps) {
                   <SelectItem key='ENTRY' value='ENTRY'>
                     Entrada
                   </SelectItem>
-                  <SelectItem key='EXIT' value='EXIT'>
+                  <SelectItem
+                    key='EXIT'
+                    value='EXIT'
+                    disabled={selectedSheet?.quantity === 0}
+                  >
                     Saída
                   </SelectItem>
                 </SelectContent>
