@@ -55,6 +55,7 @@ import { GetInventoryMovementsMetricsController } from "./controllers/get-invent
 import { GetInventoryMovementsMetricsUseCase } from "@/domain/application/use-cases/get-inventory-movements-metrics";
 import { GetReportsMetricsController } from "./controllers/get-reports-metrics.controller";
 import { GetReportsMetricsUseCase } from "@/domain/application/use-cases/get-reports-metrics";
+import { AnalyticsService } from "@/domain/application/services/analytics.service";
 
 // Auth & Users
 import { AuthenticateController } from "./controllers/authenticate.controller";
@@ -135,6 +136,7 @@ import { HealthController } from "./controllers/health.controller";
     FetchInventoryMovementsUseCase,
     RegisterInventoryMovementUseCase,
     // Metrics
+    AnalyticsService,
     GetDashboardCardsMetricsUseCase,
     GetInventoryMovementsMetricsUseCase,
     GetReportsMetricsUseCase,

@@ -1,23 +1,23 @@
-import { Either, right } from "@/core/logic/Either";
-import { DashboardCardsMetrics, MetricsRepository } from "../repositories/metrics-repository";
-import { Injectable } from "@nestjs/common";
+import { Either, right } from '@/core/logic/Either'
+import { Injectable } from '@nestjs/common'
+import { AnalyticsService } from '../services/analytics.service'
 
-type GetDashboardCardsMetricsResponde = Either<
+type GetDashboardCardsMetricsResponse = Either<
   null,
   {
-    cardsMetrics: DashboardCardsMetrics
+    cardsMetrics: Awaited<ReturnType<AnalyticsService['getDashboardMetrics']>>
   }
 >
 
 @Injectable()
 export class GetDashboardCardsMetricsUseCase {
-  constructor(private metricsRepository: MetricsRepository) { }
+  constructor(private analyticsService: AnalyticsService) { }
 
-  async execute(): Promise<GetDashboardCardsMetricsResponde> {
-    const cardsMetrics = await this.metricsRepository.getDashboardCardsMetrics();
+  async execute(role: 'ADMIN' | 'OPERATOR' | 'VIEWER'): Promise<GetDashboardCardsMetricsResponse> {
+    const cardsMetrics = await this.analyticsService.getDashboardMetrics(role)
 
     return right({
-      cardsMetrics
+      cardsMetrics,
     })
   }
 }
