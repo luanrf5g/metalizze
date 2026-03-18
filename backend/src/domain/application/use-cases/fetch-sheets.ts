@@ -15,7 +15,8 @@ interface FetchSheetsUseCaseRequest {
 type FetchSheetsUseCaseResponse = Either<
   null,
   {
-    sheets: SheetWithDetails[]
+    sheets: SheetWithDetails[],
+    totalCount: number
   }
 >
 
@@ -36,8 +37,15 @@ export class FetchSheetsUseCase {
       type
     })
 
+    const totalCount = await this.sheetsRepository.count({
+      materialId,
+      clientId,
+      type
+    })
+
     return right({
-      sheets
+      sheets,
+      totalCount
     })
   }
 }

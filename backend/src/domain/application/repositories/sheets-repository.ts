@@ -24,4 +24,6 @@ export abstract class SheetsRepository {
     type: SheetType
   ): Promise<Sheet | null>
   abstract findMany(params: FindManySheetsParams): Promise<SheetWithDetails[]>
+  abstract findAll(params: Omit<FindManySheetsParams, 'page'>): Promise<SheetWithDetails[]>
+  abstract count(params: Omit<FindManySheetsParams, 'page'>): Promise<number>
 }

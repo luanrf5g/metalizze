@@ -61,12 +61,23 @@ function CutOrdersWizard() {
 
     async function load() {
       try {
-        const [sheetsRes, clientsRes] = await Promise.all([
-          api.get('/sheets'),
-          api.get('/clients'),
-        ])
+        let sheetsRes
+
+        try {
+          // Tenta primeiro usar o endpoint dedicado para selects
+          sheetsRes = await api.get('/sheets/all')
+        } catch (error: any) {
+          // Fallback automático caso /sheets/all não exista
+          if (error?.response?.status === 404) {
+            sheetsRes = await api.get('/sheets')
+          } else {
+            throw error
+          }
+        }
+
+        const clientsRes = await api.get('/clients')
         if (!active) return;
-        setSheets(sheetsRes.data.sheets)
+        setSheets(sheetsRes.data.sheets || [])
         setClients(clientsRes.data.clients)
 
         // Auto-select sheet if passed in URL

@@ -35,10 +35,19 @@ export class FetchSheetsController {
       throw new BadRequestException()
     }
 
-    const sheets = result.value.sheets
+    const { sheets, totalCount } = result.value
+
+    const pageSize = 15
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
     return {
-      sheets: sheets.map(SheetWithDetailsPresenter.toHTTP)
+      sheets: sheets.map(SheetWithDetailsPresenter.toHTTP),
+      meta: {
+        page,
+        pageSize,
+        totalCount,
+        totalPages,
+      }
     }
   }
 }

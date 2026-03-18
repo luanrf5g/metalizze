@@ -14,6 +14,7 @@ export default function ScrapsPage() {
 
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [totalPages, setTotalPages] = useState<number | undefined>(undefined)
 
   async function fetchScraps(currentPage: number = page) {
     setIsLoading(true)
@@ -23,7 +24,15 @@ export default function ScrapsPage() {
 
       const newScraps = response.data.sheets || []
       setScraps(newScraps)
-      setHasMore(newScraps.length === 20)
+      const meta = response.data.meta
+      if (meta && typeof meta.totalPages === 'number') {
+        setTotalPages(meta.totalPages)
+        setHasMore(currentPage < meta.totalPages)
+      } else {
+        // Fallback: assume 15 itens por página, mesmo backend das chapas
+        setHasMore(newScraps.length === 15)
+        setTotalPages(undefined)
+      }
     } catch (error) {
       console.error('Erro ao buscar retalhos: ', error)
     } finally {
@@ -72,7 +81,7 @@ export default function ScrapsPage() {
               ) : (
                 scraps.map((scrap, index) => (
                   <TableRow key={scrap.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
-                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 20 + index + 1).toString().padStart(3, '0')}</TableCell>
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 15 + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className='font-semibold text-zinc-900 dark:text-zinc-100' title={scrap.sku}>
                       {scrap.sku}
                     </TableCell>
@@ -102,6 +111,7 @@ export default function ScrapsPage() {
         <div className="mt-4 shrink-0">
           <Pagination
             currentPage={page}
+            totalPages={totalPages}
             hasMore={hasMore}
             onPageChange={setPage}
           />

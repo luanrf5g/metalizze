@@ -113,4 +113,37 @@ export class PrismaSheetsRepository implements SheetsRepository {
 
     return sheets.map(PrismaSheetWithDetailsMapper.toDomain)
   }
+
+  async findAll({ materialId, clientId, type }: Omit<FindManySheetsParams, 'page'>) {
+    const sheets = await this.prisma.sheet.findMany({
+      where: {
+        materialId: materialId ?? undefined,
+        clientId: clientId ?? undefined,
+        type: type ?? undefined,
+        deletedAt: null
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        material: true,
+        client: true
+      }
+    })
+
+    return sheets.map(PrismaSheetWithDetailsMapper.toDomain)
+  }
+
+  async count({ materialId, clientId, type }: Omit<FindManySheetsParams, 'page'>) {
+    const total = await this.prisma.sheet.count({
+      where: {
+        materialId: materialId ?? undefined,
+        clientId: clientId ?? undefined,
+        type: type ?? undefined,
+        deletedAt: null
+      }
+    })
+
+    return total
+  }
 }

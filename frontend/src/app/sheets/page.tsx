@@ -35,6 +35,7 @@ export default function SheetsPage() {
 
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [totalPages, setTotalPages] = useState<number | undefined>(undefined)
 
   async function fetchSheets(currentPage: number = page) {
     setIsLoading(true)
@@ -49,8 +50,15 @@ export default function SheetsPage() {
       const newSheets = response.data.sheets || []
       setSheets(newSheets)
 
-      // Assumes the API returns 20 items per page as requested. If less than 20 are returned, it's the last page.
-      setHasMore(newSheets.length === 20)
+      const meta = response.data.meta
+      if (meta && typeof meta.totalPages === 'number') {
+        setTotalPages(meta.totalPages)
+        setHasMore(page < meta.totalPages)
+      } else {
+        // Fallback: assume 15 itens por página
+        setHasMore(newSheets.length === 15)
+        setTotalPages(undefined)
+      }
     } catch (error) {
       console.error('Erro ao buscar chapas: ', error)
       alert('Erro ao buscar chapas do estoque.')
@@ -151,7 +159,7 @@ export default function SheetsPage() {
                   return s.sku.toLowerCase().includes(query) || (s.client?.name && s.client.name.toLowerCase().includes(query));
                 }).map((sheet, index) => (
                   <TableRow key={sheet.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
-                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 20 + index + 1).toString().padStart(3, '0')}</TableCell>
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 15 + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className='font-medium text-zinc-900 dark:text-zinc-100' title={sheet.sku}>
                       {sheet.sku.split('-C:')[0]}
                     </TableCell>
@@ -219,6 +227,7 @@ export default function SheetsPage() {
       {!isLoading && (sheets.length > 0 || page > 1) && (
         <Pagination
           currentPage={page}
+          totalPages={totalPages}
           hasMore={hasMore}
           onPageChange={setPage}
         />
