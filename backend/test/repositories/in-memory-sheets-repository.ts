@@ -78,8 +78,34 @@ export class InMemorySheetsRepository implements SheetsRepository {
       }
 
       return true
-    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice((page - 1) * 20, page * 20)
+    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice((page - 1) * 15, page * 15)
 
     return sheets
+  }
+
+  async findAll({ materialId, clientId, type }: Omit<FindManySheetsParams, 'page'>) {
+    const sheets = this.items.filter((item) => {
+      if (materialId && item.materialId.toString() !== materialId) {
+        return false
+      }
+      if (clientId && item.clientId?.toString() !== clientId) {
+        return false
+      }
+      if (type && item.type !== type) {
+        return false
+      }
+      if (item.deletedAt) {
+        return false
+      }
+
+      return true
+    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+
+    return sheets
+  }
+
+  async count({ materialId, clientId, type }: Omit<FindManySheetsParams, 'page'>) {
+    const total = (await this.findAll({ materialId, clientId, type })).length
+    return total
   }
 }

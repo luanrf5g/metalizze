@@ -55,20 +55,39 @@ export function CreateMovementModal({ onSuccess }: CreateMovementModalProps) {
 
   async function fetchSheets() {
     try {
-      const response = await api.get('/sheets')
+      // Tenta usar o endpoint completo de seleção
+      const response = await api.get('/sheets/all')
       setSheets(response.data.sheets)
     } catch (error) {
-      console.log('Erro ao buscar chapas.')
+      const anyError = error as any
+
+      // Fallback: se /sheets/all não existir, tenta o endpoint paginado padrão
+      if (anyError?.response?.status === 404) {
+        try {
+          const fallbackResponse = await api.get('/sheets')
+          setSheets(fallbackResponse.data.sheets || [])
+          return
+        } catch (fallbackError) {
+          console.error('Erro ao buscar chapas no endpoint de fallback /sheets.', fallbackError)
+        }
+      }
+
+      console.error('Erro ao buscar chapas.', error)
       toast.error('Erro ao tentar buscar as chapas disponíveis.')
     }
   }
 
-  useEffect(() => {
-    fetchSheets()
-  }, [])
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+
+        if (isOpen && sheets.length === 0) {
+          fetchSheets()
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="hover:cursor-pointer">Registrar Movimentação</Button>
       </DialogTrigger>

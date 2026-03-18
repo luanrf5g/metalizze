@@ -23,6 +23,8 @@ import { ReduceSheetStockController } from "./controllers/reduce-sheet-stock.con
 import { ReduceSheetStockUseCase } from "@/domain/application/use-cases/reduce-sheet-stock";
 import { FetchSheetsController } from "./controllers/fetch-sheets.controller";
 import { FetchSheetsUseCase } from "@/domain/application/use-cases/fetch-sheets";
+import { FetchAllSheetsController } from "./controllers/fetch-all-sheets.controller";
+import { FetchAllSheetsUseCase } from "@/domain/application/use-cases/fetch-all-sheets";
 import { EditSheetController } from "./controllers/edit-sheet.controller";
 import { EditSheetUseCase } from "@/domain/application/use-cases/edit-sheet";
 import { DeleteSheetController } from "./controllers/delete-sheet.controller";
@@ -93,6 +95,7 @@ import { HealthController } from "./controllers/health.controller";
     GetSheetByIdController,
     ReduceSheetStockController,
     FetchSheetsController,
+    FetchAllSheetsController,
     EditSheetController,
     DeleteSheetController,
     RegisterSheetCutController,
@@ -129,6 +132,7 @@ import { HealthController } from "./controllers/health.controller";
     GetSheetByIdUseCase,
     ReduceSheetStockUseCase,
     FetchSheetsUseCase,
+    FetchAllSheetsUseCase,
     EditSheetUseCase,
     DeleteSheetUseCase,
     RegisterSheetCutUseCase,
