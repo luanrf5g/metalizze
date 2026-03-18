@@ -270,7 +270,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2">
                 <div>
                   <p className="text-sm text-zinc-300">Chapas consumidas</p>
                   <p className="mt-2 text-3xl font-semibold">{metrics.weekly.sheetsConsumedCurrentWeek}</p>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2">
                 <div>
                   <p className="text-sm text-zinc-300">Retalhos gerados</p>
                   <p className="mt-2 text-3xl font-semibold">{metrics.weekly.scrapsGeneratedCurrentWeek}</p>
@@ -290,7 +290,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2">
                 <div>
                   <p className="text-sm text-zinc-300">Retalhos reaproveitados</p>
                   <p className="mt-2 text-3xl font-semibold">{metrics.weekly.scrapsReusedCurrentWeek}</p>
@@ -300,7 +300,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2">
                 <div>
                   <p className="text-sm text-zinc-300">Clientes com corte em chapas próprias</p>
                   <p className="mt-2 text-3xl font-semibold">{metrics.weekly.clientsWithCutOrdersCurrentWeek}</p>
