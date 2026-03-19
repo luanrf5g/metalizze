@@ -11,13 +11,15 @@ import { cn } from "@/lib/utils";
 interface SheetSelectorProps {
   sheets: Sheet[],
   selectedSheetId: string,
-  onSelectSheet: (sheetId: string) => void
+  onSelectSheet: (sheetId: string) => void,
+  selectedSheet?: Sheet | null
 }
 
-export function SheetSelector({ sheets, selectedSheetId, onSelectSheet }: SheetSelectorProps) {
+export function SheetSelector({ sheets, selectedSheetId, onSelectSheet, selectedSheet: selectedSheetProp }: SheetSelectorProps) {
   const [open, setOpen] = useState(false)
 
-  const selectedSheet = sheets.find((sheet) => sheet.id === selectedSheetId)
+  const selectedSheetFromList = sheets.find((sheet) => sheet.id === selectedSheetId)
+  const selectedSheet = selectedSheetFromList ?? selectedSheetProp ?? undefined
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -42,7 +44,7 @@ export function SheetSelector({ sheets, selectedSheetId, onSelectSheet }: SheetS
             {selectedSheet !== undefined && (
               <CommandItem
                 key={selectedSheet?.id}
-                value={`${selectedSheet?.sku}`}
+                value={`${selectedSheet?.sku} ${selectedSheet?.material?.name ?? ''}`}
                 onSelect={() => {
                   setOpen(false)
                 }}
@@ -62,10 +64,10 @@ export function SheetSelector({ sheets, selectedSheetId, onSelectSheet }: SheetS
               </CommandItem>
             )}
             <CommandGroup>
-              {sheets.filter((item) => item !== selectedSheet).map((sheet) => (
+              {sheets.filter((item) => item.id !== selectedSheet?.id).map((sheet) => (
                 <CommandItem
                   key={sheet.id}
-                  value={`${sheet.sku}`}
+                  value={`${sheet.sku} ${sheet.material?.name ?? ''}`}
                   onSelect={() => {
                     onSelectSheet(sheet.id)
                     setOpen(false)

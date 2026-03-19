@@ -1,6 +1,11 @@
 export interface Sheet {
   id: string,
   materialId: string,
+  material?: {
+    id: string,
+    name: string,
+    slug: string
+  } | null,
   client?: {
     id: string,
     name: string,

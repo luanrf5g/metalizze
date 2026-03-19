@@ -6,6 +6,11 @@ export class SheetWithDetailsPresenter {
       id: sheet.id.toString(),
       sku: sheet.sku,
       materialId: sheet.materialId.toString(),
+      material: {
+        id: sheet.material.id.toString(),
+        name: sheet.material.name,
+        slug: sheet.material.slug,
+      },
       quantity: sheet.quantity,
       price: sheet.price,
       type: sheet.type,

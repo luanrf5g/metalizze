@@ -5,6 +5,11 @@ export interface SheetWithDetailsProps {
   id: UniqueEntityId,
   sku: string,
   materialId: UniqueEntityId,
+  material: {
+    id: UniqueEntityId,
+    name: string,
+    slug: string
+  },
   quantity: number,
   price: number,
   type: SheetType,
@@ -26,6 +31,7 @@ export class SheetWithDetails {
   get id() { return this.props.id }
   get sku() { return this.props.sku }
   get materialId() { return this.props.materialId }
+  get material() { return this.props.material }
   get quantity() { return this.props.quantity }
   get price() { return this.props.price }
   get type() { return this.props.type }
