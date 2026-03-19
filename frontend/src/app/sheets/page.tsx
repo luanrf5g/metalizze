@@ -28,6 +28,9 @@ export default function SheetsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'STANDARD' | 'SCRAP'>('ALL')
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchBaseSheets, setSearchBaseSheets] = useState<Sheet[] | null>(null)
+  const [searchFilterKey, setSearchFilterKey] = useState<'ALL' | 'STANDARD' | 'SCRAP' | null>(null)
+  const [isSearchLoading, setIsSearchLoading] = useState(false)
 
   const { user } = useAuth()
   const canCreate = user?.role === 'ADMIN' || user?.permissions?.['sheets']?.write
@@ -53,7 +56,7 @@ export default function SheetsPage() {
       const meta = response.data.meta
       if (meta && typeof meta.totalPages === 'number') {
         setTotalPages(meta.totalPages)
-        setHasMore(page < meta.totalPages)
+        setHasMore(currentPage < meta.totalPages)
       } else {
         // Fallback: assume 15 itens por página
         setHasMore(newSheets.length === 15)
@@ -70,11 +73,91 @@ export default function SheetsPage() {
   useEffect(() => {
     setPage(1) // Reset page on filter change
     fetchSheets(1)
+    // Se o filtro mudar, invalidamos a base de busca para recarregar com o novo filtro caso o usuário esteja pesquisando
+    setSearchBaseSheets(null)
+    setSearchFilterKey(null)
   }, [activeFilter])
 
   useEffect(() => {
     fetchSheets(page)
   }, [page])
+
+  // Carrega a base completa de chapas para a busca quando houver texto de pesquisa
+  useEffect(() => {
+    const hasQuery = searchQuery.trim().length > 0
+
+    if (!hasQuery) {
+      setSearchBaseSheets(null)
+      setSearchFilterKey(null)
+      return
+    }
+
+    // Já temos a base carregada para o filtro atual
+    if (searchBaseSheets && searchFilterKey === activeFilter) {
+      return
+    }
+
+    let ignore = false
+
+    async function loadAllSheetsForSearch() {
+      setIsSearchLoading(true)
+      try {
+        const aggregatedSheets: Sheet[] = []
+        let currentPage = 1
+        let totalPages: number | null = null
+
+        while (totalPages === null || currentPage <= totalPages) {
+          // Para a página atual já carregada na listagem principal,
+          // reutilizamos os dados em memória e evitamos uma segunda requisição.
+          if (currentPage === page && sheets.length > 0 && !isLoading) {
+            aggregatedSheets.push(...sheets)
+          } else {
+            let pageRoute = `/sheets?page=${currentPage}`
+
+            if (activeFilter === 'STANDARD') pageRoute += '&type=STANDARD'
+            else if (activeFilter === 'SCRAP') pageRoute += '&type=SCRAP'
+
+            const pageRes = await api.get(pageRoute)
+            const pageSheets: Sheet[] = pageRes.data.sheets || []
+            aggregatedSheets.push(...pageSheets)
+
+            const meta = pageRes.data.meta
+            if (meta && typeof meta.totalPages === 'number') {
+              totalPages = meta.totalPages
+            } else if (pageSheets.length < 15) {
+              // heurística de parada se meta não vier
+              break
+            }
+          }
+
+          currentPage += 1
+        }
+
+        if (ignore) return
+
+        setSearchBaseSheets(aggregatedSheets)
+        setSearchFilterKey(activeFilter)
+      } catch (error) {
+        console.error('Erro ao buscar chapas para pesquisa: ', error)
+        if (!ignore) {
+          // Marca como "carregado" para o filtro atual mesmo em caso de erro,
+          // para evitar laços infinitos de novas requisições.
+          setSearchBaseSheets([])
+          setSearchFilterKey(activeFilter)
+        }
+      } finally {
+        if (!ignore) {
+          setIsSearchLoading(false)
+        }
+      }
+    }
+
+    loadAllSheetsForSearch()
+
+    return () => {
+      ignore = true
+    }
+  }, [searchQuery, activeFilter, searchBaseSheets, searchFilterKey])
 
   return (
     <div className='p-6 md:p-10 w-full h-full mx-auto flex flex-col space-y-6 animate-in fade-in zoom-in-95 duration-700'>
@@ -140,26 +223,48 @@ export default function SheetsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
-                    Carregando estoque...
-                  </TableCell>
-                </TableRow>
-              ) : sheets.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
-                    Nenhuma chapa disponível nesta página.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sheets.filter(s => {
-                  if (!searchQuery) return true;
-                  const query = searchQuery.toLowerCase();
-                  return s.sku.toLowerCase().includes(query) || (s.client?.name && s.client.name.toLowerCase().includes(query));
-                }).map((sheet, index) => (
+              {(() => {
+                const query = searchQuery.trim().toLowerCase()
+                const isSearching = query.length > 0
+                const isTableLoading = isSearching ? (isSearchLoading || (!searchBaseSheets && query.length > 0)) : isLoading
+
+                const baseList = isSearching && searchBaseSheets ? searchBaseSheets : sheets
+
+                const filteredSheets = baseList.filter((s) => {
+                  if (!isSearching) return true
+
+                  const matchesSku = s.sku.toLowerCase().includes(query)
+                  const clientName = s.client?.name ? s.client.name.toLowerCase() : ''
+                  const matchesClient = clientName.includes(query)
+
+                  return matchesSku || matchesClient
+                })
+
+                if (isTableLoading) {
+                  return (
+                    <TableRow>
+                      <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
+                        Carregando estoque...
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                if (filteredSheets.length === 0) {
+                  return (
+                    <TableRow>
+                      <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
+                        Nenhuma chapa encontrada.
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
+
+                const baseIndex = isSearching ? 0 : (page - 1) * 15
+
+                return filteredSheets.map((sheet, index) => (
                   <TableRow key={sheet.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
-                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 15 + index + 1).toString().padStart(3, '0')}</TableCell>
+                    <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{(baseIndex + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className='font-medium text-zinc-900 dark:text-zinc-100' title={sheet.sku}>
                       {sheet.sku.split('-C:')[0]}
                     </TableCell>
@@ -218,13 +323,13 @@ export default function SheetsPage() {
                     </TableCell>
                   </TableRow>
                 ))
-              )}
+              })()}
             </TableBody>
           </Table>
         </div>
       </div>
 
-      {!isLoading && (sheets.length > 0 || page > 1) && (
+      {searchQuery.trim().length === 0 && !isLoading && (sheets.length > 0 || page > 1) && (
         <Pagination
           currentPage={page}
           totalPages={totalPages}

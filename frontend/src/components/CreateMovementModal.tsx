@@ -55,23 +55,27 @@ export function CreateMovementModal({ onSuccess }: CreateMovementModalProps) {
 
   async function fetchSheets() {
     try {
-      // Tenta usar o endpoint completo de seleção
-      const response = await api.get('/sheets/all')
-      setSheets(response.data.sheets)
-    } catch (error) {
-      const anyError = error as any
+      const aggregatedSheets: Sheet[] = []
+      let currentPage = 1
+      let totalPages: number | null = null
 
-      // Fallback: se /sheets/all não existir, tenta o endpoint paginado padrão
-      if (anyError?.response?.status === 404) {
-        try {
-          const fallbackResponse = await api.get('/sheets')
-          setSheets(fallbackResponse.data.sheets || [])
-          return
-        } catch (fallbackError) {
-          console.error('Erro ao buscar chapas no endpoint de fallback /sheets.', fallbackError)
+      while (totalPages === null || currentPage <= totalPages) {
+        const pageRes = await api.get(`/sheets?page=${currentPage}`)
+        const pageSheets: Sheet[] = pageRes.data.sheets || []
+        aggregatedSheets.push(...pageSheets)
+
+        const meta = pageRes.data.meta
+        if (meta && typeof meta.totalPages === 'number') {
+          totalPages = meta.totalPages
+        } else if (pageSheets.length < 15) {
+          break
         }
+
+        currentPage += 1
       }
 
+      setSheets(aggregatedSheets)
+    } catch (error) {
       console.error('Erro ao buscar chapas.', error)
       toast.error('Erro ao tentar buscar as chapas disponíveis.')
     }

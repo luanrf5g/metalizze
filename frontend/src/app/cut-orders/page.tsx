@@ -61,19 +61,27 @@ function CutOrdersWizard() {
 
     async function load() {
       try {
-        let sheetsRes
+        const aggregatedSheets: Sheet[] = []
+        let currentPage = 1
+        let totalPages: number | null = null
 
-        try {
-          // Tenta primeiro usar o endpoint dedicado para selects
-          sheetsRes = await api.get('/sheets/all')
-        } catch (error: any) {
-          // Fallback automático caso /sheets/all não exista
-          if (error?.response?.status === 404) {
-            sheetsRes = await api.get('/sheets')
-          } else {
-            throw error
+        while (totalPages === null || currentPage <= totalPages) {
+          const pageRes = await api.get(`/sheets?page=${currentPage}`)
+          const pageSheets: Sheet[] = pageRes.data.sheets || []
+          aggregatedSheets.push(...pageSheets)
+
+          const meta = pageRes.data.meta
+          if (meta && typeof meta.totalPages === 'number') {
+            totalPages = meta.totalPages
+          } else if (pageSheets.length < 15) {
+            // heurística de parada se meta não vier
+            break
           }
+
+          currentPage += 1
         }
+
+        const sheetsRes = { data: { sheets: aggregatedSheets } } as any
 
         const clientsRes = await api.get('/clients')
         if (!active) return;
