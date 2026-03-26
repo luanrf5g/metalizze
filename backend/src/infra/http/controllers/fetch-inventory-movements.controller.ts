@@ -6,7 +6,8 @@ import { InventoryMovementPresenter } from "../presenters/inventory-movement-pre
 
 const fetchMovementsQuerySchema = z.object({
   page: z.string().optional().default('1').transform(Number).pipe(z.number().min(1)),
-  sheetId: z.uuid().optional()
+  sheetId: z.uuid().optional(),
+  profileId: z.uuid().optional()
 })
 
 type FetchMovementsQuerySchema = z.infer<typeof fetchMovementsQuerySchema>
@@ -19,11 +20,12 @@ export class FetchInventoryMovementsController {
 
   @Get()
   async handle(@Query(queryValidationPipe) query: FetchMovementsQuerySchema) {
-    const { page, sheetId } = query
+    const { page, sheetId, profileId } = query
 
     const result = await this.fetchMovements.execute({
       page,
-      sheetId
+      sheetId,
+      profileId
     })
 
     if(result.isLeft()) {

@@ -225,6 +225,7 @@ export class AnalyticsService {
     const movements = await this.prisma.inventoryMovement.findMany({
       where: {
         type: 'EXIT',
+        sheetId: { not: null },
         createdAt: startDate
           ? {
             gte: startDate,
@@ -264,10 +265,10 @@ export class AnalyticsService {
       createdAt: movement.createdAt.toISOString(),
       quantity: movement.quantity,
       description: movement.description,
-      sheetSku: movement.sheet.sku,
-      sheetType: movement.sheet.type,
-      materialName: movement.sheet.material.name,
-      clientName: movement.sheet.client?.name ?? null,
+      sheetSku: movement.sheet!.sku,
+      sheetType: movement.sheet!.type,
+      materialName: movement.sheet!.material.name,
+      clientName: movement.sheet!.client?.name ?? null,
     }))
   }
 
@@ -830,15 +831,15 @@ export class AnalyticsService {
     }
 
     for (const movement of standardExits) {
-      ensureMaterial(movement.sheet.material.name).sheetsConsumed += movement.quantity
+      ensureMaterial(movement.sheet!.material.name).sheetsConsumed += movement.quantity
     }
 
     for (const movement of generatedScrapEntries) {
-      ensureMaterial(movement.sheet.material.name).scrapsGenerated += movement.quantity
+      ensureMaterial(movement.sheet!.material.name).scrapsGenerated += movement.quantity
     }
 
     for (const movement of scrapExits) {
-      ensureMaterial(movement.sheet.material.name).scrapsReused += movement.quantity
+      ensureMaterial(movement.sheet!.material.name).scrapsReused += movement.quantity
     }
 
     return Array.from(materials.values()).sort((a, b) => {
@@ -941,13 +942,13 @@ export class AnalyticsService {
           id: string
           name: string
         } | null
-      }
+      } | null
     }>,
   ) {
     const clients = new Map<string, { id: string; name: string; cutOrders: number; sheetsConsumed: number }>()
 
     for (const movement of movements) {
-      if (!movement.sheet.client) continue
+      if (!movement.sheet?.client) continue
 
       if (!clients.has(movement.sheet.client.id)) {
         clients.set(movement.sheet.client.id, {
@@ -958,7 +959,7 @@ export class AnalyticsService {
         })
       }
 
-      const current = clients.get(movement.sheet.client.id)!
+      const current = clients.get(movement.sheet!.client!.id)!
       current.cutOrders += 1
       current.sheetsConsumed += movement.quantity
     }
@@ -1041,13 +1042,13 @@ export class AnalyticsService {
         client: {
           id: string
         } | null
-      }
+      } | null
     }>,
   ) {
     const clients = new Set<string>()
 
     for (const movement of movements) {
-      if (movement.sheet.client?.id) {
+      if (movement.sheet?.client?.id) {
         clients.add(movement.sheet.client.id)
       }
     }

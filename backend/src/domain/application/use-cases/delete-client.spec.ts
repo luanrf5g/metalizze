@@ -1,5 +1,6 @@
 import { InMemoryClientsRepository } from "test/repositories/in-memory-clients-repository";
 import { InMemorySheetsRepository } from "test/repositories/in-memory-sheets-repository";
+import { InMemoryProfilesRepository } from "test/repositories/in-memory-profiles-repository";
 import { DeleteClientUseCase } from "./delete-client";
 import { makeClient } from "test/factories/make-client";
 import { makeMaterial } from "test/factories/make-material";
@@ -8,13 +9,15 @@ import { ClientHasSheetsError } from "./errors/client-has-sheets-error";
 
 let clientsRepository: InMemoryClientsRepository
 let sheetsRepository: InMemorySheetsRepository
+let profilesRepository: InMemoryProfilesRepository
 let sut: DeleteClientUseCase
 
 describe('Delete Client Use Case', () => {
   beforeEach(() => {
     clientsRepository = new InMemoryClientsRepository()
     sheetsRepository = new InMemorySheetsRepository()
-    sut = new DeleteClientUseCase(clientsRepository, sheetsRepository)
+    profilesRepository = new InMemoryProfilesRepository()
+    sut = new DeleteClientUseCase(clientsRepository, sheetsRepository, profilesRepository)
   })
 
   it('should be able to delete a client', async () => {

@@ -16,10 +16,11 @@ export class PrismaInventoryMovementsRepository implements InventoryMovementsRep
     })
   }
 
-  async findMany({ page, sheetId }: FindManyInventoryMovements) {
+  async findMany({ page, sheetId, profileId }: FindManyInventoryMovements) {
     const movements = await this.prisma.inventoryMovement.findMany({
       where: {
-        sheetId: sheetId ?? undefined
+        sheetId: sheetId ?? undefined,
+        profileId: profileId ?? undefined,
       },
       orderBy: {
         createdAt: 'desc'
