@@ -217,7 +217,7 @@ export default function BulkInsertSheetsPage() {
 
         <div className="flex flex-col items-end gap-2 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="px-3 py-1 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 backdrop-blur-md">
-            Página oculta · acesso via URL /sheets/bulk-insert
+            Página oculta · acesso via URL /stock/bulk-insert
           </span>
           {isSubmitting && (
             <span>

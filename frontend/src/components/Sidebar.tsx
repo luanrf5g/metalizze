@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 
 const menuItems = [
   { name: 'Visão Geral', href: '/', icon: LayoutDashboard, module: 'dashboard' },
-  { name: 'Estoque (Chapas)', href: '/sheets', icon: Layers, module: 'sheets' },
+  { name: 'Estoque', href: '/stock', icon: Layers, module: 'sheets' },
   { name: 'Retalhos', href: '/scraps', icon: BoxSelect, module: 'scraps' },
   { name: 'Ordens de Corte', href: '/cut-orders', icon: Scissors, module: 'cut-orders' },
   { name: 'Materiais', href: '/materials', icon: Component, module: 'materials' },
@@ -74,7 +74,7 @@ function SidebarLinks({ isMobile = false }: { isMobile?: boolean }) {
       <TooltipProvider delayDuration={0}>
         {visibleItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href
+          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
 
           const linkContent = (
             <Link

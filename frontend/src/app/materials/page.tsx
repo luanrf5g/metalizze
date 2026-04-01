@@ -239,7 +239,7 @@ export default function MaterialsPage() {
               {conflictSheets.map((sheet) => (
                 <Link
                   key={sheet.id}
-                  href={`/sheets/${sheet.id}`}
+                  href={`/stock/${sheet.id}`}
                   onClick={() => setConflictModalOpen(false)}
                   className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors group"
                 >
