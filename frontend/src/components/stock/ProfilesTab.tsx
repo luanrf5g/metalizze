@@ -8,12 +8,13 @@ import { useEffect, useState } from 'react'
 import { translateProfileType, formatDate, formatDocument, formatCurrency } from '@/lib/formatters'
 import { CreateProfileModal } from '@/components/CreateProfileModal'
 import { Pagination } from '@/components/Pagination'
-import { MoreHorizontal, Eye, Search } from 'lucide-react'
+import { MoreHorizontal, Eye, Scissors, Search } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
@@ -41,6 +42,7 @@ export function ProfilesTab() {
 
   const { user } = useAuth()
   const canCreate = user?.role === 'ADMIN' || user?.permissions?.['sheets']?.write
+  const canCut = user?.role === 'ADMIN' || user?.permissions?.['cut-orders']?.write
 
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -273,6 +275,17 @@ export function ProfilesTab() {
                               Ver detalhes
                             </Link>
                           </DropdownMenuItem>
+                          {canCut && (
+                            <>
+                              <DropdownMenuSeparator className="bg-black/10 dark:bg-white/10" />
+                              <DropdownMenuItem asChild className="cursor-pointer font-medium text-zinc-900 rounded-lg focus:text-zinc-900 focus:bg-zinc-100 dark:focus:bg-zinc-800">
+                                <Link href={`/cut-orders?profileId=${profile.id}`}>
+                                  <Scissors className="mr-2 h-4 w-4" />
+                                  Cortar perfil
+                                </Link>
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

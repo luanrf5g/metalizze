@@ -200,7 +200,7 @@ export default function DashboardPage() {
   return (
     <div className="w-full space-y-8 p-6 md:p-10">
       <section className="rounded-[2rem] border border-zinc-200 bg-linear-to-br from-zinc-950 via-zinc-900 to-stone-800 p-6 text-white shadow-sm md:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-300">Operação e inventário</p>
             <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
@@ -229,7 +229,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 1xl:grid-cols-5">
         <OverviewCard
           title="Chapas padrão disponíveis"
           value={metrics.summary.totalStandardSheets}
@@ -275,8 +275,8 @@ export default function DashboardPage() {
         />
       </section>
 
-      <section id="dashboard-weekly" className="grid grid-cols-1 gap-4 xl:grid-cols-4 scroll-mt-24">
-        <Card className="border-zinc-200/80 bg-linear-to-br from-zinc-950 via-zinc-900 to-stone-800 text-white shadow-sm xl:col-span-2">
+      <section id="dashboard-weekly" className="grid grid-cols-1 gap-4 2lg:grid-cols-2 2xl:grid-cols-4 scroll-mt-24">
+        <Card className="border-zinc-200/80 bg-linear-to-br from-zinc-950 via-zinc-900 to-stone-800 text-white shadow-sm 2xl:col-span-2">
           <CardHeader>
             <CardDescription className="text-zinc-300">Ritmo da semana</CardDescription>
             <CardTitle className="text-2xl text-white">Consumo e reaproveitamento</CardTitle>
@@ -324,7 +324,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-200/80 bg-white shadow-sm xl:col-span-2">
+        <Card className="border-zinc-200/80 bg-white shadow-sm 2xl:col-span-2">
           <CardHeader>
             <CardDescription>Carteira e capacidade atual</CardDescription>
             <CardTitle className="text-zinc-950">Cobertura de estoque disponível</CardTitle>
@@ -352,7 +352,7 @@ export default function DashboardPage() {
 
       <InventoryMovementChart />
 
-      <section id="dashboard-materials" className="grid grid-cols-1 gap-6 xl:grid-cols-2 scroll-mt-24">
+      <section id="dashboard-materials" className="grid grid-cols-1 gap-6 lg:grid-cols-2 scroll-mt-24">
         <Card className="border-zinc-200/80 bg-white shadow-sm">
           <CardHeader>
             <CardDescription>Inventário por material</CardDescription>
