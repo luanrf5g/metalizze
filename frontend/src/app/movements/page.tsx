@@ -72,7 +72,7 @@ export default function MovementsPage() {
               <TableRow>
                 <TableHead className="w-[70px]">#</TableHead>
                 <TableHead>Descrição</TableHead>
-                <TableHead>ID Chapa</TableHead>
+                <TableHead>Referência</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Quantidade</TableHead>
                 <TableHead>Data</TableHead>
@@ -96,7 +96,21 @@ export default function MovementsPage() {
                   <TableRow key={movement.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-white/20 dark:border-white/5">
                     <TableCell className="font-mono text-xs text-zinc-400 dark:text-zinc-500">#{((page - 1) * 20 + index + 1).toString().padStart(3, '0')}</TableCell>
                     <TableCell className="max-w-[300px] truncate text-zinc-900 dark:text-zinc-100 font-medium">{movement.description}</TableCell>
-                    <TableCell className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{movement.sheetId}</TableCell>
+                    <TableCell className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                      {movement.sheetId ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Chapa</span>
+                          {movement.sheetId}
+                        </span>
+                      ) : movement.profileId ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">Perfil</span>
+                          {movement.profileId}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${movement.type === 'ENTRY'

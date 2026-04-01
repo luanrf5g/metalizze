@@ -1,5 +1,6 @@
 import { InMemoryMaterialsRepository } from "test/repositories/in-memory-materials-repository";
 import { InMemorySheetsRepository } from "test/repositories/in-memory-sheets-repository";
+import { InMemoryProfilesRepository } from "test/repositories/in-memory-profiles-repository";
 import { DeleteMaterialUseCase } from "./delete-material";
 import { makeMaterial } from "test/factories/make-material";
 import { makeSheet } from "test/factories/make-sheet";
@@ -7,13 +8,15 @@ import { MaterialHasSheetsError } from "./errors/material-has-sheets-error";
 
 let materialsRepository: InMemoryMaterialsRepository
 let sheetsRepository: InMemorySheetsRepository
+let profilesRepository: InMemoryProfilesRepository
 let sut: DeleteMaterialUseCase
 
 describe('Delete Material Use Case', () => {
   beforeEach(() => {
     materialsRepository = new InMemoryMaterialsRepository()
     sheetsRepository = new InMemorySheetsRepository()
-    sut = new DeleteMaterialUseCase(materialsRepository, sheetsRepository)
+    profilesRepository = new InMemoryProfilesRepository()
+    sut = new DeleteMaterialUseCase(materialsRepository, sheetsRepository, profilesRepository)
   })
 
   it('should be able to delete a material', async () => {

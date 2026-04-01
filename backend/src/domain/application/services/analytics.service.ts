@@ -43,6 +43,20 @@ type TrendSheetRecord = {
   }>
 }
 
+type StockProfileRecord = {
+  id: string
+  sku: string
+  quantity: number
+  price: number | null
+  material: {
+    name: string
+  }
+  client: {
+    id: string
+    name: string
+  } | null
+}
+
 const GENERATED_SCRAP_PREFIX = 'Retalho gerado do corte da chapa mãe:'
 
 @Injectable()
@@ -54,8 +68,9 @@ export class AnalyticsService {
     const currentWeekStart = this.getStartOfWeek(now)
     const previousWeekStart = this.addDays(currentWeekStart, -7)
 
-    const [stockSheets, recentCutOrders, clientOwnedCutMovements, weeklyMetrics] = await Promise.all([
+    const [stockSheets, stockProfiles, recentCutOrders, clientOwnedCutMovements, weeklyMetrics] = await Promise.all([
       this.getStockSheets(),
+      this.getStockProfiles(),
       this.getRecentCutOrders(8),
       this.getClientOwnedCutMovements(),
       this.getWeeklyOperationsSnapshot(currentWeekStart, previousWeekStart, now),
@@ -63,14 +78,14 @@ export class AnalyticsService {
 
     return {
       role,
-      summary: this.buildStockSummary(stockSheets, role),
+      summary: this.buildStockSummary(stockSheets, stockProfiles, role),
       weekly: {
         ...weeklyMetrics,
         clientsWithCutOrdersCurrentWeek: this.countDistinctClients(
           clientOwnedCutMovements.filter((movement) => movement.createdAt >= currentWeekStart),
         ),
       },
-      materialSnapshot: this.buildMaterialSnapshot(stockSheets).slice(0, 6),
+      materialSnapshot: this.buildMaterialSnapshot(stockSheets, stockProfiles).slice(0, 6),
       clientsWithOwnedSheetOrders: this.buildClientOrders(clientOwnedCutMovements).slice(0, 5),
       recentCutOrders,
     }
@@ -87,6 +102,7 @@ export class AnalyticsService {
 
     const [
       stockSheets,
+      stockProfiles,
       trendSheets,
       recentCutOrders,
       clientOwnedCutMovements,
@@ -96,8 +112,10 @@ export class AnalyticsService {
       allTimeTotals,
       operationalTrend,
       materialPerformance,
+      topMaterialsAndThicknesses,
     ] = await Promise.all([
       this.getStockSheets(),
+      this.getStockProfiles(),
       this.getTrendSheets(trendStart),
       this.getRecentCutOrders(this.getRecentOrdersLimit(periodConfig.days), periodStart),
       this.getClientOwnedCutMovements(periodStart),
@@ -107,9 +125,10 @@ export class AnalyticsService {
       this.getAllTimeTotals(),
       this.getOperationalTrend(periodConfig.days, now),
       this.getMaterialPerformance(periodStart),
+      this.getTopMaterialsAndThicknesses(periodStart),
     ])
 
-    const stockSummary = this.buildStockSummary(stockSheets, 'ADMIN')
+    const stockSummary = this.buildStockSummary(stockSheets, stockProfiles, 'ADMIN')
     const clientBreakdown = this.buildClientOrders(clientOwnedCutMovements)
 
     return {
@@ -124,8 +143,10 @@ export class AnalyticsService {
         totalStockValue: stockSummary.totalStockValue ?? 0,
         standardStockValue: stockSummary.standardStockValue,
         scrapStockValue: stockSummary.scrapStockValue,
+        profileStockValue: stockSummary.profileStockValue,
         totalStandardSheets: stockSummary.totalStandardSheets,
         totalScrapSheets: stockSummary.totalScrapSheets,
+        totalProfiles: stockSummary.totalProfiles,
         totalInventoryUnits: stockSummary.totalInventoryUnits,
         totalMaterials: stockSummary.totalMaterials,
         totalClients: stockSummary.totalClients,
@@ -141,12 +162,13 @@ export class AnalyticsService {
         ownedSheetCutOrders: clientBreakdown.reduce((acc, client) => acc + client.cutOrders, 0),
       },
       charts: {
-        stockValueTrend: this.buildStockValueTrendByPeriod(trendSheets, periodConfig.days, now),
+        stockValueTrend: this.buildStockValueTrendByPeriod(trendSheets, stockProfiles, periodConfig.days, now),
         operationalTrend,
         materialPerformance: materialPerformance.slice(0, 8),
       },
       topClients: clientBreakdown.slice(0, 6),
       recentCutOrders,
+      topMaterialsAndThicknesses,
     }
   }
 
@@ -166,6 +188,34 @@ export class AnalyticsService {
         price: true,
         createdAt: true,
         deletedAt: true,
+        material: {
+          select: {
+            name: true,
+          },
+        },
+        client: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    })
+  }
+
+  private async getStockProfiles(): Promise<StockProfileRecord[]> {
+    return this.prisma.profile.findMany({
+      where: {
+        deletedAt: null,
+        quantity: {
+          gt: 0,
+        },
+      },
+      select: {
+        id: true,
+        sku: true,
+        quantity: true,
+        price: true,
         material: {
           select: {
             name: true,
@@ -225,6 +275,7 @@ export class AnalyticsService {
     const movements = await this.prisma.inventoryMovement.findMany({
       where: {
         type: 'EXIT',
+        sheetId: { not: null },
         createdAt: startDate
           ? {
             gte: startDate,
@@ -264,10 +315,10 @@ export class AnalyticsService {
       createdAt: movement.createdAt.toISOString(),
       quantity: movement.quantity,
       description: movement.description,
-      sheetSku: movement.sheet.sku,
-      sheetType: movement.sheet.type,
-      materialName: movement.sheet.material.name,
-      clientName: movement.sheet.client?.name ?? null,
+      sheetSku: movement.sheet!.sku,
+      sheetType: movement.sheet!.type,
+      materialName: movement.sheet!.material.name,
+      clientName: movement.sheet!.client?.name ?? null,
     }))
   }
 
@@ -708,8 +759,9 @@ export class AnalyticsService {
   }
 
   private async getMaterialPerformance(startDate?: Date) {
-    const [stockSheets, standardExits, generatedScrapEntries, scrapExits] = await Promise.all([
+    const [stockSheets, stockProfiles, standardExits, generatedScrapEntries, scrapExits, profileExits] = await Promise.all([
       this.getStockSheets(),
+      this.getStockProfiles(),
       this.prisma.inventoryMovement.findMany({
         where: {
           type: 'EXIT',
@@ -788,6 +840,31 @@ export class AnalyticsService {
           },
         },
       }),
+      this.prisma.inventoryMovement.findMany({
+        where: {
+          type: 'EXIT',
+          createdAt: startDate
+            ? {
+              gte: startDate,
+            }
+            : undefined,
+          profileId: {
+            not: null,
+          },
+        },
+        select: {
+          quantity: true,
+          profile: {
+            select: {
+              material: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      }),
     ])
 
     const materials = new Map<string, {
@@ -795,9 +872,11 @@ export class AnalyticsService {
       stockValue: number
       standardSheets: number
       scrapSheets: number
+      profiles: number
       sheetsConsumed: number
       scrapsGenerated: number
       scrapsReused: number
+      profilesConsumed: number
     }>()
 
     const ensureMaterial = (name: string) => {
@@ -807,9 +886,11 @@ export class AnalyticsService {
           stockValue: 0,
           standardSheets: 0,
           scrapSheets: 0,
+          profiles: 0,
           sheetsConsumed: 0,
           scrapsGenerated: 0,
           scrapsReused: 0,
+          profilesConsumed: 0,
         })
       }
 
@@ -829,34 +910,48 @@ export class AnalyticsService {
       }
     }
 
+    for (const profile of stockProfiles) {
+      const item = ensureMaterial(profile.material.name)
+      item.stockValue += (profile.price ?? 0) * profile.quantity
+      item.profiles += profile.quantity
+    }
+
     for (const movement of standardExits) {
-      ensureMaterial(movement.sheet.material.name).sheetsConsumed += movement.quantity
+      ensureMaterial(movement.sheet!.material.name).sheetsConsumed += movement.quantity
     }
 
     for (const movement of generatedScrapEntries) {
-      ensureMaterial(movement.sheet.material.name).scrapsGenerated += movement.quantity
+      ensureMaterial(movement.sheet!.material.name).scrapsGenerated += movement.quantity
     }
 
     for (const movement of scrapExits) {
-      ensureMaterial(movement.sheet.material.name).scrapsReused += movement.quantity
+      ensureMaterial(movement.sheet!.material.name).scrapsReused += movement.quantity
+    }
+
+    for (const movement of profileExits) {
+      if (movement.profile?.material?.name) {
+        ensureMaterial(movement.profile.material.name).profilesConsumed += movement.quantity
+      }
     }
 
     return Array.from(materials.values()).sort((a, b) => {
-      const scoreA = a.stockValue + a.sheetsConsumed * 5 + a.scrapsGenerated * 2
-      const scoreB = b.stockValue + b.sheetsConsumed * 5 + b.scrapsGenerated * 2
+      const scoreA = a.stockValue + a.sheetsConsumed * 5 + a.scrapsGenerated * 2 + a.profilesConsumed * 5
+      const scoreB = b.stockValue + b.sheetsConsumed * 5 + b.scrapsGenerated * 2 + b.profilesConsumed * 5
       return scoreB - scoreA
     })
   }
 
-  private buildStockSummary(stockSheets: StockSheetRecord[], role: UserRole) {
+  private buildStockSummary(stockSheets: StockSheetRecord[], stockProfiles: StockProfileRecord[], role: UserRole) {
     const summary = {
       totalStandardSheets: 0,
       totalScrapSheets: 0,
+      totalProfiles: 0,
       totalInventoryUnits: 0,
       totalMaterials: new Set<string>(),
       totalClients: new Set<string>(),
       standardStockValue: 0,
       scrapStockValue: 0,
+      profileStockValue: 0,
       lowStockSheets: 0,
       ownedSheetsInStock: 0,
     }
@@ -885,41 +980,61 @@ export class AnalyticsService {
       }
     }
 
-    const totalStockValue = summary.standardStockValue + summary.scrapStockValue
+    for (const profile of stockProfiles) {
+      const value = (profile.price ?? 0) * profile.quantity
+
+      summary.totalProfiles += profile.quantity
+      summary.totalInventoryUnits += profile.quantity
+      summary.profileStockValue += value
+      summary.totalMaterials.add(profile.material.name)
+
+      if (profile.client) {
+        summary.totalClients.add(profile.client.id)
+      }
+    }
+
+    const totalStockValue = summary.standardStockValue + summary.scrapStockValue + summary.profileStockValue
 
     return {
       totalStandardSheets: summary.totalStandardSheets,
       totalScrapSheets: summary.totalScrapSheets,
+      totalProfiles: summary.totalProfiles,
       totalInventoryUnits: summary.totalInventoryUnits,
       totalMaterials: summary.totalMaterials.size,
       totalClients: summary.totalClients.size,
       totalStockValue: role === 'ADMIN' ? totalStockValue : null,
       standardStockValue: summary.standardStockValue,
       scrapStockValue: summary.scrapStockValue,
+      profileStockValue: summary.profileStockValue,
       lowStockSheets: summary.lowStockSheets,
       ownedSheetsInStock: summary.ownedSheetsInStock,
     }
   }
 
-  private buildMaterialSnapshot(stockSheets: StockSheetRecord[]) {
+  private buildMaterialSnapshot(stockSheets: StockSheetRecord[], stockProfiles: StockProfileRecord[]) {
     const materials = new Map<string, {
       name: string
       standardSheets: number
       scrapSheets: number
+      profiles: number
       stockValue: number
     }>()
 
-    for (const sheet of stockSheets) {
-      if (!materials.has(sheet.material.name)) {
-        materials.set(sheet.material.name, {
-          name: sheet.material.name,
+    const ensureMaterial = (name: string) => {
+      if (!materials.has(name)) {
+        materials.set(name, {
+          name,
           standardSheets: 0,
           scrapSheets: 0,
+          profiles: 0,
           stockValue: 0,
         })
       }
+      return materials.get(name)!
+    }
 
-      const current = materials.get(sheet.material.name)!
+    for (const sheet of stockSheets) {
+      const current = ensureMaterial(sheet.material.name)
       current.stockValue += (sheet.price ?? 0) * sheet.quantity
 
       if (sheet.type === 'STANDARD') {
@@ -927,6 +1042,12 @@ export class AnalyticsService {
       } else {
         current.scrapSheets += sheet.quantity
       }
+    }
+
+    for (const profile of stockProfiles) {
+      const current = ensureMaterial(profile.material.name)
+      current.stockValue += (profile.price ?? 0) * profile.quantity
+      current.profiles += profile.quantity
     }
 
     return Array.from(materials.values()).sort((a, b) => b.stockValue - a.stockValue)
@@ -941,13 +1062,13 @@ export class AnalyticsService {
           id: string
           name: string
         } | null
-      }
+      } | null
     }>,
   ) {
     const clients = new Map<string, { id: string; name: string; cutOrders: number; sheetsConsumed: number }>()
 
     for (const movement of movements) {
-      if (!movement.sheet.client) continue
+      if (!movement.sheet?.client) continue
 
       if (!clients.has(movement.sheet.client.id)) {
         clients.set(movement.sheet.client.id, {
@@ -958,7 +1079,7 @@ export class AnalyticsService {
         })
       }
 
-      const current = clients.get(movement.sheet.client.id)!
+      const current = clients.get(movement.sheet!.client!.id)!
       current.cutOrders += 1
       current.sheetsConsumed += movement.quantity
     }
@@ -972,12 +1093,15 @@ export class AnalyticsService {
     })
   }
 
-  private buildStockValueTrendByPeriod(sheets: TrendSheetRecord[], periodDays: number, now: Date) {
+  private buildStockValueTrendByPeriod(sheets: TrendSheetRecord[], profiles: StockProfileRecord[], periodDays: number, now: Date) {
     const startDate = this.getRollingPeriodStart(now, periodDays)
     const useDailyBuckets = periodDays <= 31
     const pointDates = this.createTrendPointDates(startDate, now, useDailyBuckets)
 
-    return pointDates.map((pointDate) => {
+    // Profile value is current snapshot (no historical movement tracking for profiles)
+    const currentProfileValue = profiles.reduce((sum, p) => sum + (p.price ?? 0) * p.quantity, 0)
+
+    return pointDates.map((pointDate, index) => {
       let totalValue = 0
       let standardValue = 0
       let scrapValue = 0
@@ -999,12 +1123,18 @@ export class AnalyticsService {
         }
       }
 
+      // Add profile value to total (use current value for all points since we lack historical data)
+      const isLastPoint = index === pointDates.length - 1
+      const profileValue = isLastPoint ? currentProfileValue : 0
+      totalValue += profileValue
+
       return {
         date: pointDate.toISOString(),
         label: useDailyBuckets ? this.formatDayLabel(pointDate) : this.formatRangeLabel(this.addDays(pointDate, -6)),
         totalValue: Number(totalValue.toFixed(2)),
         standardValue: Number(standardValue.toFixed(2)),
         scrapValue: Number(scrapValue.toFixed(2)),
+        profileValue: Number(profileValue.toFixed(2)),
       }
     })
   }
@@ -1041,13 +1171,13 @@ export class AnalyticsService {
         client: {
           id: string
         } | null
-      }
+      } | null
     }>,
   ) {
     const clients = new Set<string>()
 
     for (const movement of movements) {
-      if (movement.sheet.client?.id) {
+      if (movement.sheet?.client?.id) {
         clients.add(movement.sheet.client.id)
       }
     }
@@ -1212,5 +1342,87 @@ export class AnalyticsService {
       day: '2-digit',
       month: 'short',
     })
+  }
+
+  private async getTopMaterialsAndThicknesses(startDate?: Date) {
+    const whereDate = startDate ? { gte: startDate } : undefined
+
+    const [sheetExits, profileExits] = await Promise.all([
+      this.prisma.inventoryMovement.findMany({
+        where: {
+          type: 'EXIT',
+          createdAt: whereDate,
+          sheetId: { not: null },
+        },
+        select: {
+          quantity: true,
+          sheet: {
+            select: {
+              thickness: true,
+              material: { select: { name: true } },
+            },
+          },
+        },
+      }),
+      this.prisma.inventoryMovement.findMany({
+        where: {
+          type: 'EXIT',
+          createdAt: whereDate,
+          profileId: { not: null },
+        },
+        select: {
+          quantity: true,
+          profile: {
+            select: {
+              thickness: true,
+              material: { select: { name: true } },
+            },
+          },
+        },
+      }),
+    ])
+
+    const materialMap = new Map<string, { name: string; totalConsumed: number; orders: number }>()
+    const thicknessMap = new Map<number, { thickness: number; totalConsumed: number; orders: number }>()
+
+    for (const m of sheetExits) {
+      const name = m.sheet!.material.name
+      const thickness = m.sheet!.thickness
+
+      const mat = materialMap.get(name) ?? { name, totalConsumed: 0, orders: 0 }
+      mat.totalConsumed += m.quantity
+      mat.orders += 1
+      materialMap.set(name, mat)
+
+      const th = thicknessMap.get(thickness) ?? { thickness, totalConsumed: 0, orders: 0 }
+      th.totalConsumed += m.quantity
+      th.orders += 1
+      thicknessMap.set(thickness, th)
+    }
+
+    for (const m of profileExits) {
+      if (!m.profile) continue
+      const name = m.profile.material.name
+      const thickness = m.profile.thickness
+
+      const mat = materialMap.get(name) ?? { name, totalConsumed: 0, orders: 0 }
+      mat.totalConsumed += m.quantity
+      mat.orders += 1
+      materialMap.set(name, mat)
+
+      const th = thicknessMap.get(thickness) ?? { thickness, totalConsumed: 0, orders: 0 }
+      th.totalConsumed += m.quantity
+      th.orders += 1
+      thicknessMap.set(thickness, th)
+    }
+
+    return {
+      topMaterials: Array.from(materialMap.values())
+        .sort((a, b) => b.totalConsumed - a.totalConsumed)
+        .slice(0, 10),
+      topThicknesses: Array.from(thicknessMap.values())
+        .sort((a, b) => b.totalConsumed - a.totalConsumed)
+        .slice(0, 10),
+    }
   }
 }

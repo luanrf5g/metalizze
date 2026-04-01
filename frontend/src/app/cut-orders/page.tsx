@@ -4,44 +4,68 @@ import { useCallback, useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { api } from "@/lib/api"
 import { Sheet } from "@/types/sheet"
+import { Profile } from "@/types/profile"
 import { Client } from "@/types/clients"
 import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Loader2, Scissors } from "lucide-react"
+import { ChevronLeft, ChevronRight, Layers, Loader2, RectangleHorizontal, Scissors } from "lucide-react"
 
 import { Stepper } from "@/components/cut-orders/Stepper"
 import { StepSheetSelection } from "@/components/cut-orders/StepSheetSelection"
 import { StepScraps, ScrapForm } from "@/components/cut-orders/StepScraps"
 import { StepSummary } from "@/components/cut-orders/StepSummary"
+import { StepProfileSelection } from "@/components/cut-orders/StepProfileSelection"
+import { StepProfileLeftover, LeftoverForm } from "@/components/cut-orders/StepProfileLeftover"
+import { StepProfileSummary } from "@/components/cut-orders/StepProfileSummary"
+
+type CutMode = 'sheet' | 'profile'
 
 function CutOrdersWizard() {
   const searchParams = useSearchParams()
+  const [mode, setMode] = useState<CutMode>('sheet')
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Data
-  const [sheets, setSheets] = useState<Sheet[]>([])
+  // Shared data
   const [clients, setClients] = useState<Client[]>([])
 
-  // Step 1 - Sheet selection
+  // Sheet data
+  const [sheets, setSheets] = useState<Sheet[]>([])
   const [sheetId, setSheetId] = useState("")
   const [selectedSheet, setSelectedSheet] = useState<Sheet | null>(null)
-  const [quantity, setQuantity] = useState("")
-  const [description, setDescription] = useState("")
+  const [sheetQuantity, setSheetQuantity] = useState("")
+  const [sheetDescription, setSheetDescription] = useState("")
 
-  // Step 2 - Scraps
+  // Scraps
   const [hasScraps, setHasScraps] = useState(false)
   const [scraps, setScraps] = useState<ScrapForm[]>([
     { width: "", height: "", quantity: "1", clientId: "none" }
   ])
 
-  // Fetch full sheet details when selection changes
+  // Profile data
+  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [profileId, setProfileId] = useState("")
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
+  const [profileQuantity, setProfileQuantity] = useState("")
+  const [profileDescription, setProfileDescription] = useState("")
+  const [hasLeftover, setHasLeftover] = useState(false)
+  const [leftovers, setLeftovers] = useState<LeftoverForm[]>([
+    { length: "", quantity: "1" }
+  ])
+
+  const totalSteps = 3
+
+  // Mode change resets
+  function handleModeChange(newMode: CutMode) {
+    if (newMode === mode) return
+    setMode(newMode)
+    setCurrentStep(0)
+  }
+
+  // ─── Sheet helpers ────────────────────────────────────
   const fetchSheetDetails = useCallback(async (id: string) => {
-    if (!id) {
-      setSelectedSheet(null)
-      return
-    }
+    if (!id) { setSelectedSheet(null); return }
     try {
       const response = await api.get(`/sheets/${id}`)
       setSelectedSheet(response.data.sheet)
@@ -55,12 +79,29 @@ function CutOrdersWizard() {
     fetchSheetDetails(id)
   }
 
-  // Fetch data
+  // ─── Profile helpers ──────────────────────────────────
+  const fetchProfileDetails = useCallback(async (id: string) => {
+    if (!id) { setSelectedProfile(null); return }
+    try {
+      const response = await api.get(`/profiles/${id}`)
+      setSelectedProfile(response.data.profile)
+    } catch {
+      toast.error("Erro ao buscar detalhes do perfil.")
+    }
+  }, [])
+
+  function handleSelectProfile(id: string) {
+    setProfileId(id)
+    fetchProfileDetails(id)
+  }
+
+  // ─── Fetch data ───────────────────────────────────────
   useEffect(() => {
-    let active = true;
+    let active = true
 
     async function load() {
       try {
+        // Fetch sheets (paginated)
         const aggregatedSheets: Sheet[] = []
         let currentPage = 1
         let totalPages: number | null = null
@@ -74,36 +115,44 @@ function CutOrdersWizard() {
           if (meta && typeof meta.totalPages === 'number') {
             totalPages = meta.totalPages
           } else if (pageSheets.length < 15) {
-            // heurística de parada se meta não vier
             break
           }
-
           currentPage += 1
         }
 
-        const sheetsRes = { data: { sheets: aggregatedSheets } } as any
+        // Fetch profiles (all)
+        const profilesRes = await api.get('/profiles/all')
 
+        // Fetch clients
         const clientsRes = await api.get('/clients')
-        if (!active) return;
-        setSheets(sheetsRes.data.sheets || [])
+
+        if (!active) return
+
+        setSheets(aggregatedSheets)
+        setProfiles(profilesRes.data.profiles || [])
         setClients(clientsRes.data.clients)
 
-        // Auto-select sheet if passed in URL
+        // Auto-select from URL params
         const urlSheetId = searchParams.get('sheetId')
-        if (urlSheetId) {
+        const urlProfileId = searchParams.get('profileId')
+
+        if (urlProfileId) {
+          setMode('profile')
+          handleSelectProfile(urlProfileId)
+        } else if (urlSheetId) {
           handleSelectSheet(urlSheetId)
         }
       } catch {
-        if (!active) return;
+        if (!active) return
         toast.error("Erro ao carregar dados.")
       }
     }
     load()
 
-    return () => { active = false; }
-  }, [searchParams, fetchSheetDetails]) // Added fetchSheetDetails to deps
+    return () => { active = false }
+  }, [searchParams, fetchSheetDetails, fetchProfileDetails])
 
-  // Scrap helpers
+  // ─── Scrap helpers ────────────────────────────────────
   function addScrap() {
     setScraps((prev) => [...prev, { width: "", height: "", quantity: "1", clientId: "none" }])
   }
@@ -118,64 +167,131 @@ function CutOrdersWizard() {
     )
   }
 
-  // Validation
-  function canAdvanceStep1() {
-    return sheetId !== "" && quantity !== "" && Number(quantity) > 0 && description.trim() !== ""
+  // ─── Leftover helpers ─────────────────────────────────
+  function addLeftover() {
+    setLeftovers((prev) => [...prev, { length: "", quantity: "1" }])
   }
 
-  function canAdvanceStep2() {
+  function removeLeftover(index: number) {
+    setLeftovers((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  function updateLeftover(index: number, field: keyof LeftoverForm, value: string) {
+    setLeftovers((prev) =>
+      prev.map((l, i) => (i === index ? { ...l, [field]: value } : l))
+    )
+  }
+
+  // ─── Validation ───────────────────────────────────────
+  function canAdvanceSheetStep1() {
+    return sheetId !== "" && sheetQuantity !== "" && Number(sheetQuantity) > 0 && sheetDescription.trim() !== ""
+  }
+
+  function canAdvanceSheetStep2() {
     if (!hasScraps) return true
     return scraps.every(
       (s) => s.width !== "" && Number(s.width) > 0 && s.height !== "" && Number(s.height) > 0 && s.quantity !== "" && Number(s.quantity) > 0
     )
   }
 
-  // Navigation
+  function canAdvanceProfileStep1() {
+    return profileId !== "" && profileQuantity !== "" && Number(profileQuantity) > 0 && profileDescription.trim() !== ""
+  }
+
+  function canAdvanceProfileStep2() {
+    if (!hasLeftover) return true
+    return leftovers.every(
+      (l) => l.length !== "" && Number(l.length) > 0 && l.quantity !== "" && Number(l.quantity) > 0 &&
+        (!selectedProfile || Number(l.length) < selectedProfile.length)
+    )
+  }
+
+  // ─── Navigation ───────────────────────────────────────
   function nextStep() {
-    if (currentStep === 0 && !canAdvanceStep1()) {
-      toast.error("Preencha todos os campos obrigatórios.")
-      return
+    if (mode === 'sheet') {
+      if (currentStep === 0 && !canAdvanceSheetStep1()) {
+        toast.error("Preencha todos os campos obrigatórios.")
+        return
+      }
+      if (currentStep === 1 && !canAdvanceSheetStep2()) {
+        toast.error("Preencha corretamente os dados dos retalhos.")
+        return
+      }
+    } else {
+      if (currentStep === 0 && !canAdvanceProfileStep1()) {
+        toast.error("Preencha todos os campos obrigatórios.")
+        return
+      }
+      if (currentStep === 1 && !canAdvanceProfileStep2()) {
+        toast.error("Informe corretamente o comprimento restante.")
+        return
+      }
     }
-    if (currentStep === 1 && !canAdvanceStep2()) {
-      toast.error("Preencha corretamente os dados dos retalhos.")
-      return
-    }
-    setCurrentStep((prev) => Math.min(prev + 1, 2))
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1))
   }
 
   function prevStep() {
     setCurrentStep((prev) => Math.max(prev - 1, 0))
   }
 
-  // Submit
+  // ─── Submit ───────────────────────────────────────────
   async function handleSubmit() {
     setIsSubmitting(true)
     try {
-      const payload = {
-        sheetId,
-        quantityToCut: Number(quantity),
-        description,
-        generatedScraps: hasScraps
-          ? scraps.map((s) => ({
-            width: Number(s.width),
-            height: Number(s.height),
-            quantity: Number(s.quantity),
-            clientId: s.clientId === "none" ? null : s.clientId,
-          }))
-          : [],
+      if (mode === 'sheet') {
+        const payload = {
+          sheetId,
+          quantityToCut: Number(sheetQuantity),
+          description: sheetDescription,
+          generatedScraps: hasScraps
+            ? scraps.map((s) => ({
+              width: Number(s.width),
+              height: Number(s.height),
+              quantity: Number(s.quantity),
+              clientId: s.clientId === "none" ? null : s.clientId,
+            }))
+            : [],
+        }
+        await api.post("/sheets/cut", payload)
+
+        // Reset sheet form
+        setSheetId("")
+        setSelectedSheet(null)
+        setSheetQuantity("")
+        setSheetDescription("")
+        setHasScraps(false)
+        setScraps([{ width: "", height: "", quantity: "1", clientId: "none" }])
+      } else {
+        await api.post("/profiles/cut", {
+          profileId,
+          quantityToCut: Number(profileQuantity),
+          description: profileDescription,
+          leftovers: hasLeftover
+            ? leftovers
+              .filter((l) => Number(l.length) > 0 && Number(l.quantity) > 0)
+              .map((l) => ({ length: Number(l.length), quantity: Number(l.quantity) }))
+            : [],
+        })
+
+        // Update local profile quantity
+        setProfiles((prev) =>
+          prev.map((p) =>
+            p.id === profileId
+              ? { ...p, quantity: p.quantity - Number(profileQuantity) }
+              : p
+          )
+        )
+
+        // Reset profile form
+        setProfileId("")
+        setSelectedProfile(null)
+        setProfileQuantity("")
+        setProfileDescription("")
+        setHasLeftover(false)
+        setLeftovers([{ length: "", quantity: "1" }])
       }
 
-      await api.post("/sheets/cut", payload)
-
       toast.success("Ordem de corte registrada com sucesso!")
-
-      // Reset form
-      setSheetId("")
-      setSelectedSheet(null)
-      setQuantity("")
-      setDescription("")
-      setHasScraps(false)
-      setScraps([{ width: "", height: "", quantity: "1", clientId: "none" }])
       setCurrentStep(0)
     } catch {
       toast.error("Erro ao registrar a ordem de corte.")
@@ -186,8 +302,32 @@ function CutOrdersWizard() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      {/* Mode selector */}
+      <div className="shrink-0 flex items-center gap-2 mb-6">
+        <Button
+          type="button"
+          variant={mode === 'sheet' ? 'default' : 'outline'}
+          size="sm"
+          className="gap-2"
+          onClick={() => handleModeChange('sheet')}
+        >
+          <Layers className="w-4 h-4" />
+          Chapas
+        </Button>
+        <Button
+          type="button"
+          variant={mode === 'profile' ? 'default' : 'outline'}
+          size="sm"
+          className="gap-2"
+          onClick={() => handleModeChange('profile')}
+        >
+          <RectangleHorizontal className="w-4 h-4" />
+          Perfis
+        </Button>
+      </div>
+
       <div className="shrink-0">
-        <Stepper currentStep={currentStep} />
+        <Stepper currentStep={currentStep} mode={mode} />
       </div>
 
       {/* Card with carousel slides */}
@@ -198,41 +338,82 @@ function CutOrdersWizard() {
               className="flex h-full absolute inset-0 transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentStep * 100}%)` }}
             >
-              <div className="w-full shrink-0 h-full overflow-y-auto">
-                <StepSheetSelection
-                  sheets={sheets}
-                  sheetId={sheetId}
-                  selectedSheet={selectedSheet}
-                  quantity={quantity}
-                  description={description}
-                  onSelectSheet={handleSelectSheet}
-                  onQuantityChange={setQuantity}
-                  onDescriptionChange={setDescription}
-                />
-              </div>
+              {mode === 'sheet' ? (
+                <>
+                  <div className="w-full shrink-0 h-full overflow-y-auto">
+                    <StepSheetSelection
+                      sheets={sheets}
+                      sheetId={sheetId}
+                      selectedSheet={selectedSheet}
+                      quantity={sheetQuantity}
+                      description={sheetDescription}
+                      onSelectSheet={handleSelectSheet}
+                      onQuantityChange={setSheetQuantity}
+                      onDescriptionChange={setSheetDescription}
+                    />
+                  </div>
 
-              <div className="w-full shrink-0 h-full overflow-y-auto">
-                <StepScraps
-                  hasScraps={hasScraps}
-                  scraps={scraps}
-                  clients={clients}
-                  onToggleScraps={() => setHasScraps(!hasScraps)}
-                  onAddScrap={addScrap}
-                  onRemoveScrap={removeScrap}
-                  onUpdateScrap={updateScrap}
-                />
-              </div>
+                  <div className="w-full shrink-0 h-full overflow-y-auto">
+                    <StepScraps
+                      hasScraps={hasScraps}
+                      scraps={scraps}
+                      clients={clients}
+                      onToggleScraps={() => setHasScraps(!hasScraps)}
+                      onAddScrap={addScrap}
+                      onRemoveScrap={removeScrap}
+                      onUpdateScrap={updateScrap}
+                    />
+                  </div>
 
-              <div className="w-full shrink-0 h-full overflow-y-auto">
-                <StepSummary
-                  selectedSheet={selectedSheet}
-                  quantity={quantity}
-                  description={description}
-                  hasScraps={hasScraps}
-                  scraps={scraps}
-                  clients={clients}
-                />
-              </div>
+                  <div className="w-full shrink-0 h-full overflow-y-auto">
+                    <StepSummary
+                      selectedSheet={selectedSheet}
+                      quantity={sheetQuantity}
+                      description={sheetDescription}
+                      hasScraps={hasScraps}
+                      scraps={scraps}
+                      clients={clients}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-full shrink-0 h-full overflow-y-auto">
+                    <StepProfileSelection
+                      profiles={profiles}
+                      profileId={profileId}
+                      selectedProfile={selectedProfile}
+                      quantity={profileQuantity}
+                      description={profileDescription}
+                      onSelectProfile={handleSelectProfile}
+                      onQuantityChange={setProfileQuantity}
+                      onDescriptionChange={setProfileDescription}
+                    />
+                  </div>
+
+                  <div className="w-full shrink-0 h-full overflow-y-auto">
+                    <StepProfileLeftover
+                      selectedProfile={selectedProfile}
+                      hasLeftover={hasLeftover}
+                      leftovers={leftovers}
+                      onToggleLeftover={() => setHasLeftover(!hasLeftover)}
+                      onAddLeftover={addLeftover}
+                      onRemoveLeftover={removeLeftover}
+                      onUpdateLeftover={updateLeftover}
+                    />
+                  </div>
+
+                  <div className="w-full shrink-0 h-full overflow-y-auto">
+                    <StepProfileSummary
+                      selectedProfile={selectedProfile}
+                      quantity={profileQuantity}
+                      description={profileDescription}
+                      hasLeftover={hasLeftover}
+                      leftovers={leftovers}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -249,7 +430,7 @@ function CutOrdersWizard() {
               Voltar
             </Button>
 
-            {currentStep < 2 ? (
+            {currentStep < totalSteps - 1 ? (
               <Button
                 type="button"
                 onClick={nextStep}

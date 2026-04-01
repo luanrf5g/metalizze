@@ -32,6 +32,24 @@ import { DeleteSheetUseCase } from "@/domain/application/use-cases/delete-sheet"
 import { RegisterSheetCutController } from "./controllers/register-sheet-cut.controller";
 import { RegisterSheetCutUseCase } from "@/domain/application/use-cases/register-sheet-cut";
 
+// Profile
+import { CreateProfileController } from "./controllers/create-profile.controller";
+import { RegisterProfileUseCase } from "@/domain/application/use-cases/register-profile";
+import { FetchProfilesController } from "./controllers/fetch-profiles.controller";
+import { FetchProfilesUseCase } from "@/domain/application/use-cases/fetch-profiles";
+import { FetchAllProfilesController } from "./controllers/fetch-all-profiles.controller";
+import { FetchAllProfilesUseCase } from "@/domain/application/use-cases/fetch-all-profiles";
+import { GetProfileByIdController } from "./controllers/get-profile-by-id.controller";
+import { GetProfileByIdUseCase } from "@/domain/application/use-cases/get-profile-by-id";
+import { EditProfileController } from "./controllers/edit-profile.controller";
+import { EditProfileUseCase } from "@/domain/application/use-cases/edit-profile";
+import { DeleteProfileController } from "./controllers/delete-profile.controller";
+import { DeleteProfileUseCase } from "@/domain/application/use-cases/delete-profile";
+import { ReduceProfileStockController } from "./controllers/reduce-profile-stock.controller";
+import { ReduceProfileStockUseCase } from "@/domain/application/use-cases/reduce-profile-stock";
+import { RegisterProfileCutController } from "./controllers/register-profile-cut.controller";
+import { RegisterProfileCutUseCase } from "@/domain/application/use-cases/register-profile-cut";
+
 // Client
 import { CreateClientController } from "./controllers/create-client.controller";
 import { RegisterClientUseCase } from "@/domain/application/use-cases/register-client";
@@ -99,6 +117,15 @@ import { HealthController } from "./controllers/health.controller";
     EditSheetController,
     DeleteSheetController,
     RegisterSheetCutController,
+    // Profile
+    CreateProfileController,
+    FetchProfilesController,
+    FetchAllProfilesController,
+    GetProfileByIdController,
+    EditProfileController,
+    DeleteProfileController,
+    ReduceProfileStockController,
+    RegisterProfileCutController,
     // Inventory Movements
     FetchInventoryMovementsController,
     RegisterInventoryMovementController,
@@ -136,6 +163,15 @@ import { HealthController } from "./controllers/health.controller";
     EditSheetUseCase,
     DeleteSheetUseCase,
     RegisterSheetCutUseCase,
+    // Profile
+    RegisterProfileUseCase,
+    FetchProfilesUseCase,
+    FetchAllProfilesUseCase,
+    GetProfileByIdUseCase,
+    EditProfileUseCase,
+    DeleteProfileUseCase,
+    ReduceProfileStockUseCase,
+    RegisterProfileCutUseCase,
     // Inventory Movements
     FetchInventoryMovementsUseCase,
     RegisterInventoryMovementUseCase,

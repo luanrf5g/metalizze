@@ -6,7 +6,8 @@ export class PrismaInventoryMovementMapper {
   static toDomain(raw: PrismaInventoryMovement): InventoryMovement {
     return InventoryMovement.create(
       {
-        sheetId: new UniqueEntityId(raw.sheetId),
+        sheetId: raw.sheetId ? new UniqueEntityId(raw.sheetId) : null,
+        profileId: raw.profileId ? new UniqueEntityId(raw.profileId) : null,
         type: raw.type,
         quantity: raw.quantity,
         description: raw.description,
@@ -19,7 +20,8 @@ export class PrismaInventoryMovementMapper {
   static toPrisma(inventoryMovement: InventoryMovement): Prisma.InventoryMovementUncheckedCreateInput {
     return {
       id: inventoryMovement.id.toString(),
-      sheetId: inventoryMovement.sheetId.toString(),
+      sheetId: inventoryMovement.sheetId?.toString() ?? null,
+      profileId: inventoryMovement.profileId?.toString() ?? null,
       type: inventoryMovement.type,
       quantity: inventoryMovement.quantity,
       description: inventoryMovement.description,

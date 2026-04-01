@@ -3,6 +3,7 @@ import { InventoryMovement } from "@/domain/enterprise/entities/inventory-moveme
 
 export interface FindManyInventoryMovements extends PaginationParams {
   sheetId?: string
+  profileId?: string
 }
 
 export abstract class InventoryMovementsRepository {

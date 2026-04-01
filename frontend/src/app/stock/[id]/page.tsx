@@ -167,7 +167,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
       <div className="p-6 md:p-10 w-full h-full mx-auto flex flex-col items-center justify-center gap-4 animate-in fade-in duration-500">
         <p className="text-zinc-500">Chapa não encontrada.</p>
         <Button asChild variant="outline">
-          <Link href="/sheets"><ArrowLeft className="mr-2 h-4 w-4" />Voltar ao Estoque</Link>
+          <Link href="/stock"><ArrowLeft className="mr-2 h-4 w-4" />Voltar ao Estoque</Link>
         </Button>
       </div>
     )
@@ -179,7 +179,7 @@ export default function SheetDetailsPage({ params }: { params: Promise<{ id: str
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-4">
           <Button asChild variant="outline" size="icon" className="shrink-0">
-            <Link href="/sheets"><ArrowLeft className="h-4 w-4" /></Link>
+            <Link href="/stock"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
           <div>
             <div className="flex items-center gap-3">

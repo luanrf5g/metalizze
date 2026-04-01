@@ -22,6 +22,15 @@ enum MovementType {
   EXIT
 }
 
+enum ProfileType {
+  SQUARE // Quadrado - altura = largura
+  RECTANGULAR // Retangular - altura ≠ largura
+  ROUND // Redondo - altura = largura (diâmetro)
+  OBLONG // Oblongo - altura ≠ largura
+  ANGLE // Cantoneira - altura = largura
+  U_CHANNEL // Perfil U - altura ≠ largura
+}
+
 enum UserRole {
   ADMIN
   OPERATOR
@@ -52,7 +61,8 @@ model Material {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  sheets Sheet[]
+  sheets   Sheet[]
+  profiles Profile[]
 
   @@map("materials")
 }
@@ -95,7 +105,8 @@ model Client {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  sheets Sheet[] // um client pode ter várias chapas
+  sheets   Sheet[] // um client pode ter várias chapas
+  profiles Profile[] // um client pode ter vários perfis
 
   @@map("clients")
 }
@@ -107,8 +118,39 @@ model InventoryMovement {
   description String?
   createdAt   DateTime     @default(now()) @map("created_at")
 
-  sheetId String @map("sheet_id")
-  sheet   Sheet  @relation(fields: [sheetId], references: [id])
+  sheetId String? @map("sheet_id")
+  sheet   Sheet?  @relation(fields: [sheetId], references: [id])
+
+  profileId String?  @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id])
 
   @@map("inventory_movements")
+}
+
+model Profile {
+  id              String      @id @default(uuid())
+  sku             String
+  profileType     ProfileType @map("profile_type")
+  width           Float
+  height          Float
+  length          Float
+  thickness       Float
+  quantity        Int         @default(0)
+  price           Float?      @default(0)
+  storageLocation String?     @map("storage_location")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  materialId String   @map("material_id")
+  material   Material @relation(fields: [materialId], references: [id])
+
+  clientId String? @map("client_id")
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  movements InventoryMovement[]
+
+  @@unique([materialId, profileType, width, height, length, thickness, clientId])
+  @@map("profiles")
 }

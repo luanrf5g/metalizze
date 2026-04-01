@@ -8,9 +8,12 @@ export class InMemoryInventoryMovementsRepository implements InventoryMovementsR
     this.items.push(inventoryMovement)
   }
 
-  async findMany({ page, sheetId }: FindManyInventoryMovements) {
+  async findMany({ page, sheetId, profileId }: FindManyInventoryMovements) {
     const movements = this.items.filter((item) => {
-      if (sheetId && item.sheetId.toString() !== sheetId) {
+      if (sheetId && item.sheetId?.toString() !== sheetId) {
+        return false
+      }
+      if (profileId && item.profileId?.toString() !== profileId) {
         return false
       }
 

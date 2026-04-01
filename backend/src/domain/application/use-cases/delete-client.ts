@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { ClientHasSheetsError } from "./errors/client-has-sheets-error";
 import { ClientsRepository } from "../repositories/clients-repository";
 import { SheetsRepository } from "../repositories/sheets-repository";
+import { ProfilesRepository } from "../repositories/profiles-repository";
 
 interface DeleteClientUseCaseRequest {
   clientId: string
@@ -18,7 +19,8 @@ type DeleteClientUseCaseResponse = Either<
 export class DeleteClientUseCase {
   constructor(
     private clientsRepository: ClientsRepository,
-    private sheetsRepository: SheetsRepository
+    private sheetsRepository: SheetsRepository,
+    private profilesRepository: ProfilesRepository
   ) { }
 
   async execute({
@@ -31,8 +33,9 @@ export class DeleteClientUseCase {
     }
 
     const countSheets = await this.sheetsRepository.countByClientId(clientId)
+    const countProfiles = await this.profilesRepository.countByClientId(clientId)
 
-    if (countSheets > 0) {
+    if (countSheets > 0 || countProfiles > 0) {
       return left(new ClientHasSheetsError(client.name))
     }
 

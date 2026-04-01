@@ -5,7 +5,8 @@ import { InventoryMovementsRepository } from "../repositories/inventory-movement
 
 interface FetchInventoryMovementUseCaseRequest {
   page: number,
-  sheetId?: string
+  sheetId?: string,
+  profileId?: string
 }
 
 type FetchInventoryMovementUseCaseResponse = Either<
@@ -21,11 +22,13 @@ export class FetchInventoryMovementsUseCase {
 
   async execute({
     page,
-    sheetId
+    sheetId,
+    profileId
   }: FetchInventoryMovementUseCaseRequest): Promise<FetchInventoryMovementUseCaseResponse> {
     const movements = await this.inventoryMovementsRepository.findMany({
       page,
-      sheetId
+      sheetId,
+      profileId
     })
 
     return right({

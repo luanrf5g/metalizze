@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { translateSheetType, formatDate, formatDocument, formatCurrency } from '@/lib/formatters'
 import { CreateSheetModal } from '@/components/CreateSheetModal'
 import { Pagination } from '@/components/Pagination'
-import { MoreHorizontal, Eye, Scissors } from 'lucide-react'
+import { MoreHorizontal, Eye, Scissors, Search } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,11 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
-
 import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
 
-export default function SheetsPage() {
+export function SheetsTab() {
   const [sheets, setSheets] = useState<Sheet[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'STANDARD' | 'SCRAP'>('ALL')
@@ -58,22 +56,19 @@ export default function SheetsPage() {
         setTotalPages(meta.totalPages)
         setHasMore(currentPage < meta.totalPages)
       } else {
-        // Fallback: assume 15 itens por página
         setHasMore(newSheets.length === 15)
         setTotalPages(undefined)
       }
     } catch (error) {
       console.error('Erro ao buscar chapas: ', error)
-      alert('Erro ao buscar chapas do estoque.')
     } finally {
       setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    setPage(1) // Reset page on filter change
+    setPage(1)
     fetchSheets(1)
-    // Se o filtro mudar, invalidamos a base de busca para recarregar com o novo filtro caso o usuário esteja pesquisando
     setSearchBaseSheets(null)
     setSearchFilterKey(null)
   }, [activeFilter])
@@ -82,7 +77,6 @@ export default function SheetsPage() {
     fetchSheets(page)
   }, [page])
 
-  // Carrega a base completa de chapas para a busca quando houver texto de pesquisa
   useEffect(() => {
     const hasQuery = searchQuery.trim().length > 0
 
@@ -92,7 +86,6 @@ export default function SheetsPage() {
       return
     }
 
-    // Já temos a base carregada para o filtro atual
     if (searchBaseSheets && searchFilterKey === activeFilter) {
       return
     }
@@ -104,30 +97,22 @@ export default function SheetsPage() {
       try {
         const aggregatedSheets: Sheet[] = []
         let currentPage = 1
-        let totalPages: number | null = null
+        let total: number | null = null
 
-        while (totalPages === null || currentPage <= totalPages) {
-          // Para a página atual já carregada na listagem principal,
-          // reutilizamos os dados em memória e evitamos uma segunda requisição.
-          if (currentPage === page && sheets.length > 0 && !isLoading) {
-            aggregatedSheets.push(...sheets)
-          } else {
-            let pageRoute = `/sheets?page=${currentPage}`
+        while (total === null || currentPage <= total) {
+          let pageRoute = `/sheets?page=${currentPage}`
+          if (activeFilter === 'STANDARD') pageRoute += '&type=STANDARD'
+          else if (activeFilter === 'SCRAP') pageRoute += '&type=SCRAP'
 
-            if (activeFilter === 'STANDARD') pageRoute += '&type=STANDARD'
-            else if (activeFilter === 'SCRAP') pageRoute += '&type=SCRAP'
+          const pageRes = await api.get(pageRoute)
+          const pageSheets: Sheet[] = pageRes.data.sheets || []
+          aggregatedSheets.push(...pageSheets)
 
-            const pageRes = await api.get(pageRoute)
-            const pageSheets: Sheet[] = pageRes.data.sheets || []
-            aggregatedSheets.push(...pageSheets)
-
-            const meta = pageRes.data.meta
-            if (meta && typeof meta.totalPages === 'number') {
-              totalPages = meta.totalPages
-            } else if (pageSheets.length < 15) {
-              // heurística de parada se meta não vier
-              break
-            }
+          const meta = pageRes.data.meta
+          if (meta && typeof meta.totalPages === 'number') {
+            total = meta.totalPages
+          } else if (pageSheets.length < 15) {
+            break
           }
 
           currentPage += 1
@@ -140,62 +125,45 @@ export default function SheetsPage() {
       } catch (error) {
         console.error('Erro ao buscar chapas para pesquisa: ', error)
         if (!ignore) {
-          // Marca como "carregado" para o filtro atual mesmo em caso de erro,
-          // para evitar laços infinitos de novas requisições.
           setSearchBaseSheets([])
           setSearchFilterKey(activeFilter)
         }
       } finally {
-        if (!ignore) {
-          setIsSearchLoading(false)
-        }
+        if (!ignore) setIsSearchLoading(false)
       }
     }
 
     loadAllSheetsForSearch()
-
-    return () => {
-      ignore = true
-    }
+    return () => { ignore = true }
   }, [searchQuery, activeFilter, searchBaseSheets, searchFilterKey])
 
   return (
-    <div className='p-6 md:p-10 w-full h-full mx-auto flex flex-col space-y-6 animate-in fade-in zoom-in-95 duration-700'>
-      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between shrink-0 gap-4'>
-        <div>
-          <h1 className='text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400 pb-1'>Estoque de Chapas</h1>
-          <p className='text-zinc-500 dark:text-zinc-400 text-sm font-medium mt-1'>Gerencie as chapas disponíveis no estoque.</p>
-        </div>
-        {canCreate && <CreateSheetModal onSuccess={() => fetchSheets(page)} />}
-      </div>
-
+    <>
       <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0'>
-        {/* Apple Style Segmented Control */}
-        <div className='flex p-1 bg-black/5 dark:bg-white/10 backdrop-blur-md rounded-xl w-full md:w-auto overflow-hidden'>
-          <button
-            onClick={() => setActiveFilter('ALL')}
-            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'ALL' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-              }`}
-          >
-            Tudo
-          </button>
-          <button
-            onClick={() => setActiveFilter('STANDARD')}
-            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'STANDARD' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-              }`}
-          >
-            Chapas
-          </button>
-          <button
-            onClick={() => setActiveFilter('SCRAP')}
-            className={`flex-1 md:flex-none px-6 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'SCRAP' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-              }`}
-          >
-            Retalhos
-          </button>
+        <div className='flex items-center gap-3 w-full md:w-auto'>
+          <div className='flex p-1 bg-black/5 dark:bg-white/10 backdrop-blur-md rounded-xl overflow-hidden'>
+            <button
+              onClick={() => setActiveFilter('ALL')}
+              className={`px-5 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'ALL' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+            >
+              Tudo
+            </button>
+            <button
+              onClick={() => setActiveFilter('STANDARD')}
+              className={`px-5 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'STANDARD' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+            >
+              Chapas
+            </button>
+            <button
+              onClick={() => setActiveFilter('SCRAP')}
+              className={`px-5 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 hover:cursor-pointer ${activeFilter === 'SCRAP' ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-sm' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
+            >
+              Retalhos
+            </button>
+          </div>
+          {canCreate && <CreateSheetModal onSuccess={() => fetchSheets(page)} />}
         </div>
 
-        {/* Search Bar */}
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
           <Input
@@ -232,19 +200,16 @@ export default function SheetsPage() {
 
                 const filteredSheets = baseList.filter((s) => {
                   if (!isSearching) return true
-
                   const matchesSku = s.sku.toLowerCase().includes(query)
                   const clientName = s.client?.name ? s.client.name.toLowerCase() : ''
-                  const matchesClient = clientName.includes(query)
-
-                  return matchesSku || matchesClient
+                  return matchesSku || clientName.includes(query)
                 })
 
                 if (isTableLoading) {
                   return (
                     <TableRow>
                       <TableCell colSpan={8} className='h-24 text-center text-muted-foreground'>
-                        Carregando estoque...
+                        Carregando chapas...
                       </TableCell>
                     </TableRow>
                   )
@@ -302,7 +267,7 @@ export default function SheetsPage() {
                         <DropdownMenuContent align="end" className="glass-panel border-white/20 rounded-xl">
                           <DropdownMenuLabel className="font-semibold">Ações da Chapa</DropdownMenuLabel>
                           <DropdownMenuItem asChild className="cursor-pointer rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
-                            <Link href={`/sheets/${sheet.id}`}>
+                            <Link href={`/stock/${sheet.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
                               Ver detalhes
                             </Link>
@@ -337,6 +302,6 @@ export default function SheetsPage() {
           onPageChange={setPage}
         />
       )}
-    </div>
+    </>
   )
 }

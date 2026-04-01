@@ -47,8 +47,10 @@ interface ReportsMetrics {
     totalStockValue: number
     standardStockValue: number
     scrapStockValue: number
+    profileStockValue: number
     totalStandardSheets: number
     totalScrapSheets: number
+    totalProfiles: number
     totalInventoryUnits: number
     totalMaterials: number
     totalClients: number
@@ -96,6 +98,7 @@ interface ReportsMetrics {
       totalValue: number
       standardValue: number
       scrapValue: number
+      profileValue: number
     }>
     operationalTrend: Array<{
       label: string
@@ -109,9 +112,23 @@ interface ReportsMetrics {
       stockValue: number
       standardSheets: number
       scrapSheets: number
+      profiles: number
       sheetsConsumed: number
       scrapsGenerated: number
       scrapsReused: number
+      profilesConsumed: number
+    }>
+  }
+  topMaterialsAndThicknesses: {
+    topMaterials: Array<{
+      name: string
+      totalConsumed: number
+      orders: number
+    }>
+    topThicknesses: Array<{
+      thickness: number
+      totalConsumed: number
+      orders: number
     }>
   }
   topClients: Array<{
@@ -149,8 +166,10 @@ function normalizeReportsMetrics(raw: any): ReportsMetrics {
       totalStockValue: toNumber(raw?.overview?.totalStockValue),
       standardStockValue: toNumber(raw?.overview?.standardStockValue),
       scrapStockValue: toNumber(raw?.overview?.scrapStockValue),
+      profileStockValue: toNumber(raw?.overview?.profileStockValue),
       totalStandardSheets: toNumber(raw?.overview?.totalStandardSheets),
       totalScrapSheets: toNumber(raw?.overview?.totalScrapSheets),
+      totalProfiles: toNumber(raw?.overview?.totalProfiles),
       totalInventoryUnits: toNumber(raw?.overview?.totalInventoryUnits),
       totalMaterials: toNumber(raw?.overview?.totalMaterials),
       totalClients: toNumber(raw?.overview?.totalClients),
@@ -198,6 +217,10 @@ function normalizeReportsMetrics(raw: any): ReportsMetrics {
     },
     topClients: Array.isArray(raw?.topClients) ? raw.topClients : [],
     recentCutOrders: Array.isArray(raw?.recentCutOrders) ? raw.recentCutOrders : [],
+    topMaterialsAndThicknesses: {
+      topMaterials: Array.isArray(raw?.topMaterialsAndThicknesses?.topMaterials) ? raw.topMaterialsAndThicknesses.topMaterials : [],
+      topThicknesses: Array.isArray(raw?.topMaterialsAndThicknesses?.topThicknesses) ? raw.topMaterialsAndThicknesses.topThicknesses : [],
+    },
   }
 }
 
@@ -278,6 +301,7 @@ export default function ReportsPage() {
       ['Valor total do estoque', metrics.overview.totalStockValue],
       ['Valor em chapas padrão', metrics.overview.standardStockValue],
       ['Valor em retalhos', metrics.overview.scrapStockValue],
+      ['Valor em perfis', metrics.overview.profileStockValue],
       ['Ordens no período', metrics.periodComparison.cutOrders],
       ['Chapas consumidas no período', metrics.periodComparison.sheetsConsumed],
       ['Retalhos gerados no período', metrics.periodComparison.scrapsGenerated],
@@ -288,16 +312,26 @@ export default function ReportsPage() {
       ...metrics.charts.operationalTrend.map((item) => [item.label, item.orders, item.sheetsConsumed, item.scrapsGenerated, item.scrapsReused]),
       [],
       ['Desempenho por material'],
-      ['Material', 'Valor em estoque', 'Chapas padrão', 'Retalhos', 'Chapas consumidas', 'Retalhos gerados', 'Retalhos reaproveitados'],
+      ['Material', 'Valor em estoque', 'Chapas padrão', 'Retalhos', 'Perfis', 'Chapas consumidas', 'Retalhos gerados', 'Retalhos reaproveitados', 'Perfis consumidos'],
       ...metrics.charts.materialPerformance.map((item) => [
         item.name,
         item.stockValue,
         item.standardSheets,
         item.scrapSheets,
+        item.profiles,
         item.sheetsConsumed,
         item.scrapsGenerated,
         item.scrapsReused,
+        item.profilesConsumed,
       ]),
+      [],
+      ['Materiais mais utilizados'],
+      ['Posição', 'Material', 'Unidades consumidas', 'Saídas'],
+      ...metrics.topMaterialsAndThicknesses.topMaterials.map((item, i) => [i + 1, item.name, item.totalConsumed, item.orders]),
+      [],
+      ['Espessuras mais utilizadas'],
+      ['Posição', 'Espessura (mm)', 'Unidades consumidas', 'Saídas'],
+      ...metrics.topMaterialsAndThicknesses.topThicknesses.map((item, i) => [i + 1, item.thickness, item.totalConsumed, item.orders]),
       [],
       ['Ordens recentes'],
       ['Data', 'SKU', 'Tipo', 'Material', 'Cliente', 'Quantidade', 'Descrição'],
@@ -411,7 +445,7 @@ export default function ReportsPage() {
         </div>
       </section>
 
-      <section id="reports-period" className="grid grid-cols-1 gap-4 scroll-mt-24 md:grid-cols-2 xl:grid-cols-3">
+      <section id="reports-period" className="grid grid-cols-1 gap-4 scroll-mt-24 md:grid-cols-2 xl:grid-cols-4">
         <ReportCard
           title={`Ordens em ${metrics.selectedPeriod.label.toLowerCase()}`}
           value={metrics.periodComparison.cutOrders}
@@ -439,13 +473,25 @@ export default function ReportsPage() {
         <ReportCard
           title="Valor total do estoque"
           value={formatCurrency(metrics.overview.totalStockValue)}
-          detail="Somatório financeiro atual do estoque, independente do filtro temporal."
+          detail="Somatório financeiro atual de chapas, retalhos e perfis."
           onClick={() => scrollToSection('reports-stock-trend')}
         />
         <ReportCard
           title="Valor em retalhos"
           value={formatCurrency(metrics.overview.scrapStockValue)}
           detail="Parcela do patrimônio atual concentrada em retalhos reaproveitáveis."
+          onClick={() => scrollToSection('reports-stock-trend')}
+        />
+        <ReportCard
+          title="Perfis em estoque"
+          value={metrics.overview.totalProfiles}
+          detail="Quantidade total de barras/perfis disponíveis no estoque."
+          onClick={() => scrollToSection('reports-stock-trend')}
+        />
+        <ReportCard
+          title="Valor em perfis"
+          value={formatCurrency(metrics.overview.profileStockValue)}
+          detail="Parcela do patrimônio atual concentrada em perfis metálicos."
           onClick={() => scrollToSection('reports-stock-trend')}
         />
       </section>
@@ -519,6 +565,7 @@ export default function ReportsPage() {
                 <Area type="monotone" dataKey="totalValue" name="Total" stroke="#0f766e" fill="url(#stockTotalFill)" strokeWidth={3} />
                 <Line type="monotone" dataKey="standardValue" name="Chapas padrão" stroke="#f59e0b" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="scrapValue" name="Retalhos" stroke="#2563eb" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="profileValue" name="Perfis" stroke="#8b5cf6" strokeWidth={2} dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -563,6 +610,7 @@ export default function ReportsPage() {
                 <Bar dataKey="sheetsConsumed" name="Chapas utilizadas" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="scrapsGenerated" name="Retalhos gerados" fill="#ea580c" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="scrapsReused" name="Retalhos reaproveitados" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="profilesConsumed" name="Perfis consumidos" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -598,6 +646,66 @@ export default function ReportsPage() {
               <p className="text-sm text-zinc-500">SKUs com baixo estoque</p>
               <p className="mt-2 text-2xl font-semibold text-zinc-950">{metrics.overview.lowStockSheets}</p>
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <Card className="border-zinc-200/80 bg-white shadow-sm">
+          <CardHeader>
+            <CardDescription>Baseado nas saídas registradas no período</CardDescription>
+            <CardTitle className="text-zinc-950">Materiais mais utilizados</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {metrics.topMaterialsAndThicknesses.topMaterials.length === 0 ? (
+              <p className="text-sm text-zinc-500">Sem movimentações de saída no período selecionado.</p>
+            ) : (
+              metrics.topMaterialsAndThicknesses.topMaterials.map((item, index) => (
+                <div key={item.name} className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-zinc-950">{item.name}</p>
+                      <p className="text-sm text-zinc-500">{item.orders} saídas registradas</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+                    {item.totalConsumed} un. consumidas
+                  </Badge>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-zinc-200/80 bg-white shadow-sm">
+          <CardHeader>
+            <CardDescription>Espessuras com maior demanda no período</CardDescription>
+            <CardTitle className="text-zinc-950">Espessuras mais utilizadas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {metrics.topMaterialsAndThicknesses.topThicknesses.length === 0 ? (
+              <p className="text-sm text-zinc-500">Sem movimentações de saída no período selecionado.</p>
+            ) : (
+              metrics.topMaterialsAndThicknesses.topThicknesses.map((item, index) => (
+                <div key={item.thickness} className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-zinc-950">{item.thickness} mm</p>
+                      <p className="text-sm text-zinc-500">{item.orders} saídas registradas</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-800">
+                    {item.totalConsumed} un. consumidas
+                  </Badge>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       </section>

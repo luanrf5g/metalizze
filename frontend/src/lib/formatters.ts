@@ -50,13 +50,35 @@ export function formatCurrency(value: number | null | undefined) {
   }).format(value)
 }
 
+export function translateProfileType(type: string) {
+  const dictionary: Record<string, string> = {
+    SQUARE: 'Quadrado',
+    RECTANGULAR: 'Retangular',
+    ROUND: 'Redondo',
+    OBLONG: 'Oblongo',
+    ANGLE: 'Cantoneira',
+    U_CHANNEL: 'Perfil U',
+  }
+
+  return dictionary[type] || type
+}
+
+export function formatProfileDimensions(profile: { width: number; height: number; length: number; thickness: number; profileType: string }) {
+  const equalDimTypes = ['SQUARE', 'ROUND', 'ANGLE']
+  const dim = equalDimTypes.includes(profile.profileType)
+    ? `${profile.width}mm`
+    : `${profile.width}x${profile.height}mm`
+
+  return `${dim} × ${profile.length}mm · ${profile.thickness}mm esp.`
+}
+
 export function formatPhone(phone: string) {
   phone = phone.replace(/\D/g, "")
 
-  if(phone.length === 11) {
+  if (phone.length === 11) {
     // Aplica a máscara: (00) 0.0000-0000
     return phone.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, "($1) $2.$3-$4")
-  } else if(phone.length === 9) {
+  } else if (phone.length === 9) {
     return phone.replace(/(\d{1})(\d{4})(\d{4})/, "$1.$2-$3")
   }
 }

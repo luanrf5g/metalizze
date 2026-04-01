@@ -4,6 +4,7 @@ import { Either, left, right } from "@/core/logic/Either";
 import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
 import { MaterialHasSheetsError } from "./errors/material-has-sheets-error";
 import { SheetsRepository } from "../repositories/sheets-repository";
+import { ProfilesRepository } from "../repositories/profiles-repository";
 
 interface DeleteMaterialUseCaseRequest {
   id: string
@@ -18,7 +19,8 @@ type DeleteMaterialUseCaseResponse = Either<
 export class DeleteMaterialUseCase {
   constructor(
     private materialsRepository: MaterialsRepository,
-    private sheetsRepository: SheetsRepository
+    private sheetsRepository: SheetsRepository,
+    private profilesRepository: ProfilesRepository
   ) { }
 
   async execute({
@@ -31,8 +33,9 @@ export class DeleteMaterialUseCase {
     }
 
     const countSheets = await this.sheetsRepository.countByMaterialId(material.id.toString())
+    const countProfiles = await this.profilesRepository.countByMaterialId(material.id.toString())
 
-    if (countSheets > 0) {
+    if (countSheets > 0 || countProfiles > 0) {
       return left(new MaterialHasSheetsError())
     }
 
