@@ -136,6 +136,15 @@ export function ProfilesTab() {
     return `${dim} × ${p.length}mm`
   }
 
+  const profileTypeColors: Record<ProfileType, string> = {
+    SQUARE: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+    RECTANGULAR: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+    ROUND: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+    OBLONG: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+    ANGLE: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+    U_CHANNEL: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
+  }
+
   return (
     <>
       <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0'>
@@ -225,7 +234,7 @@ export function ProfilesTab() {
                       {profile.sku.split('-C:')[0]}
                     </TableCell>
                     <TableCell>
-                      <span className='px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300'>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shadow-sm ${profileTypeColors[profile.profileType]}`}>
                         {translateProfileType(profile.profileType)}
                       </span>
                     </TableCell>

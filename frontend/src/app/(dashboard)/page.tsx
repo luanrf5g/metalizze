@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertCircleIcon, Factory, Layers, Loader2, PackageSearch, Scissors, Wallet } from 'lucide-react'
+import { AlertCircleIcon, Factory, Layers, Loader2, PackageSearch, RectangleHorizontal, Scissors, Wallet } from 'lucide-react'
 import { api } from '@/lib/api'
 import { formatCurrency, formatDate, translateSheetType } from '@/lib/formatters'
 import { useAuth } from '@/components/AuthProvider'
@@ -18,12 +18,14 @@ interface DashboardMetrics {
   summary: {
     totalStandardSheets: number
     totalScrapSheets: number
+    totalProfiles: number
     totalInventoryUnits: number
     totalMaterials: number
     totalClients: number
     totalStockValue: number | null
     standardStockValue: number
     scrapStockValue: number
+    profileStockValue: number
     lowStockSheets: number
     ownedSheetsInStock: number
   }
@@ -42,6 +44,7 @@ interface DashboardMetrics {
     name: string
     standardSheets: number
     scrapSheets: number
+    profiles: number
     stockValue: number
   }>
   clientsWithOwnedSheetOrders: Array<{
@@ -75,15 +78,17 @@ function normalizeDashboardMetrics(raw: any, role: UserRole = 'VIEWER'): Dashboa
     summary: {
       totalStandardSheets: toNumber(summarySource.totalStandardSheets),
       totalScrapSheets: toNumber(summarySource.totalScrapSheets),
+      totalProfiles: toNumber(summarySource.totalProfiles),
       totalInventoryUnits: toNumber(
         summarySource.totalInventoryUnits ??
-        toNumber(summarySource.totalStandardSheets) + toNumber(summarySource.totalScrapSheets),
+        toNumber(summarySource.totalStandardSheets) + toNumber(summarySource.totalScrapSheets) + toNumber(summarySource.totalProfiles),
       ),
       totalMaterials: toNumber(summarySource.totalMaterials),
       totalClients: toNumber(summarySource.totalClients),
       totalStockValue: typeof summarySource.totalStockValue === 'number' ? summarySource.totalStockValue : null,
       standardStockValue: toNumber(summarySource.standardStockValue),
       scrapStockValue: toNumber(summarySource.scrapStockValue),
+      profileStockValue: toNumber(summarySource.profileStockValue),
       lowStockSheets: toNumber(summarySource.lowStockSheets),
       ownedSheetsInStock: toNumber(summarySource.ownedSheetsInStock),
     },
@@ -224,7 +229,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
         <OverviewCard
           title="Chapas padrão disponíveis"
           value={metrics.summary.totalStandardSheets}
@@ -242,11 +247,19 @@ export default function DashboardPage() {
         />
 
         <OverviewCard
+          title="Perfis disponíveis"
+          value={metrics.summary.totalProfiles}
+          description="Quantidade total de perfis (barras) disponíveis no estoque."
+          icon={RectangleHorizontal}
+          onClick={() => scrollToSection('dashboard-materials')}
+        />
+
+        <OverviewCard
           title={isAdmin ? 'Valor total do estoque' : 'Ordens de corte na semana'}
           value={isAdmin ? formatCurrency(metrics.summary.totalStockValue ?? 0) : metrics.weekly.cutOrdersCurrentWeek}
           description={
             isAdmin
-              ? 'Somatório financeiro de chapas padrão e retalhos atualmente disponíveis.'
+              ? 'Somatório financeiro de chapas, retalhos e perfis atualmente disponíveis.'
               : 'Quantidade de registros de corte e utilização feitos sobre chapas padrão nesta semana.'
           }
           icon={isAdmin ? Wallet : Factory}
@@ -355,7 +368,7 @@ export default function DashboardPage() {
                     <div>
                       <p className="text-base font-semibold text-zinc-950">{material.name}</p>
                       <p className="mt-1 text-sm text-zinc-500">
-                        {material.standardSheets} chapas padrão e {material.scrapSheets} retalhos disponíveis
+                        {material.standardSheets} chapas padrão, {material.scrapSheets} retalhos{material.profiles > 0 ? ` e ${material.profiles} perfis` : ''} disponíveis
                       </p>
                     </div>
                     {isAdmin ? (

@@ -2,20 +2,29 @@
 
 import { Check } from "lucide-react"
 
-const STEPS = [
+const SHEET_STEPS = [
   { number: 1, label: "Chapa" },
   { number: 2, label: "Retalhos" },
   { number: 3, label: "Confirmação" },
 ]
 
+const PROFILE_STEPS = [
+  { number: 1, label: "Perfil" },
+  { number: 2, label: "Sobra" },
+  { number: 3, label: "Confirmação" },
+]
+
 interface StepperProps {
   currentStep: number
+  mode?: 'sheet' | 'profile'
 }
 
-export function Stepper({ currentStep }: StepperProps) {
+export function Stepper({ currentStep, mode = 'sheet' }: StepperProps) {
+  const steps = mode === 'profile' ? PROFILE_STEPS : SHEET_STEPS
+
   return (
     <div className="flex items-center justify-center gap-0">
-      {STEPS.map((step, index) => (
+      {steps.map((step, index) => (
         <div key={step.number} className="flex items-center">
           <div className="flex flex-col items-center gap-1.5">
             <div
@@ -43,7 +52,7 @@ export function Stepper({ currentStep }: StepperProps) {
             </span>
           </div>
 
-          {index < STEPS.length - 1 && (
+          {index < steps.length - 1 && (
             <div className="flex items-center pb-6">
               <div
                 className={`w-20 sm:w-28 h-0.5 mx-2 transition-colors duration-500 ${
