@@ -15,7 +15,7 @@ export class ProfileDetailsPresenter {
       quantity: profile.quantity,
       price: profile.price,
       storageLocation: profile.storageLocation,
-      created: profile.createdAt
+      createdAt: profile.createdAt
     }
   }
 }
