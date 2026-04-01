@@ -47,6 +47,8 @@ import { DeleteProfileController } from "./controllers/delete-profile.controller
 import { DeleteProfileUseCase } from "@/domain/application/use-cases/delete-profile";
 import { ReduceProfileStockController } from "./controllers/reduce-profile-stock.controller";
 import { ReduceProfileStockUseCase } from "@/domain/application/use-cases/reduce-profile-stock";
+import { RegisterProfileCutController } from "./controllers/register-profile-cut.controller";
+import { RegisterProfileCutUseCase } from "@/domain/application/use-cases/register-profile-cut";
 
 // Client
 import { CreateClientController } from "./controllers/create-client.controller";
@@ -123,6 +125,7 @@ import { HealthController } from "./controllers/health.controller";
     EditProfileController,
     DeleteProfileController,
     ReduceProfileStockController,
+    RegisterProfileCutController,
     // Inventory Movements
     FetchInventoryMovementsController,
     RegisterInventoryMovementController,
@@ -168,6 +171,7 @@ import { HealthController } from "./controllers/health.controller";
     EditProfileUseCase,
     DeleteProfileUseCase,
     ReduceProfileStockUseCase,
+    RegisterProfileCutUseCase,
     // Inventory Movements
     FetchInventoryMovementsUseCase,
     RegisterInventoryMovementUseCase,
