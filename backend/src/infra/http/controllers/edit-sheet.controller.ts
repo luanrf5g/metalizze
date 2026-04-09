@@ -5,7 +5,7 @@ import { BadRequestException, Body, Controller, HttpCode, NotFoundException, Par
 import { ResourceNotFoundError } from "@/core/errors/errors/resource-not-found-error";
 import { SheetType } from "@prisma/client";
 
-const editSchemaBodySchema = z.object({
+const editSheetBodySchema = z.object({
   materialId: z.uuid().optional(),
   clientId: z.uuid().nullable().optional(),
   width: z.number().positive().optional(),
@@ -16,9 +16,9 @@ const editSchemaBodySchema = z.object({
   storageLocation: z.string().max(255).nullable().optional()
 })
 
-type EditSchemaBodySchema = z.infer<typeof editSchemaBodySchema>
+type EditSheetBodySchema = z.infer<typeof editSheetBodySchema>
 
-const bodyValidationPipe = new ZodValidationPipe(editSchemaBodySchema)
+const bodyValidationPipe = new ZodValidationPipe(editSheetBodySchema)
 
 @Controller('/sheets/:id')
 export class EditSheetController {
@@ -28,7 +28,7 @@ export class EditSheetController {
   @HttpCode(204)
   async handle(
     @Param('id') sheetId: string,
-    @Body(bodyValidationPipe) body: EditSchemaBodySchema
+    @Body(bodyValidationPipe) body: EditSheetBodySchema
   ) {
     const { materialId, clientId, width, height, thickness, type, price, storageLocation } = body
 

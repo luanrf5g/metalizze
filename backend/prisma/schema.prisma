@@ -22,6 +22,30 @@ enum MovementType {
   EXIT
 }
 
+enum QuoteStatus {
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum QuoteItemKind {
+  SHEET
+  PROFILE
+}
+
+enum DiscountType {
+  PERCENT
+  AMOUNT
+}
+
+enum AdditionalServiceType {
+  BENDING // Dobra ( Unidade )
+  THREADING // Rosqueamento ( Unidade )
+  WELDING // Soldagem ( Metro )
+}
+
 enum ProfileType {
   SQUARE // Quadrado - altura = largura
   RECTANGULAR // Retangular - altura ≠ largura
@@ -49,6 +73,8 @@ model User {
   isActive  Boolean   @default(true) @map("is_active")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
+
+  quotes Quote[] // um usuário pode criar vários orçamentos
 
   @@map("users")
 }
@@ -89,7 +115,8 @@ model Sheet {
   clientId String? @map("client_id")
   client   Client? @relation(fields: [clientId], references: [id])
 
-  movements InventoryMovement[]
+  movements  InventoryMovement[]
+  quoteItems QuoteItem[] // uma chapa pode ser associada a vários itens de orçamento (opcional)
 
   @@unique([materialId, width, height, thickness, clientId, type])
   @@map("sheets")
@@ -105,8 +132,9 @@ model Client {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  sheets   Sheet[] // um client pode ter várias chapas
-  profiles Profile[] // um client pode ter vários perfis
+  sheets   Sheet[] // um cliente pode ter várias chapas
+  profiles Profile[] // um cliente pode ter vários perfis
+  quotes   Quote[] // um cliente pode ter vários orçamentos
 
   @@map("clients")
 }
@@ -149,8 +177,201 @@ model Profile {
   clientId String? @map("client_id")
   client   Client? @relation(fields: [clientId], references: [id])
 
-  movements InventoryMovement[]
+  movements  InventoryMovement[]
+  quoteItems QuoteItem[] // um perfil pode ser associado a vários itens de orçamento (opcional)
 
   @@unique([materialId, profileType, width, height, length, thickness, clientId])
   @@map("profiles")
+}
+
+// === GASES de Corte (Tabela de Configuração) ===
+model CuttingGas {
+  id           String  @id @default(uuid())
+  name         String  @unique
+  pricePerHour Float   @map("price_per_hour")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  quoteItems QuoteItem[] // um gás de corte pode ser usado em vários itens de cotação
+
+  @@map("cutting_gases")
+}
+
+// === Serviços Adicionais Predefinidos (Tabela de Configuração) ===
+model AdditionalService {
+  id           String                @id @default(uuid())
+  type         AdditionalServiceType
+  name         String
+  unitLabel    String                @map("unit_label") // "un", "m", etc.
+  pricePerUnit Float                 @map("price_per_unit")
+  isActive     Boolean               @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  quoteItemServices QuoteItemService[] // um serviço adicional pode ser usado em vários itens de cotação
+
+  @@unique([type, name]) // não pode ter dois serviços com o mesmo tipo e nome
+  @@map("additional_services")
+}
+
+// === SETUP RATE (Table de Configuração) ===
+// A ideia é você poder ter 1..N taxas ( ex.: "Setup Padrão", "Setup Complexo", etc. )
+// cada uma pode ter um valor fixo ou uma fórmula baseada em atributos do item ( ex.: "R$ 100 por item", "R$ 50 + 10% do preço do item", etc. )
+// e escolher qual aplicar no item do orçamento
+model SetupRate {
+  id           String  @id @default(uuid())
+  name         String
+  pricePerHour Float   @map("price_per_hour")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  quoteItems QuoteItem[] // uma taxa de setup pode ser aplicada em vários itens de cotação
+
+  @@map("setup_rates")
+}
+
+// === Orçamento (cabeçalho) ===
+model Quote {
+  id     String      @id @default(uuid())
+  code   String      @unique // código do orçamento, ex.: "QT-2024-0001"
+  status QuoteStatus @default(DRAFT)
+
+  clientId String? @map("client_id")
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  notes      String? // campo para anotações gerais do orçamento
+  validUntil DateTime? @map("valid_until") // data de validade do orçamento
+
+  // Totais (armazenados para performance e para "congelar" os valores no momento da aprovação)
+  totalMaterial  Float         @default(0) @map("total_material")
+  totalCutting   Float         @default(0) @map("total_cutting")
+  totalSetup     Float         @default(0) @map("total_setup")
+  totalServices  Float         @default(0) @map("total_services")
+  subtotalQuote  Float         @default(0) @map("subtotal_quote")
+  discountType   DiscountType? @map("discount_type")
+  discountValue  Float?        @map("discount_value") // valor do desconto, pode ser % ou valor fixo dependendo do discountType
+  discountAmount Float         @default(0) @map("discount_amount") // valor do desconto calculado (para facilitar o processo de aprovação e exibição)
+  totalQuote     Float         @default(0) @map("total_quote") // valor final do orçamento após desconto
+
+  createdById String @map("created_by_id") // ID do usuário que criou o orçamento
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  items QuoteItem[]
+
+  @@map("quotes")
+}
+
+// === Item do orçamento (1 Orçamento pode ter N partes/materiais) ===
+model QuoteItem {
+  id String @id @default(uuid())
+
+  quoteId String @map("quote_id")
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  partNumber Int @map("part_number") // número sequencial da parte dentro do orçamento, ex.: 1, 2, 3...
+
+  itemKind QuoteItemKind @default(SHEET) @map("item_kind") // indica se o item é uma chapa ou um perfil (pode ser usado para mostrar/ocultar campos específicos de cada tipo)
+
+  // Vínculos opcionais com estoque
+  sheetId String? @map("sheet_id")
+  sheet   Sheet?  @relation(fields: [sheetId], references: [id])
+
+  profileId String?  @map("profile_id")
+  profile   Profile? @relation(fields: [profileId], references: [id])
+
+  // Snapshot do material (serve para sheet ou profile)
+  materialName String @map("material_name")
+  thickness    Float
+
+  // Snapshot CHAPA (nullable quando itemKind=Profile)
+  sheetWidth  Float? @map("sheet_width")
+  sheetHeight Float? @map("sheet_height")
+
+  // Snapshot PERFIL (nullable quando itemKind=Sheet)
+  profileType       ProfileType? @map("profile_type")
+  profileLength     Float?       @map("profile_length")
+  profileDimensions String?      @map("profile_dimensions") // campo livre para descrever as dimensões do perfil, ex.: "100x50", "Ø20", etc.
+
+  // Preço base da chapa considerado no orçamento
+  baseMaterialPrice Float   @map("base_material_price") // preço da chapa ou perfil por unidade (ex.: por metro, por peça, etc.)
+  isManualPrice     Boolean @default(false) @map("is_manual_price") // indica se o preço foi editado manualmente
+
+  // "Chapa completa" faz sentido pra sheet; pra profile você pode usar como "barra inteira"
+  isFullMaterial Boolean @default(false) @map("is_full_material") // indica se a parte ocupa uma chapa inteira, mesmo que suas dimensões sejam menores
+
+  // Dados do Corte
+  cuttingGasId       String     @map("cutting_gas_id")
+  cuttingGas         CuttingGas @relation(fields: [cuttingGasId], references: [id])
+  cuttingTimeMinutes Float      @map("cutting_time_minutes") // tempo de corte estimado em minutos
+
+  // Dimensões do “corte total” para chapa
+  cutWidth  Float? @map("cut_width")
+  cutHeight Float? @map("cut_height")
+
+  // Dimensões do "corte total" para perfil
+  cutLength Float? @map("cut_length")
+
+  // Opcional: se você preferir trabalhar com % ao invés de ( ou além de ) dimensões
+  usagePercentage Float? @map("usage_percentage")
+
+  // Setup (opcional)
+  setupRateId String?    @map("setup_rate_id")
+  setupRate   SetupRate? @relation(fields: [setupRateId], references: [id])
+
+  setupTimeMinutes  Float @default(0) @map("setup_time_minutes") // tempo de setup estimado em minutos
+  setupPricePerHour Float @default(0) @map("setup_price_per_hour") // snapshot da taxa de setup para cálculo do preço
+
+  // Acabamento: Opcional e livre (não pre-cadastrado)
+  finishingDescription String? @map("finishing_description")
+  finishingPrice       Float   @default(0) @map("finishing_price")
+
+  // Custos
+  materialCost Float @default(0) @map("material_cost")
+  cuttingCost  Float @default(0) @map("cutting_cost")
+  setupCost    Float @default(0) @map("setup_cost")
+  servicesCost Float @default(0) @map("services_cost")
+
+  subtotalItemCost Float         @default(0) @map("subtotal_item_cost")
+  discountType     DiscountType? @map("discount_type")
+  discountValue    Float?        @map("discount_value") // valor do desconto, pode ser % ou valor fixo dependendo do discountType
+  discountAmount   Float         @default(0) @map("discount_amount") // valor do desconto
+
+  totalItemCost    Float         @default(0) @map("total_item_cost")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  services QuoteItemService[]
+
+  @@index([quoteId])
+  @@index([sheetId])
+  @@index([profileId])
+  @@index([cuttingGasId])
+  @@map("quote_items")
+}
+
+// === Serviços Aplicados ao item (dobra/rosca/solda) ===
+model QuoteItemService {
+  id String @id @default(uuid())
+
+  quoteItemId String    @map("quote_item_id")
+  quoteItem   QuoteItem @relation(fields: [quoteItemId], references: [id], onDelete: Cascade)
+
+  serviceId String            @map("service_id")
+  service   AdditionalService @relation(fields: [serviceId], references: [id])
+
+  quantity   Float
+  unitPrice  Float @map("unit_price")
+  totalPrice Float @map("total_price")
+
+  @@index([quoteItemId])
+  @@index([serviceId])
+  @@map("quote_item_services")
 }

@@ -77,6 +77,38 @@ import { GetReportsMetricsController } from "./controllers/get-reports-metrics.c
 import { GetReportsMetricsUseCase } from "@/domain/application/use-cases/get-reports-metrics";
 import { AnalyticsService } from "@/domain/application/services/analytics.service";
 
+// Additional Services
+import { CreateAdditionalServiceController } from "./controllers/create-additional-service.controller";
+import { CreateAdditionalServiceUseCase } from "@/domain/application/use-cases/create-additional-service";
+import { FetchAdditionalServicesController } from "./controllers/fetch-additional-services.controller";
+import { FetchAdditionalServicesUseCase } from "@/domain/application/use-cases/fetch-additional-services";
+import { EditAdditionalServiceController } from "./controllers/edit-additional-service.controller";
+import { EditAdditionalServiceUseCase } from "@/domain/application/use-cases/edit-additional-service";
+import { ToggleAdditionalServiceActiveController } from "./controllers/toggle-additional-service-active.controller";
+import { ToggleAdditionalServiceActiveUseCase } from "@/domain/application/use-cases/toggle-additional-service-active";
+
+// Setup Rate
+import { CreateSetupRateController } from "./controllers/create-setup-rate.controller";
+import { CreateSetupRateUseCase } from "@/domain/application/use-cases/create-setup-rate";
+import { FetchSetupRatesController } from "./controllers/fetch-setup-rates.controller";
+import { FetchSetupRatesUseCase } from "@/domain/application/use-cases/fetch-setup-rates";
+import { EditSetupRateController } from "./controllers/edit-setup-rate.controller";
+import { EditSetupRateUseCase } from "@/domain/application/use-cases/edit-setup-rate";
+import { ToggleSetupRateActiveController } from "./controllers/toggle-setup-rate-active.controller";
+import { ToggleSetupRateActiveUseCase } from "@/domain/application/use-cases/toggle-setup-rate-active";
+
+// Cutting Gas
+import { CreateCuttingGasController } from "./controllers/create-cutting-gas.controller";
+import { RegisterCuttingGasUseCase } from "@/domain/application/use-cases/register-cutting-gas";
+import { FetchCuttingGasesController } from "./controllers/fetch-cutting-gases.controller";
+import { FetchCuttingGasesUseCase } from "@/domain/application/use-cases/fetch-cutting-gases";
+import { EditCuttingGasController } from "./controllers/edit-cutting-gas.controller";
+import { EditCuttingGasUseCase } from "@/domain/application/use-cases/edit-cutting-gas";
+import { ToggleCuttingGasActiveController } from "./controllers/toggle-cutting-gas-active.controller";
+import { ToggleCuttingGasActiveUseCase } from "@/domain/application/use-cases/toggle-cutting-gas-active";
+import { GetCuttingGasByIdController } from "./controllers/get-cutting-gas-by-id.controller";
+import { GetCuttingGasByIdUseCase } from "@/domain/application/use-cases/get-cutting-gas-by-id";
+
 // Auth & Users
 import { AuthenticateController } from "./controllers/authenticate.controller";
 import { AuthenticateUserUseCase } from "@/domain/application/use-cases/authenticate-user";
@@ -140,6 +172,22 @@ import { HealthController } from "./controllers/health.controller";
     FetchUsersController,
     EditUserController,
     DeleteUserController,
+    // Cutting Gas
+    CreateCuttingGasController,
+    FetchCuttingGasesController,
+    EditCuttingGasController,
+    ToggleCuttingGasActiveController,
+    GetCuttingGasByIdController,
+    // Additional Services
+    CreateAdditionalServiceController,
+    FetchAdditionalServicesController,
+    EditAdditionalServiceController,
+    ToggleAdditionalServiceActiveController,
+    // Setup Rate
+    CreateSetupRateController,
+    FetchSetupRatesController,
+    EditSetupRateController,
+    ToggleSetupRateActiveController,
   ],
   providers: [
     // Material
@@ -187,6 +235,22 @@ import { HealthController } from "./controllers/health.controller";
     FetchUsersUseCase,
     EditUserUseCase,
     DeleteUserUseCase,
+    // Cutting Gas
+    RegisterCuttingGasUseCase,
+    FetchCuttingGasesUseCase,
+    EditCuttingGasUseCase,
+    ToggleCuttingGasActiveUseCase,
+    GetCuttingGasByIdUseCase,
+    // Additional Services
+    CreateAdditionalServiceUseCase,
+    FetchAdditionalServicesUseCase,
+    EditAdditionalServiceUseCase,
+    ToggleAdditionalServiceActiveUseCase,
+    // Setup Rate
+    CreateSetupRateUseCase,
+    FetchSetupRatesUseCase,
+    EditSetupRateUseCase,
+    ToggleSetupRateActiveUseCase
   ]
 })
 export class HttpModule { }

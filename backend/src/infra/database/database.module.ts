@@ -14,6 +14,12 @@ import { UsersRepository } from "@/domain/application/repositories/users-reposit
 import { PrismaUsersRepository } from "./prisma/repositories/prisma-users-repository";
 import { ProfilesRepository } from "@/domain/application/repositories/profiles-repository";
 import { PrismaProfilesRepository } from "./prisma/repositories/prisma-profiles-repository";
+import { CuttingGasRepository } from "@/domain/application/repositories/cutting-gas-repository";
+import { PrismaCuttingGasRepository } from "./prisma/repositories/prisma-cutting-gas-repository";
+import { AdditionalServicesRepository } from "@/domain/application/repositories/additional-services-repository";
+import { PrismaAdditionalServicesRepository } from "./prisma/repositories/prisma-additional-services-repository";
+import { SetupRatesRepository } from "@/domain/application/repositories/setup-rates-repository";
+import { PrismaSetupRatesRepository } from "./prisma/repositories/prisma-setup-rates-repository";
 
 @Module({
   providers: [
@@ -45,6 +51,18 @@ import { PrismaProfilesRepository } from "./prisma/repositories/prisma-profiles-
     {
       provide: ProfilesRepository,
       useClass: PrismaProfilesRepository
+    },
+    {
+      provide: CuttingGasRepository,
+      useClass: PrismaCuttingGasRepository
+    },
+    {
+      provide: AdditionalServicesRepository,
+      useClass: PrismaAdditionalServicesRepository
+    },
+    {
+      provide: SetupRatesRepository,
+      useClass: PrismaSetupRatesRepository
     }
   ],
   exports: [
@@ -55,7 +73,10 @@ import { PrismaProfilesRepository } from "./prisma/repositories/prisma-profiles-
     InventoryMovementsRepository,
     MetricsRepository,
     UsersRepository,
-    ProfilesRepository
+    ProfilesRepository,
+    CuttingGasRepository,
+    AdditionalServicesRepository,
+    SetupRatesRepository
   ]
 })
 export class DatabaseModule { }

@@ -8,7 +8,7 @@ const createSheetBodySchema = z.object({
   width: z.number().positive(),
   height: z.number().positive(),
   thickness: z.number().positive(),
-  quantity: z.number().int().min(1),
+  quantity: z.number().int().min(0),
   price: z.number().min(0).nullable().optional(),
   clientId: z.uuid().nullable().optional(),
   type: z.enum(['STANDARD', 'SCRAP']).optional(),
