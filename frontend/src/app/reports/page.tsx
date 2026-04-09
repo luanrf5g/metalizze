@@ -396,7 +396,7 @@ export default function ReportsPage() {
   return (
     <div className="w-full space-y-8 p-6 md:p-10">
       <section className="rounded-[2rem] border border-zinc-200 bg-linear-to-br from-zinc-950 via-zinc-900 to-stone-800 p-6 text-white shadow-sm md:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-300">Relatórios gerenciais</p>
             <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">Leitura completa do sistema e do estoque</h1>
@@ -406,7 +406,7 @@ export default function ReportsPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 lg:items-end">
+          <div className="flex flex-col gap-3 xl:items-end">
             <div className="flex flex-col gap-3 sm:flex-row">
               <Select value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as ReportPeriod)}>
                 <SelectTrigger className="w-full min-w-52 border-white/20 bg-white/10 text-white">
@@ -445,7 +445,7 @@ export default function ReportsPage() {
         </div>
       </section>
 
-      <section id="reports-period" className="grid grid-cols-1 gap-4 scroll-mt-24 md:grid-cols-2 xl:grid-cols-4">
+      <section id="reports-period" className="grid grid-cols-1 gap-4 scroll-mt-24 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <ReportCard
           title={`Ordens em ${metrics.selectedPeriod.label.toLowerCase()}`}
           value={metrics.periodComparison.cutOrders}
@@ -496,7 +496,7 @@ export default function ReportsPage() {
         />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
         <Card className="border-zinc-200/80 bg-white shadow-sm">
           <CardHeader>
             <CardDescription>Ordens no período</CardDescription>
@@ -542,7 +542,7 @@ export default function ReportsPage() {
         </Card>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card id="reports-stock-trend" className="border-zinc-200/80 bg-white shadow-sm scroll-mt-24">
           <CardHeader>
             <CardDescription>Patrimônio em estoque ao longo do período filtrado</CardDescription>
@@ -593,7 +593,7 @@ export default function ReportsPage() {
         </Card>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
         <Card id="reports-materials" className="border-zinc-200/80 bg-white shadow-sm scroll-mt-24">
           <CardHeader>
             <CardDescription>Materiais com maior impacto operacional no período filtrado</CardDescription>
@@ -650,7 +650,7 @@ export default function ReportsPage() {
         </Card>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="border-zinc-200/80 bg-white shadow-sm">
           <CardHeader>
             <CardDescription>Baseado nas saídas registradas no período</CardDescription>
@@ -710,7 +710,7 @@ export default function ReportsPage() {
         </Card>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card id="reports-clients" className="border-zinc-200/80 bg-white shadow-sm scroll-mt-24">
           <CardHeader>
             <CardDescription>Clientes vinculados a ordens em chapas próprias no período</CardDescription>
