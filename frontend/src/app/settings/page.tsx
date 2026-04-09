@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
+import { QuoteSettingsTabs } from "@/components/settings/quote-settings/QuoteSettingsTabs"
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -27,9 +28,10 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue={isAdmin ? "general" : "profile"} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+        <TabsList className={`grid w-full lg:w-auto lg:inline-flex ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="general">Geral</TabsTrigger>
           <TabsTrigger value="profile">Perfil</TabsTrigger>
+          {isAdmin && <TabsTrigger value="quote-settings">Cálculo de Orçamento</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="general" className="mt-6">
@@ -91,6 +93,22 @@ export default function SettingsPage() {
             </Card>
           </form>
         </TabsContent>
+
+        {isAdmin && (
+          <TabsContent value="quote-settings" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cálculo de Orçamento</CardTitle>
+                <CardDescription>
+                  Gerencie gases de corte, serviços adicionais e taxas de setup usados nos orçamentos.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <QuoteSettingsTabs isAdmin={isAdmin} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )
