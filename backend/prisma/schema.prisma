@@ -40,6 +40,11 @@ enum DiscountType {
   AMOUNT
 }
 
+enum MaterialCalcMode {
+  SIMPLE_CUT
+  NEST_UNITS
+}
+
 enum AdditionalServiceType {
   BENDING // Dobra ( Unidade )
   THREADING // Rosqueamento ( Unidade )
@@ -313,6 +318,28 @@ model QuoteItem {
 
   // "Chapa completa" faz sentido pra sheet; pra profile você pode usar como "barra inteira"
   isFullMaterial Boolean @default(false) @map("is_full_material") // indica se a parte ocupa uma chapa inteira, mesmo que suas dimensões sejam menores
+
+  // Modo de cálculo do material
+  materialCalcMode MaterialCalcMode @default(NEST_UNITS) @map("material_calc_mode")
+
+  // Nest CHAPA: controle de múltiplas chapas e chapa parcial
+  sheetCount          Int     @default(1) @map("sheet_count") // número de chapas consumidas pelo nest
+  hasPartialLastSheet Boolean @default(false) @map("has_partial_last_sheet") // se a última chapa é parcial
+  partialSheetWidth   Float?  @map("partial_sheet_width") // largura da chapa parcial
+  partialSheetHeight  Float?  @map("partial_sheet_height") // altura da chapa parcial
+  chargeFullLastSheet Boolean @default(false) @map("charge_full_last_sheet") // cobra a última chapa inteira mesmo parcial
+  computedSheetUnits  Float   @default(1) @map("computed_sheet_units") // chapas efetivamente cobradas (ex.: 9.35)
+
+  // Nest PERFIL: controle de múltiplas barras e barra parcial
+  profileBarCount          Int     @default(1) @map("profile_bar_count") // número de barras/perfis consumidos
+  hasPartialLastProfileBar Boolean @default(false) @map("has_partial_last_profile_bar") // se a última barra é parcial
+  partialProfileLength     Float?  @map("partial_profile_length") // comprimento usado na última barra (mm)
+  chargeFullLastProfileBar Boolean @default(false) @map("charge_full_last_profile_bar") // cobra a última barra inteira mesmo parcial
+  computedProfileBarUnits  Float   @default(1) @map("computed_profile_bar_units") // barras efetivamente cobradas
+  scrapNotes               String? @map("scrap_notes") // observações de sobra (opcional)
+
+  // Geral
+  isMaterialProvidedByClient Boolean @default(false) @map("is_material_provided_by_client") // material fornecido pelo cliente (custo não entra no total)
 
   // Dados do Corte
   cuttingGasId       String     @map("cutting_gas_id")

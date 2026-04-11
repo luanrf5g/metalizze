@@ -35,7 +35,7 @@ export class CalculateQuoteTotalsUseCase {
     let subtotalQuote = 0
 
     for (const { item } of items) {
-      totalMaterial += item.materialCost
+      totalMaterial += item.materialCharged
       totalCutting += item.cuttingCost
       totalSetup += item.setupCost
       totalServices += item.servicesCost

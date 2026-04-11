@@ -43,7 +43,7 @@ export class FetchQuotesController {
     const { quotes } = result.value
 
     return {
-      quotes: quotes.map(QuotePresenter.toHTTP),
+      quotes: quotes.map(QuotePresenter.toHTTPList),
     }
   }
 }

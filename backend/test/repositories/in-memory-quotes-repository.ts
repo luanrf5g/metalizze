@@ -3,6 +3,7 @@ import { Quote } from "@/domain/enterprise/entities/quote";
 import { QuoteItem } from "@/domain/enterprise/entities/quote-item";
 import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
 import { QuoteWithItems } from "@/domain/enterprise/value-objects/quote-with-items";
+import { QuoteListEntry } from "@/domain/enterprise/value-objects/quote-list-entry";
 
 export class InMemoryQuotesRepository implements QuotesRepository {
   public items: Quote[] = []
@@ -79,7 +80,7 @@ export class InMemoryQuotesRepository implements QuotesRepository {
     this.quoteItemServices.push(...services)
   }
 
-  async fetchAll({ page, clientId, status }: FetchQuotesParams) {
+  async fetchAll({ page, clientId, status }: FetchQuotesParams): Promise<QuoteListEntry[]> {
     return this.items
       .filter((quote) => {
         if (clientId != null && quote.clientId?.toString() !== clientId) return false
@@ -88,5 +89,12 @@ export class InMemoryQuotesRepository implements QuotesRepository {
       })
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice((page - 1) * 20, page * 20)
+      .map((quote) =>
+        QuoteListEntry.create({
+          quote,
+          client: null,
+          createdBy: { id: quote.createdById.toString(), name: 'Unknown' },
+        }),
+      )
   }
 }

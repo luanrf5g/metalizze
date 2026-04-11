@@ -1,10 +1,11 @@
-import { Entity } from "@/core/entities/entity";
+﻿import { Entity } from "@/core/entities/entity";
 import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 import { Optional } from "@/core/types/optional";
 import { ProfileType } from "./profile";
 import { DiscountType } from "./quote";
 
 export type QuoteItemKind = 'SHEET' | 'PROFILE'
+export type MaterialCalcMode = 'SIMPLE_CUT' | 'NEST_UNITS'
 
 export interface QuoteItemProps {
   quoteId: UniqueEntityId
@@ -22,6 +23,20 @@ export interface QuoteItemProps {
   baseMaterialPrice: number
   isManualPrice: boolean
   isFullMaterial: boolean
+  materialCalcMode: MaterialCalcMode
+  sheetCount: number
+  hasPartialLastSheet: boolean
+  partialSheetWidth?: number | null
+  partialSheetHeight?: number | null
+  chargeFullLastSheet: boolean
+  computedSheetUnits: number
+  profileBarCount: number
+  hasPartialLastProfileBar: boolean
+  partialProfileLength?: number | null
+  chargeFullLastProfileBar: boolean
+  computedProfileBarUnits: number
+  scrapNotes?: string | null
+  isMaterialProvidedByClient: boolean
   cuttingGasId: UniqueEntityId
   cuttingTimeMinutes: number
   cutWidth?: number | null
@@ -61,6 +76,21 @@ export class QuoteItem extends Entity<QuoteItemProps> {
   get baseMaterialPrice() { return this.props.baseMaterialPrice }
   get isManualPrice() { return this.props.isManualPrice }
   get isFullMaterial() { return this.props.isFullMaterial }
+  get materialCalcMode() { return this.props.materialCalcMode }
+  get sheetCount() { return this.props.sheetCount }
+  get hasPartialLastSheet() { return this.props.hasPartialLastSheet }
+  get partialSheetWidth() { return this.props.partialSheetWidth ?? null }
+  get partialSheetHeight() { return this.props.partialSheetHeight ?? null }
+  get chargeFullLastSheet() { return this.props.chargeFullLastSheet }
+  get computedSheetUnits() { return this.props.computedSheetUnits }
+  get profileBarCount() { return this.props.profileBarCount }
+  get hasPartialLastProfileBar() { return this.props.hasPartialLastProfileBar }
+  get partialProfileLength() { return this.props.partialProfileLength ?? null }
+  get chargeFullLastProfileBar() { return this.props.chargeFullLastProfileBar }
+  get computedProfileBarUnits() { return this.props.computedProfileBarUnits }
+  get scrapNotes() { return this.props.scrapNotes ?? null }
+  get isMaterialProvidedByClient() { return this.props.isMaterialProvidedByClient }
+  get materialCharged() { return this.props.isMaterialProvidedByClient ? 0 : this.props.materialCost }
   get cuttingGasId() { return this.props.cuttingGasId }
   get cuttingTimeMinutes() { return this.props.cuttingTimeMinutes }
   get cutWidth() { return this.props.cutWidth ?? null }
@@ -89,6 +119,16 @@ export class QuoteItem extends Entity<QuoteItemProps> {
       | 'createdAt'
       | 'isManualPrice'
       | 'isFullMaterial'
+      | 'materialCalcMode'
+      | 'sheetCount'
+      | 'hasPartialLastSheet'
+      | 'chargeFullLastSheet'
+      | 'computedSheetUnits'
+      | 'profileBarCount'
+      | 'hasPartialLastProfileBar'
+      | 'chargeFullLastProfileBar'
+      | 'computedProfileBarUnits'
+      | 'isMaterialProvidedByClient'
       | 'setupTimeMinutes'
       | 'setupPricePerHour'
       | 'finishingPrice'
@@ -107,6 +147,16 @@ export class QuoteItem extends Entity<QuoteItemProps> {
         ...props,
         isManualPrice: props.isManualPrice ?? false,
         isFullMaterial: props.isFullMaterial ?? false,
+        materialCalcMode: props.materialCalcMode ?? 'NEST_UNITS',
+        sheetCount: props.sheetCount ?? 1,
+        hasPartialLastSheet: props.hasPartialLastSheet ?? false,
+        chargeFullLastSheet: props.chargeFullLastSheet ?? false,
+        computedSheetUnits: props.computedSheetUnits ?? 1,
+        profileBarCount: props.profileBarCount ?? 1,
+        hasPartialLastProfileBar: props.hasPartialLastProfileBar ?? false,
+        chargeFullLastProfileBar: props.chargeFullLastProfileBar ?? false,
+        computedProfileBarUnits: props.computedProfileBarUnits ?? 1,
+        isMaterialProvidedByClient: props.isMaterialProvidedByClient ?? false,
         setupTimeMinutes: props.setupTimeMinutes ?? 0,
         setupPricePerHour: props.setupPricePerHour ?? 0,
         finishingPrice: props.finishingPrice ?? 0,

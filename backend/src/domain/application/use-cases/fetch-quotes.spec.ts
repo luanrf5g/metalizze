@@ -76,7 +76,7 @@ describe('Fetch Quotes Use Case', () => {
     expect(result.isRight()).toBe(true)
     if (result.isRight()) {
       expect(result.value.quotes).toHaveLength(2)
-      expect(result.value.quotes.every((q) => q.status === 'DRAFT')).toBe(true)
+      expect(result.value.quotes.every((q) => q.quote.status === 'DRAFT')).toBe(true)
     }
   })
 

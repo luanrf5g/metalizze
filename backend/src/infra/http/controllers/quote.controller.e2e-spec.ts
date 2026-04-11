@@ -222,4 +222,263 @@ describe('Quotes (E2E)', () => {
     expect(deleteRes.statusCode).toBe(200)
     expect(deleteRes.body.quote.items).toHaveLength(0)
   })
+
+  it('should compute partial sheet units (9.35) and store materialCharged', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({
+      pricePerHour: 0,
+    })
+
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    expect(createRes.statusCode).toBe(201)
+    const qId: string = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'SHEET',
+        materialName: 'Aço Galvanizado',
+        thickness: 1.5,
+        sheetWidth: 2000,
+        sheetHeight: 1000,
+        baseMaterialPrice: 100,
+        isFullMaterial: false,
+        sheetCount: 10,
+        hasPartialLastSheet: true,
+        chargeFullLastSheet: false,
+        partialSheetWidth: 700,
+        partialSheetHeight: 1000,
+        isMaterialProvidedByClient: false,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    expect(item).toBeDefined()
+    // partialUsage = (700*1000) / (2000*1000) = 0.35 → 9.35 units
+    expect(item.computedSheetUnits).toBeCloseTo(9.35, 4)
+    expect(item.materialCost).toBeCloseTo(935, 2)
+    expect(item.materialCharged).toBeCloseTo(935, 2)
+    // totalMaterial on the quote should reflect materialCharged
+    expect(addRes.body.quote.totalMaterial).toBeCloseTo(935, 2)
+  })
+
+  it('should return 10 sheet units when chargeFullLastSheet=true', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({ pricePerHour: 0 })
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    const qId = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'SHEET',
+        materialName: 'Inox',
+        thickness: 2,
+        sheetWidth: 2000,
+        sheetHeight: 1000,
+        baseMaterialPrice: 200,
+        isFullMaterial: false,
+        sheetCount: 10,
+        hasPartialLastSheet: true,
+        chargeFullLastSheet: true,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    expect(item.computedSheetUnits).toBe(10)
+    expect(item.materialCost).toBe(2000)
+  })
+
+  it('should set materialCharged=0 and reduce totalMaterial when isMaterialProvidedByClient=true', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({ pricePerHour: 0 })
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    const qId = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'SHEET',
+        materialName: 'Alumínio cliente',
+        thickness: 3,
+        baseMaterialPrice: 800,
+        isFullMaterial: true,
+        isMaterialProvidedByClient: true,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    expect(item.materialCost).toBe(800)
+    expect(item.materialCharged).toBe(0)
+    // totalMaterial on quote is computed from materialCharged
+    expect(addRes.body.quote.totalMaterial).toBe(0)
+    expect(addRes.body.quote.totalQuote).toBe(0)
+  })
+
+  it('GET /quotes list includes client and createdBy', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+
+    expect(response.statusCode).toBe(200)
+    const quotes: { client: unknown, createdBy: unknown }[] = response.body.quotes
+    expect(Array.isArray(quotes)).toBe(true)
+    if (quotes.length > 0) {
+      const q = quotes[0]
+      expect(q).toHaveProperty('createdBy')
+      expect((q.createdBy as { name: string }).name).toBeDefined()
+      // client may be null for quotes without a client
+      expect('client' in q).toBe(true)
+    }
+  })
+
+  it('should compute SIMPLE_CUT sheet units = cutArea/sheetArea', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({ pricePerHour: 0 })
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    const qId = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'SHEET',
+        materialName: 'Aço SIMPLE_CUT',
+        thickness: 3,
+        sheetWidth: 2000,
+        sheetHeight: 1000,
+        baseMaterialPrice: 1000,
+        isFullMaterial: false,
+        materialCalcMode: 'SIMPLE_CUT',
+        cutWidth: 400,
+        cutHeight: 600,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    // (400*600) / (2000*1000) = 0.12
+    expect(item.computedSheetUnits).toBeCloseTo(0.12, 4)
+    expect(item.materialCost).toBeCloseTo(120, 2)
+    expect(item.materialCalcMode).toBe('SIMPLE_CUT')
+  })
+
+  it('should add a PROFILE item with NEST_UNITS and compute partial bar units', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({ pricePerHour: 0 })
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    const qId = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'PROFILE',
+        materialName: 'Perfil U 30x30',
+        thickness: 3,
+        profileLength: 3000,
+        baseMaterialPrice: 100,
+        isFullMaterial: false,
+        materialCalcMode: 'NEST_UNITS',
+        profileBarCount: 5,
+        hasPartialLastProfileBar: true,
+        partialProfileLength: 600,
+        chargeFullLastProfileBar: false,
+        scrapNotes: 'Sobra para estoque',
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    // 4 + 600/3000 = 4.2
+    expect(item.computedProfileBarUnits).toBeCloseTo(4.2, 4)
+    expect(item.materialCost).toBeCloseTo(420, 2)
+    expect(item.scrapNotes).toBe('Sobra para estoque')
+    expect(item.materialCalcMode).toBe('NEST_UNITS')
+  })
+
+  it('should add a PROFILE item with SIMPLE_CUT and compute bar units = cutLength/profileLength', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({ pricePerHour: 0 })
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    const qId = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'PROFILE',
+        materialName: 'Barra chata SIMPLE_CUT',
+        thickness: 5,
+        profileLength: 3000,
+        baseMaterialPrice: 80,
+        isFullMaterial: false,
+        materialCalcMode: 'SIMPLE_CUT',
+        cutLength: 750,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    // 750/3000 = 0.25
+    expect(item.computedProfileBarUnits).toBeCloseTo(0.25, 4)
+    expect(item.materialCost).toBeCloseTo(20, 2)
+    expect(item.materialCalcMode).toBe('SIMPLE_CUT')
+  })
+
+  it('should set materialCharged=0 for PROFILE when isMaterialProvidedByClient=true', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({ pricePerHour: 0 })
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+    const qId = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${qId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'PROFILE',
+        materialName: 'Tubo cliente',
+        thickness: 3,
+        profileLength: 6000,
+        baseMaterialPrice: 200,
+        isFullMaterial: false,
+        materialCalcMode: 'NEST_UNITS',
+        profileBarCount: 3,
+        isMaterialProvidedByClient: true,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 0,
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const item = addRes.body.quote.items[0]
+    expect(item.materialCost).toBe(600) // 200 * 3
+    expect(item.materialCharged).toBe(0)
+    expect(addRes.body.quote.totalMaterial).toBe(0)
+  })
 })

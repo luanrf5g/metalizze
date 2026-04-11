@@ -1,5 +1,6 @@
 import { Quote } from '@/domain/enterprise/entities/quote'
 import { QuoteWithItems } from '@/domain/enterprise/value-objects/quote-with-items'
+import { QuoteListEntry } from '@/domain/enterprise/value-objects/quote-list-entry'
 import { QuoteItemPresenter } from './quote-item-presenter'
 
 export class QuotePresenter {
@@ -28,6 +29,14 @@ export class QuotePresenter {
       createdById: quote.createdById.toString(),
       createdAt: quote.createdAt,
       updatedAt: quote.updatedAt,
+    }
+  }
+
+  static toHTTPList(entry: QuoteListEntry) {
+    return {
+      ...QuotePresenter.toHTTP(entry.quote),
+      client: entry.client,
+      createdBy: entry.createdBy,
     }
   }
 

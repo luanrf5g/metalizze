@@ -4,6 +4,7 @@ import { Quote } from "@/domain/enterprise/entities/quote";
 import { QuoteItem } from "@/domain/enterprise/entities/quote-item";
 import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
 import { QuoteWithItems } from "@/domain/enterprise/value-objects/quote-with-items";
+import { QuoteListEntry } from "@/domain/enterprise/value-objects/quote-list-entry";
 import { PrismaService } from "../prisma.service";
 import { PrismaQuoteMapper } from "../mappers/prisma-quote-mapper";
 import { PrismaQuoteItemMapper } from "../mappers/prisma-quote-item-mapper";
@@ -108,17 +109,27 @@ export class PrismaQuotesRepository implements QuotesRepository {
     })
   }
 
-  async fetchAll({ page, clientId, status }: FetchQuotesParams): Promise<Quote[]> {
+  async fetchAll({ page, clientId, status }: FetchQuotesParams): Promise<QuoteListEntry[]> {
     const raws = await this.prisma.quote.findMany({
       where: {
         ...(clientId != null ? { clientId } : {}),
         ...(status != null ? { status } : {}),
+      },
+      include: {
+        client: { select: { id: true, name: true } },
+        createdBy: { select: { id: true, name: true } },
       },
       take: 20,
       skip: (page - 1) * 20,
       orderBy: { createdAt: 'desc' },
     })
 
-    return raws.map(PrismaQuoteMapper.toDomain)
+    return raws.map((raw) =>
+      QuoteListEntry.create({
+        quote: PrismaQuoteMapper.toDomain(raw),
+        client: raw.client ? { id: raw.client.id, name: raw.client.name } : null,
+        createdBy: { id: raw.createdBy.id, name: raw.createdBy.name },
+      }),
+    )
   }
 }

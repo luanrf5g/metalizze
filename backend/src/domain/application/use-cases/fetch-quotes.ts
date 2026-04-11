@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Either, right } from "@/core/logic/Either";
 import { QuotesRepository, FetchQuotesParams } from "../repositories/quotes-repository";
-import { Quote } from "@/domain/enterprise/entities/quote";
+import { QuoteListEntry } from "@/domain/enterprise/value-objects/quote-list-entry";
 
-type FetchQuotesUseCaseResponse = Either<never, { quotes: Quote[] }>
+type FetchQuotesUseCaseResponse = Either<never, { quotes: QuoteListEntry[] }>
 
 @Injectable()
 export class FetchQuotesUseCase {

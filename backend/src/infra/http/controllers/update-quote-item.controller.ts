@@ -32,6 +32,21 @@ const updateQuoteItemBodySchema = z.object({
   baseMaterialPrice: z.number().min(0).optional(),
   isManualPrice: z.boolean().optional(),
   isFullMaterial: z.boolean().optional(),
+  materialCalcMode: z.enum(['SIMPLE_CUT', 'NEST_UNITS']).optional(),
+  // Nest CHAPA
+  sheetCount: z.number().int().min(1).optional(),
+  hasPartialLastSheet: z.boolean().optional(),
+  partialSheetWidth: z.number().positive().optional().nullable(),
+  partialSheetHeight: z.number().positive().optional().nullable(),
+  chargeFullLastSheet: z.boolean().optional(),
+  // Nest PERFIL
+  profileBarCount: z.number().int().min(1).optional(),
+  hasPartialLastProfileBar: z.boolean().optional(),
+  partialProfileLength: z.number().positive().optional().nullable(),
+  chargeFullLastProfileBar: z.boolean().optional(),
+  scrapNotes: z.string().optional().nullable(),
+  // Geral
+  isMaterialProvidedByClient: z.boolean().optional(),
   usagePercentage: z.number().min(0).max(100).optional().nullable(),
   cuttingGasId: z.uuid().optional(),
   cuttingTimeMinutes: z.number().min(0).optional(),
