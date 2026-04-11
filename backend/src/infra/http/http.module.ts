@@ -108,6 +108,15 @@ import { UpdateQuoteItemUseCase } from "@/domain/application/use-cases/update-qu
 import { RemoveQuoteItemUseCase } from "@/domain/application/use-cases/remove-quote-item";
 import { ReplaceQuoteItemServicesUseCase } from "@/domain/application/use-cases/replace-quote-item-services";
 import { TransitionQuoteStatusUseCase } from "@/domain/application/use-cases/transition-quote-status";
+import { CreateQuoteController } from "./controllers/create-quote.controller";
+import { FetchQuotesController } from "./controllers/fetch-quotes.controller";
+import { GetQuoteByIdController } from "./controllers/get-quote-by-id.controller";
+import { UpdateQuoteController } from "./controllers/update-quote.controller";
+import { TransitionQuoteStatusController } from "./controllers/transition-quote-status.controller";
+import { AddQuoteItemController } from "./controllers/add-quote-item.controller";
+import { UpdateQuoteItemController } from "./controllers/update-quote-item.controller";
+import { DeleteQuoteItemController } from "./controllers/delete-quote-item.controller";
+import { ReplaceQuoteItemServicesController } from "./controllers/replace-quote-item-services.controller";
 
 // Cutting Gas
 import { CreateCuttingGasController } from "./controllers/create-cutting-gas.controller";
@@ -200,6 +209,16 @@ import { HealthController } from "./controllers/health.controller";
     FetchSetupRatesController,
     EditSetupRateController,
     ToggleSetupRateActiveController,
+    // Quote
+    CreateQuoteController,
+    FetchQuotesController,
+    GetQuoteByIdController,
+    UpdateQuoteController,
+    TransitionQuoteStatusController,
+    AddQuoteItemController,
+    UpdateQuoteItemController,
+    DeleteQuoteItemController,
+    ReplaceQuoteItemServicesController,
   ],
   providers: [
     // Material
