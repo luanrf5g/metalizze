@@ -11,6 +11,7 @@ import {
   Layers,
   LayoutDashboard,
   Menu,
+  Receipt,
   Scissors,
   Settings,
   Users,
@@ -31,6 +32,7 @@ const menuItems = [
   { name: 'Clientes', href: '/customers', icon: Users, module: 'clients' },
   { name: 'Movimentações', href: '/movements', icon: ArrowRightLeft, module: 'movements' },
   { name: 'Relatórios', href: '/reports', icon: FileText, module: 'reports' },
+  { name: 'Orçamentos', href: '/quotes', icon: Receipt, module: 'quotes' },
   { name: 'Usuários', href: '/users', icon: UserCog, module: 'users' },
   { name: 'Configurações', href: '/settings', icon: Settings, module: 'settings' },
 ];
