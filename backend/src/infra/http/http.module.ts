@@ -97,6 +97,18 @@ import { EditSetupRateUseCase } from "@/domain/application/use-cases/edit-setup-
 import { ToggleSetupRateActiveController } from "./controllers/toggle-setup-rate-active.controller";
 import { ToggleSetupRateActiveUseCase } from "@/domain/application/use-cases/toggle-setup-rate-active";
 
+// Quote
+import { CreateQuoteUseCase } from "@/domain/application/use-cases/create-quote";
+import { AddQuoteItemUseCase } from "@/domain/application/use-cases/add-quote-item";
+import { CalculateQuoteTotalsUseCase } from "@/domain/application/use-cases/calculate-quote-totals";
+import { FetchQuotesUseCase } from "@/domain/application/use-cases/fetch-quotes";
+import { GetQuoteByIdUseCase } from "@/domain/application/use-cases/get-quote-by-id";
+import { UpdateQuoteUseCase } from "@/domain/application/use-cases/update-quote";
+import { UpdateQuoteItemUseCase } from "@/domain/application/use-cases/update-quote-item";
+import { RemoveQuoteItemUseCase } from "@/domain/application/use-cases/remove-quote-item";
+import { ReplaceQuoteItemServicesUseCase } from "@/domain/application/use-cases/replace-quote-item-services";
+import { TransitionQuoteStatusUseCase } from "@/domain/application/use-cases/transition-quote-status";
+
 // Cutting Gas
 import { CreateCuttingGasController } from "./controllers/create-cutting-gas.controller";
 import { RegisterCuttingGasUseCase } from "@/domain/application/use-cases/register-cutting-gas";
@@ -250,7 +262,18 @@ import { HealthController } from "./controllers/health.controller";
     CreateSetupRateUseCase,
     FetchSetupRatesUseCase,
     EditSetupRateUseCase,
-    ToggleSetupRateActiveUseCase
+    ToggleSetupRateActiveUseCase,
+    // Quote
+    CalculateQuoteTotalsUseCase,
+    CreateQuoteUseCase,
+    AddQuoteItemUseCase,
+    FetchQuotesUseCase,
+    GetQuoteByIdUseCase,
+    UpdateQuoteUseCase,
+    UpdateQuoteItemUseCase,
+    RemoveQuoteItemUseCase,
+    ReplaceQuoteItemServicesUseCase,
+    TransitionQuoteStatusUseCase,
   ]
 })
 export class HttpModule { }

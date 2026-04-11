@@ -264,6 +264,13 @@ model Quote {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
+  sentAt     DateTime? @map("sent_at")
+  approvedAt DateTime? @map("approved_at")
+  rejectedAt DateTime? @map("rejected_at")
+  expiredAt  DateTime? @map("expired_at")
+
+  revision Int @default(1)
+
   items QuoteItem[]
 
   @@map("quotes")
@@ -344,7 +351,7 @@ model QuoteItem {
   discountValue    Float?        @map("discount_value") // valor do desconto, pode ser % ou valor fixo dependendo do discountType
   discountAmount   Float         @default(0) @map("discount_amount") // valor do desconto
 
-  totalItemCost    Float         @default(0) @map("total_item_cost")
+  totalItemCost Float @default(0) @map("total_item_cost")
 
   createdAt DateTime @default(now()) @map("created_at")
 

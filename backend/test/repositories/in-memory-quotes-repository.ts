@@ -1,0 +1,92 @@
+import { QuotesRepository, FetchQuotesParams } from "@/domain/application/repositories/quotes-repository";
+import { Quote } from "@/domain/enterprise/entities/quote";
+import { QuoteItem } from "@/domain/enterprise/entities/quote-item";
+import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
+import { QuoteWithItems } from "@/domain/enterprise/value-objects/quote-with-items";
+
+export class InMemoryQuotesRepository implements QuotesRepository {
+  public items: Quote[] = []
+  public quoteItems: QuoteItem[] = []
+  public quoteItemServices: QuoteItemService[] = []
+
+  async create(quote: Quote) {
+    this.items.push(quote)
+  }
+
+  async save(quote: Quote) {
+    const index = this.items.findIndex((item) => item.id.equals(quote.id))
+    this.items[index] = quote
+  }
+
+  async findById(id: string) {
+    const quote = this.items.find((item) => item.id.toString() === id)
+    return quote ?? null
+  }
+
+  async findByCode(code: string) {
+    const quote = this.items.find((item) => item.code === code)
+    return quote ?? null
+  }
+
+  async findWithItemsById(id: string) {
+    const quote = this.items.find((item) => item.id.toString() === id)
+    if (!quote) return null
+
+    const items = this.quoteItems
+      .filter((item) => item.quoteId.toString() === id)
+      .sort((a, b) => a.partNumber - b.partNumber)
+      .map((item) => ({
+        item,
+        services: this.quoteItemServices.filter(
+          (s) => s.quoteItemId.toString() === item.id.toString(),
+        ),
+      }))
+
+    return QuoteWithItems.create({ quote, items })
+  }
+
+  async countItemsByQuoteId(quoteId: string) {
+    return this.quoteItems.filter((item) => item.quoteId.toString() === quoteId).length
+  }
+
+  async addItem(item: QuoteItem, services: QuoteItemService[]) {
+    this.quoteItems.push(item)
+    this.quoteItemServices.push(...services)
+  }
+
+  async findItemById(itemId: string) {
+    const item = this.quoteItems.find((i) => i.id.toString() === itemId)
+    return item ?? null
+  }
+
+  async saveItem(item: QuoteItem) {
+    const index = this.quoteItems.findIndex((i) => i.id.equals(item.id))
+    this.quoteItems[index] = item
+  }
+
+  async removeItem(itemId: string) {
+    const index = this.quoteItems.findIndex((i) => i.id.toString() === itemId)
+    if (index !== -1) this.quoteItems.splice(index, 1)
+    this.quoteItemServices = this.quoteItemServices.filter(
+      (s) => s.quoteItemId.toString() !== itemId,
+    )
+  }
+
+  async replaceItemServices(itemId: string, services: QuoteItemService[]) {
+    this.quoteItemServices = this.quoteItemServices.filter(
+      (s) => s.quoteItemId.toString() !== itemId,
+    )
+    this.quoteItemServices.push(...services)
+  }
+
+  async fetchAll({ page, clientId, status }: FetchQuotesParams) {
+    return this.items
+      .filter((quote) => {
+        if (clientId != null && quote.clientId?.toString() !== clientId) return false
+        if (status != null && quote.status !== status) return false
+        return true
+      })
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice((page - 1) * 20, page * 20)
+  }
+}

@@ -20,6 +20,8 @@ import { AdditionalServicesRepository } from "@/domain/application/repositories/
 import { PrismaAdditionalServicesRepository } from "./prisma/repositories/prisma-additional-services-repository";
 import { SetupRatesRepository } from "@/domain/application/repositories/setup-rates-repository";
 import { PrismaSetupRatesRepository } from "./prisma/repositories/prisma-setup-rates-repository";
+import { QuotesRepository } from "@/domain/application/repositories/quotes-repository";
+import { PrismaQuotesRepository } from "./prisma/repositories/prisma-quotes-repository";
 
 @Module({
   providers: [
@@ -63,6 +65,10 @@ import { PrismaSetupRatesRepository } from "./prisma/repositories/prisma-setup-r
     {
       provide: SetupRatesRepository,
       useClass: PrismaSetupRatesRepository
+    },
+    {
+      provide: QuotesRepository,
+      useClass: PrismaQuotesRepository
     }
   ],
   exports: [
@@ -76,7 +82,8 @@ import { PrismaSetupRatesRepository } from "./prisma/repositories/prisma-setup-r
     ProfilesRepository,
     CuttingGasRepository,
     AdditionalServicesRepository,
-    SetupRatesRepository
+    SetupRatesRepository,
+    QuotesRepository
   ]
 })
 export class DatabaseModule { }
