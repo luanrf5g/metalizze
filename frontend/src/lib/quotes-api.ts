@@ -1,5 +1,5 @@
 import { api } from './api'
-import type { QuoteDTO, QuoteStatus, DiscountType, QuoteItemKind, ProfileType, MaterialCalcMode } from '@/types/quote'
+import type { QuoteDTO, QuoteStatus, DiscountType, QuoteItemKind, ProfileType, MaterialCalcMode, MetaDTO, QuotesSortBy, QuotesSortOrder } from '@/types/quote'
 
 /* ── Quote CRUD ─────────────────────────────────────────────── */
 
@@ -18,13 +18,39 @@ export async function createQuote(input: CreateQuoteInput): Promise<QuoteDTO> {
 
 export interface FetchQuotesParams {
   page?: number
-  status?: QuoteStatus | null
+  perPage?: number
+  sortBy?: QuotesSortBy
+  sortOrder?: QuotesSortOrder
+  status?: string | null   // CSV e.g. "DRAFT,SENT" or single "DRAFT"
   clientId?: string | null
+  createdById?: string | null
+  code?: string | null
+  from?: string | null
+  to?: string | null
 }
 
-export async function fetchQuotes(params: FetchQuotesParams = {}): Promise<QuoteDTO[]> {
-  const res = await api.get('/quotes', { params })
-  return res.data.quotes
+export interface QuotesListResponse {
+  quotes: QuoteDTO[]
+  meta: MetaDTO
+}
+
+export async function fetchQuotes(params: FetchQuotesParams = {}): Promise<QuotesListResponse> {
+  // Remove nullish/empty params before sending
+  const cleaned: Record<string, string | number> = {}
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== null && v !== undefined && v !== '') {
+      cleaned[k] = v as string | number
+    }
+  }
+  const res = await api.get('/quotes', { params: cleaned })
+  const quotes: QuoteDTO[] = res.data.quotes ?? []
+  const meta: MetaDTO = res.data.meta ?? {
+    page: params.page ?? 1,
+    perPage: params.perPage ?? 20,
+    total: quotes.length,
+    totalPages: 1,
+  }
+  return { quotes, meta }
 }
 
 export async function getQuoteById(id: string): Promise<QuoteDTO> {
@@ -161,4 +187,23 @@ export interface AdditionalServiceOption {
 export async function fetchAdditionalServices(): Promise<AdditionalServiceOption[]> {
   const res = await api.get('/additional-services')
   return (res.data.additionalServices ?? []).filter((s: AdditionalServiceOption) => s.isActive)
+}
+
+/* ── Clients for filter selects ──────────────────────────────── */
+
+export interface ClientOption {
+  id: string
+  name: string
+}
+
+export async function fetchClientOptions(): Promise<ClientOption[]> {
+  try {
+    const res = await api.get('/clients', { params: { page: 1 } })
+    return (res.data.clients ?? []).map((c: { id: string; name: string }) => ({
+      id: c.id,
+      name: c.name,
+    }))
+  } catch {
+    return []
+  }
 }

@@ -3,10 +3,21 @@ export type DiscountType = 'PERCENT' | 'AMOUNT'
 export type QuoteItemKind = 'SHEET' | 'PROFILE'
 export type ProfileType = 'SQUARE' | 'RECTANGULAR' | 'ROUND' | 'OBLONG' | 'ANGLE' | 'U_CHANNEL'
 export type MaterialCalcMode = 'SIMPLE_CUT' | 'NEST_UNITS'
+export type QuotesSortBy = 'createdAt' | 'updatedAt' | 'totalQuote' | 'code'
+export type QuotesSortOrder = 'asc' | 'desc'
+
+export interface MetaDTO {
+  page: number
+  perPage: number
+  total: number
+  totalPages: number
+}
 
 export interface QuoteItemServiceDTO {
   id: string
   serviceId: string
+  serviceName: string | null
+  unitLabel: string | null
   quantity: number
   unitPrice: number
   totalPrice: number

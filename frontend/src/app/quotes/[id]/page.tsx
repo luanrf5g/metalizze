@@ -8,11 +8,13 @@ import {
   AlertCircleIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
+  DownloadIcon,
   Loader2Icon,
   PencilIcon,
   PlusIcon,
   RefreshCcwIcon,
   SendIcon,
+  ShareIcon,
   Trash2Icon,
   WrenchIcon,
   XCircleIcon,
@@ -102,9 +104,56 @@ export default function QuoteDetailPage() {
   const [servicesItem, setServicesItem] = useState<QuoteItemDTO | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<QuoteItemDTO | null>(null)
   const [isDeletingItem, setIsDeletingItem] = useState(false)
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false)
 
   function applyUpdate(updated: QuoteDTO) {
     setQuote(updated)
+  }
+
+  async function handleExportPdf(share = false) {
+    if (!quote) return
+    setIsPdfGenerating(true)
+    try {
+      // Load full quote with items if not already loaded
+      const fullQuote = quote.items ? quote : await getQuoteById(quote.id)
+
+      // Dynamic import to keep jspdf out of SSR bundle
+      const { buildQuotePdf } = await import('@/lib/quote-pdf')
+      const { blob, filename } = buildQuotePdf(fullQuote)
+
+      if (share && typeof navigator.share === 'function') {
+        try {
+          const file = new File([blob], filename, { type: 'application/pdf' })
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `Orçamento ${fullQuote.code}`,
+              text: `Orçamento ${fullQuote.code} - Rev. ${fullQuote.revision}`,
+            })
+            return
+          }
+        } catch (shareErr) {
+          if ((shareErr as Error)?.name === 'AbortError') return
+          // Otherwise fallback to download
+        }
+      }
+
+      // Download fallback
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+
+      if (share) {
+        toast.info('Seu navegador não suporta compartilhar. O arquivo foi baixado.')
+      }
+    } catch {
+      toast.error('Erro ao gerar o PDF.')
+    } finally {
+      setIsPdfGenerating(false)
+    }
   }
 
   async function loadQuote() {
@@ -278,6 +327,30 @@ export default function QuoteDetailPage() {
             )}
           </div>
         )}
+
+        {/* PDF export — always visible */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isPdfGenerating}
+            onClick={() => handleExportPdf(false)}
+          >
+            {isPdfGenerating
+              ? <Loader2Icon className="size-4 animate-spin" />
+              : <DownloadIcon className="size-4" />}
+            Baixar PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isPdfGenerating}
+            onClick={() => handleExportPdf(true)}
+          >
+            <ShareIcon className="size-4" />
+            Compartilhar
+          </Button>
+        </div>
       </div>
 
       {/* Two-column layout: left = details/items, right = sticky financial summary */}
