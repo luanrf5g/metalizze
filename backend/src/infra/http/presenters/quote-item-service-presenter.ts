@@ -5,6 +5,8 @@ export class QuoteItemServicePresenter {
     return {
       id: service.id.toString(),
       serviceId: service.serviceId.toString(),
+      serviceName: service.serviceName,
+      unitLabel: service.unitLabel,
       quantity: service.quantity,
       unitPrice: service.unitPrice,
       totalPrice: service.totalPrice,

@@ -4,10 +4,25 @@ import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-servic
 import { QuoteWithItems } from "@/domain/enterprise/value-objects/quote-with-items";
 import { QuoteListEntry } from "@/domain/enterprise/value-objects/quote-list-entry";
 
+export type QuotesSortBy = 'createdAt' | 'updatedAt' | 'totalQuote' | 'code'
+export type QuotesSortOrder = 'asc' | 'desc'
+
 export interface FetchQuotesParams {
   page: number
+  perPage?: number
+  sortBy?: QuotesSortBy
+  sortOrder?: QuotesSortOrder
+  status?: QuoteStatus[] | null
   clientId?: string | null
-  status?: QuoteStatus | null
+  createdById?: string | null
+  code?: string | null
+  from?: Date | null
+  to?: Date | null
+}
+
+export interface FetchQuotesResult {
+  quotes: QuoteListEntry[]
+  total: number
 }
 
 export abstract class QuotesRepository {
@@ -22,5 +37,5 @@ export abstract class QuotesRepository {
   abstract saveItem(item: QuoteItem): Promise<void>
   abstract removeItem(itemId: string): Promise<void>
   abstract replaceItemServices(itemId: string, services: QuoteItemService[]): Promise<void>
-  abstract fetchAll(params: FetchQuotesParams): Promise<QuoteListEntry[]>
+  abstract fetchAll(params: FetchQuotesParams): Promise<FetchQuotesResult>
 }

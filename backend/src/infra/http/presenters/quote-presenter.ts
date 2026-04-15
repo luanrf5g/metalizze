@@ -43,6 +43,8 @@ export class QuotePresenter {
   static toHTTPWithItems(quoteWithItems: QuoteWithItems) {
     return {
       ...QuotePresenter.toHTTP(quoteWithItems.quote),
+      client: quoteWithItems.client,
+      createdBy: quoteWithItems.createdBy,
       items: quoteWithItems.items.map(({ item, services }) =>
         QuoteItemPresenter.toHTTP(item, services),
       ),

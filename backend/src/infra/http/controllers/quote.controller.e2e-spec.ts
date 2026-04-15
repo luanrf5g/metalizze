@@ -481,4 +481,144 @@ describe('Quotes (E2E)', () => {
     expect(item.materialCharged).toBe(0)
     expect(addRes.body.quote.totalMaterial).toBe(0)
   })
+
+  describe('GET /quotes filters + pagination + sorting', () => {
+    let quoteCodes: string[] = []
+
+    beforeAll(async () => {
+      quoteCodes = []
+      // Create 3 DRAFT quotes
+      for (let i = 0; i < 3; i++) {
+        const res = await request(app.getHttpServer())
+          .post('/quotes')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ notes: `filter-test-${i}` })
+        expect(res.statusCode).toBe(201)
+        quoteCodes.push(res.body.quote.code)
+      }
+      // Create 1 SENT quote (transition DRAFT -> SENT)
+      const sentRes = await request(app.getHttpServer())
+        .post('/quotes')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ notes: 'filter-sent' })
+      expect(sentRes.statusCode).toBe(201)
+      const sentId: string = sentRes.body.quote.id
+      quoteCodes.push(sentRes.body.quote.code)
+      await request(app.getHttpServer())
+        .patch(`/quotes/${sentId}/status`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ status: 'SENT' })
+    })
+
+    it('should return meta with pagination info', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ page: '1', perPage: '1' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      expect(res.body).toHaveProperty('meta')
+      expect(res.body.meta.page).toBe(1)
+      expect(res.body.meta.perPage).toBe(1)
+      expect(res.body.meta.total).toBeGreaterThan(1)
+      expect(res.body.meta.totalPages).toBeGreaterThan(1)
+      expect(res.body.quotes).toHaveLength(1)
+    })
+
+    it('should filter by status=DRAFT', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ status: 'DRAFT', perPage: '100' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      const quotes: { status: string }[] = res.body.quotes
+      expect(quotes.every((q) => q.status === 'DRAFT')).toBe(true)
+    })
+
+    it('should filter by status=DRAFT,SENT (csv)', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ status: 'DRAFT,SENT', perPage: '100' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      const quotes: { status: string }[] = res.body.quotes
+      expect(quotes.every((q) => q.status === 'DRAFT' || q.status === 'SENT')).toBe(true)
+      // should include at least one SENT
+      expect(quotes.some((q) => q.status === 'SENT')).toBe(true)
+    })
+
+    it('should filter by createdById (current user)', async () => {
+      // Get current user id
+      const meRes = await request(app.getHttpServer())
+        .get('/me')
+        .set('Authorization', `Bearer ${authToken}`)
+      expect(meRes.statusCode).toBe(200)
+      const userId: string = meRes.body.user.id
+
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ createdById: userId, perPage: '100' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      const quotes: { createdById: string }[] = res.body.quotes
+      expect(quotes.length).toBeGreaterThan(0)
+      expect(quotes.every((q) => q.createdById === userId)).toBe(true)
+    })
+
+    it('should filter by code (partial contains)', async () => {
+      // Use first 3 chars of a created code
+      const codeFragment = quoteCodes[0].slice(0, 3)
+
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ code: codeFragment, perPage: '100' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      const quotes: { code: string }[] = res.body.quotes
+      expect(quotes.every((q) => q.code.toLowerCase().includes(codeFragment.toLowerCase()))).toBe(true)
+    })
+
+    it('should sort by createdAt asc', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ sortBy: 'createdAt', sortOrder: 'asc', perPage: '100' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      const quotes: { createdAt: string }[] = res.body.quotes
+      for (let i = 1; i < quotes.length; i++) {
+        expect(new Date(quotes[i].createdAt).getTime()).toBeGreaterThanOrEqual(
+          new Date(quotes[i - 1].createdAt).getTime(),
+        )
+      }
+    })
+
+    it('should sort by createdAt desc', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ sortBy: 'createdAt', sortOrder: 'desc', perPage: '100' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(200)
+      const quotes: { createdAt: string }[] = res.body.quotes
+      for (let i = 1; i < quotes.length; i++) {
+        expect(new Date(quotes[i].createdAt).getTime()).toBeLessThanOrEqual(
+          new Date(quotes[i - 1].createdAt).getTime(),
+        )
+      }
+    })
+
+    it('should return 400 for invalid status value', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/quotes')
+        .query({ status: 'INVALID_STATUS' })
+        .set('Authorization', `Bearer ${authToken}`)
+
+      expect(res.statusCode).toBe(400)
+    })
+  })
 })

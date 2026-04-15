@@ -2,8 +2,12 @@ import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
 import { Prisma, QuoteItemService as PrismaQuoteItemService } from "@prisma/client";
 
+type PrismaQuoteItemServiceWithName = PrismaQuoteItemService & {
+  service?: { name: string; unitLabel: string } | null
+}
+
 export class PrismaQuoteItemServiceMapper {
-  static toDomain(raw: PrismaQuoteItemService): QuoteItemService {
+  static toDomain(raw: PrismaQuoteItemServiceWithName): QuoteItemService {
     return QuoteItemService.create(
       {
         quoteItemId: new UniqueEntityId(raw.quoteItemId),
@@ -11,6 +15,8 @@ export class PrismaQuoteItemServiceMapper {
         quantity: raw.quantity,
         unitPrice: raw.unitPrice,
         totalPrice: raw.totalPrice,
+        serviceName: raw.service?.name,
+        unitLabel: raw.service?.unitLabel,
       },
       new UniqueEntityId(raw.id),
     )

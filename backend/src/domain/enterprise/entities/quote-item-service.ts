@@ -7,6 +7,8 @@ export interface QuoteItemServiceProps {
   quantity: number
   unitPrice: number
   totalPrice: number
+  serviceName?: string
+  unitLabel?: string
 }
 
 export class QuoteItemService extends Entity<QuoteItemServiceProps> {
@@ -15,6 +17,8 @@ export class QuoteItemService extends Entity<QuoteItemServiceProps> {
   get quantity() { return this.props.quantity }
   get unitPrice() { return this.props.unitPrice }
   get totalPrice() { return this.props.totalPrice }
+  get serviceName() { return this.props.serviceName ?? null }
+  get unitLabel() { return this.props.unitLabel ?? null }
 
   static create(props: QuoteItemServiceProps, id?: UniqueEntityId) {
     return new QuoteItemService(props, id)

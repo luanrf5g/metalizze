@@ -1,4 +1,4 @@
-import { QuotesRepository, FetchQuotesParams } from "@/domain/application/repositories/quotes-repository";
+import { QuotesRepository, FetchQuotesParams, FetchQuotesResult } from "@/domain/application/repositories/quotes-repository";
 import { Quote } from "@/domain/enterprise/entities/quote";
 import { QuoteItem } from "@/domain/enterprise/entities/quote-item";
 import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
@@ -80,21 +80,72 @@ export class InMemoryQuotesRepository implements QuotesRepository {
     this.quoteItemServices.push(...services)
   }
 
-  async fetchAll({ page, clientId, status }: FetchQuotesParams): Promise<QuoteListEntry[]> {
-    return this.items
-      .filter((quote) => {
-        if (clientId != null && quote.clientId?.toString() !== clientId) return false
-        if (status != null && quote.status !== status) return false
-        return true
-      })
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice((page - 1) * 20, page * 20)
-      .map((quote) =>
+  async fetchAll(params: FetchQuotesParams): Promise<FetchQuotesResult> {
+    const {
+      page,
+      perPage = 20,
+      sortBy = 'updatedAt',
+      sortOrder = 'desc',
+      clientId,
+      createdById,
+      status,
+      code,
+      from,
+      to,
+    } = params
+
+    let filtered = this.items.filter((quote) => {
+      if (clientId != null && quote.clientId?.toString() !== clientId) return false
+      if (createdById != null && quote.createdById.toString() !== createdById) return false
+      if (status != null && status.length > 0 && !status.includes(quote.status)) return false
+      if (code != null && !quote.code.toLowerCase().includes(code.toLowerCase())) return false
+      if (from != null && quote.createdAt < from) return false
+      if (to != null && quote.createdAt > to) return false
+      return true
+    })
+
+    filtered = filtered.sort((a, b) => {
+      let aVal: number | string
+      let bVal: number | string
+      switch (sortBy) {
+        case 'totalQuote':
+          aVal = a.totalQuote
+          bVal = b.totalQuote
+          break
+        case 'code':
+          aVal = a.code
+          bVal = b.code
+          break
+        case 'createdAt':
+          aVal = a.createdAt.getTime()
+          bVal = b.createdAt.getTime()
+          break
+        case 'updatedAt':
+        default:
+          aVal = (a.updatedAt ?? a.createdAt).getTime()
+          bVal = (b.updatedAt ?? b.createdAt).getTime()
+          break
+      }
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      return sortOrder === 'asc'
+        ? (aVal as number) - (bVal as number)
+        : (bVal as number) - (aVal as number)
+    })
+
+    const total = filtered.length
+    const paginated = filtered.slice((page - 1) * perPage, page * perPage)
+
+    return {
+      quotes: paginated.map((quote) =>
         QuoteListEntry.create({
           quote,
           client: null,
           createdBy: { id: quote.createdById.toString(), name: 'Unknown' },
         }),
-      )
+      ),
+      total,
+    }
   }
 }

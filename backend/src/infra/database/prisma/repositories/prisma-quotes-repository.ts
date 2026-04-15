@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { QuotesRepository, FetchQuotesParams } from "@/domain/application/repositories/quotes-repository";
+import { QuotesRepository, FetchQuotesParams, FetchQuotesResult } from "@/domain/application/repositories/quotes-repository";
 import { Quote } from "@/domain/enterprise/entities/quote";
 import { QuoteItem } from "@/domain/enterprise/entities/quote-item";
 import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
@@ -43,9 +43,15 @@ export class PrismaQuotesRepository implements QuotesRepository {
     const raw = await this.prisma.quote.findUnique({
       where: { id },
       include: {
+        client: { select: { id: true, name: true } },
+        createdBy: { select: { id: true, name: true } },
         items: {
           include: {
-            services: true,
+            services: {
+              include: {
+                service: { select: { name: true, unitLabel: true } },
+              },
+            },
           },
           orderBy: { partNumber: 'asc' },
         },
@@ -60,7 +66,12 @@ export class PrismaQuotesRepository implements QuotesRepository {
       services: rawItem.services.map(PrismaQuoteItemServiceMapper.toDomain),
     }))
 
-    return QuoteWithItems.create({ quote, items })
+    return QuoteWithItems.create({
+      quote,
+      items,
+      client: raw.client ?? null,
+      createdBy: raw.createdBy,
+    })
   }
 
   async countItemsByQuoteId(quoteId: string): Promise<number> {
@@ -109,27 +120,58 @@ export class PrismaQuotesRepository implements QuotesRepository {
     })
   }
 
-  async fetchAll({ page, clientId, status }: FetchQuotesParams): Promise<QuoteListEntry[]> {
-    const raws = await this.prisma.quote.findMany({
-      where: {
-        ...(clientId != null ? { clientId } : {}),
-        ...(status != null ? { status } : {}),
-      },
-      include: {
-        client: { select: { id: true, name: true } },
-        createdBy: { select: { id: true, name: true } },
-      },
-      take: 20,
-      skip: (page - 1) * 20,
-      orderBy: { createdAt: 'desc' },
-    })
+  async fetchAll(params: FetchQuotesParams): Promise<FetchQuotesResult> {
+    const {
+      page,
+      perPage = 20,
+      sortBy = 'updatedAt',
+      sortOrder = 'desc',
+      clientId,
+      createdById,
+      status,
+      code,
+      from,
+      to,
+    } = params
 
-    return raws.map((raw) =>
-      QuoteListEntry.create({
-        quote: PrismaQuoteMapper.toDomain(raw),
-        client: raw.client ? { id: raw.client.id, name: raw.client.name } : null,
-        createdBy: { id: raw.createdBy.id, name: raw.createdBy.name },
+    const where = {
+      ...(clientId != null ? { clientId } : {}),
+      ...(createdById != null ? { createdById } : {}),
+      ...(status != null && status.length > 0 ? { status: { in: status } } : {}),
+      ...(code != null ? { code: { contains: code, mode: 'insensitive' as const } } : {}),
+      ...(from != null || to != null
+        ? {
+          createdAt: {
+            ...(from != null ? { gte: from } : {}),
+            ...(to != null ? { lte: to } : {}),
+          },
+        }
+        : {}),
+    }
+
+    const [raws, total] = await Promise.all([
+      this.prisma.quote.findMany({
+        where,
+        include: {
+          client: { select: { id: true, name: true } },
+          createdBy: { select: { id: true, name: true } },
+        },
+        orderBy: { [sortBy]: sortOrder },
+        take: perPage,
+        skip: (page - 1) * perPage,
       }),
-    )
+      this.prisma.quote.count({ where }),
+    ])
+
+    return {
+      quotes: raws.map((raw) =>
+        QuoteListEntry.create({
+          quote: PrismaQuoteMapper.toDomain(raw),
+          client: raw.client ? { id: raw.client.id, name: raw.client.name } : null,
+          createdBy: { id: raw.createdBy.id, name: raw.createdBy.name },
+        }),
+      ),
+      total,
+    }
   }
 }

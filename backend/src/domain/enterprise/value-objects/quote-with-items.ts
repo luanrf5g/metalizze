@@ -10,6 +10,8 @@ export interface QuoteItemEntry {
 export interface QuoteWithItemsProps {
   quote: Quote
   items: QuoteItemEntry[]
+  client?: { id: string; name: string } | null
+  createdBy?: { id: string; name: string }
 }
 
 export class QuoteWithItems {
@@ -21,6 +23,8 @@ export class QuoteWithItems {
 
   get quote() { return this.props.quote }
   get items() { return this.props.items }
+  get client() { return this.props.client ?? null }
+  get createdBy() { return this.props.createdBy ?? null }
 
   static create(props: QuoteWithItemsProps) {
     return new QuoteWithItems(props)
