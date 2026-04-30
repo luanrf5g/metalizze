@@ -1,5 +1,6 @@
 export type QuoteStatus = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED' | 'EXPIRED'
 export type DiscountType = 'PERCENT' | 'AMOUNT'
+export type QuoteType = 'CUTTING' | 'SALE'
 export type QuoteItemKind = 'SHEET' | 'PROFILE'
 export type ProfileType = 'SQUARE' | 'RECTANGULAR' | 'ROUND' | 'OBLONG' | 'ANGLE' | 'U_CHANNEL'
 export type MaterialCalcMode = 'SIMPLE_CUT' | 'NEST_UNITS'
@@ -56,6 +57,8 @@ export interface QuoteItemDTO {
   isMaterialProvidedByClient: boolean
   cuttingGasId: string
   cuttingTimeMinutes: number
+  chargeMinimumCutting: boolean
+  effectiveCuttingTimeMinutes?: number
   cutWidth: number | null
   cutHeight: number | null
   cutLength: number | null
@@ -95,8 +98,12 @@ export interface QuoteDTO {
   discountType: DiscountType | null
   discountValue: number | null
   discountAmount: number
-  totalQuote: number
-  sentAt: string | null
+  totalQuote: number  quoteType: QuoteType
+  saleMarkupType: DiscountType | null
+  saleMarkupValue: number | null
+  totalCost: number
+  saleMarkupAmount: number
+  totalSale: number  sentAt: string | null
   approvedAt: string | null
   rejectedAt: string | null
   expiredAt: string | null

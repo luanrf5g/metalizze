@@ -1,5 +1,5 @@
 import { api } from './api'
-import type { QuoteDTO, QuoteStatus, DiscountType, QuoteItemKind, ProfileType, MaterialCalcMode, MetaDTO, QuotesSortBy, QuotesSortOrder } from '@/types/quote'
+import type { QuoteDTO, QuoteStatus, QuoteType, DiscountType, QuoteItemKind, ProfileType, MaterialCalcMode, MetaDTO, QuotesSortBy, QuotesSortOrder } from '@/types/quote'
 
 /* ── Quote CRUD ─────────────────────────────────────────────── */
 
@@ -21,8 +21,7 @@ export interface FetchQuotesParams {
   perPage?: number
   sortBy?: QuotesSortBy
   sortOrder?: QuotesSortOrder
-  status?: string | null   // CSV e.g. "DRAFT,SENT" or single "DRAFT"
-  clientId?: string | null
+  status?: string | null   // CSV e.g. "DRAFT,SENT" or single "DRAFT"  quoteType?: QuoteType | null  clientId?: string | null
   createdById?: string | null
   code?: string | null
   from?: string | null
@@ -64,6 +63,9 @@ export interface UpdateQuoteInput {
   validUntil?: string | null
   discountType?: DiscountType | null
   discountValue?: number | null
+  quoteType?: QuoteType
+  saleMarkupType?: DiscountType | null
+  saleMarkupValue?: number | null
 }
 
 export async function updateQuote(id: string, input: UpdateQuoteInput): Promise<QuoteDTO> {

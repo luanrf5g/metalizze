@@ -42,7 +42,7 @@ import { QuoteStatusBadge } from '@/components/quotes/QuoteStatusBadge'
 import { CreateQuoteModal } from '@/components/quotes/CreateQuoteModal'
 import { fetchQuotes, fetchClientOptions, getQuoteById, type ClientOption, type QuotesListResponse } from '@/lib/quotes-api'
 import { formatCurrency, formatDate } from '@/lib/formatters'
-import type { QuoteDTO, QuoteStatus, QuotesSortBy, QuotesSortOrder, MetaDTO } from '@/types/quote'
+import type { QuoteDTO, QuoteStatus, QuoteType, QuotesSortBy, QuotesSortOrder, MetaDTO } from '@/types/quote'
 
 const STATUS_OPTIONS: { label: string; value: QuoteStatus }[] = [
   { label: 'Rascunho', value: 'DRAFT' },
@@ -86,6 +86,7 @@ export default function QuotesPage() {
   const sortBy = (sp.get('sortBy') as QuotesSortBy) || 'updatedAt'
   const sortOrder = (sp.get('sortOrder') as QuotesSortOrder) || 'desc'
   const statusParam = sp.get('status') ?? ''          // CSV
+  const quoteTypeParam = (sp.get('quoteType') ?? '') as QuoteType | ''
   const clientIdParam = sp.get('clientId') ?? ''
   const fromParam = sp.get('from') ?? ''
   const toParam = sp.get('to') ?? ''
@@ -138,6 +139,7 @@ export default function QuotesPage() {
       sortBy,
       sortOrder,
       status: statusParam || null,
+      quoteType: (quoteTypeParam || null) as QuoteType | null,
       clientId: clientIdParam || null,
       createdById: myQuotes && user?.id ? user.id : null,
       code: searchFromUrl || null,
@@ -206,6 +208,10 @@ export default function QuotesPage() {
     updateUrl({ clientId: val === 'ALL' ? null : val, page: '1' })
   }
 
+  function handleQuoteTypeChange(val: string) {
+    updateUrl({ quoteType: val === 'ALL' ? null : val, page: '1' })
+  }
+
   function handleFromChange(val: string) {
     updateUrl({ from: val || null, page: '1' })
   }
@@ -246,7 +252,7 @@ export default function QuotesPage() {
   // ── Computed helpers ──────────────────────────────────────────────
   const activeStatuses = statusParam ? statusParam.split(',') : []
   const hasFilters =
-    searchFromUrl || statusParam || clientIdParam || fromParam || toParam || myQuotes
+    searchFromUrl || statusParam || quoteTypeParam || clientIdParam || fromParam || toParam || myQuotes
 
   const start = (meta?.total ?? 0) === 0 ? 0 : (page - 1) * perPage + 1
   const end = Math.min(page * perPage, meta?.total ?? 0)
@@ -317,6 +323,18 @@ export default function QuotesPage() {
             ))}
           </PopoverContent>
         </Popover>
+
+        {/* Quote type select */}
+        <Select value={quoteTypeParam || 'ALL'} onValueChange={handleQuoteTypeChange}>
+          <SelectTrigger className="w-44 h-9">
+            <SelectValue placeholder="Tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todos os tipos</SelectItem>
+            <SelectItem value="CUTTING">Corte</SelectItem>
+            <SelectItem value="SALE">Venda</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Client select */}
         {clients.length > 0 && (
@@ -402,6 +420,7 @@ export default function QuotesPage() {
                     Código <SortIcon column="code" currentSortBy={sortBy} currentSortOrder={sortOrder} />
                   </TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead className="w-16">Rev.</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Criado por</TableHead>
@@ -423,7 +442,7 @@ export default function QuotesPage() {
               <TableBody>
                 {quotes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-12">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-12">
                       Nenhum orçamento encontrado.
                     </TableCell>
                   </TableRow>
@@ -433,6 +452,11 @@ export default function QuotesPage() {
                       <TableCell className="font-mono text-sm font-medium">{quote.code}</TableCell>
                       <TableCell>
                         <QuoteStatusBadge status={quote.status} />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={quote.quoteType === 'SALE' ? 'default' : 'secondary'} className="text-xs">
+                          {quote.quoteType === 'SALE' ? 'Venda' : 'Corte'}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-center text-muted-foreground">
                         v{quote.revision}

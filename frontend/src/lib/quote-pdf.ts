@@ -53,29 +53,26 @@ function itemDimensions(item: QuoteItemDTO): string {
   return `${type} – ${item.profileLength ?? '—'} mm`
 }
 
-export function buildQuotePdfFilename(quote: QuoteDTO): string {
+export function buildQuotePdfFilename(quote: QuoteDTO, mode: 'internal' | 'client' = 'internal'): string {
   // quote.code format: "ORC-2604-SI0QM-4810" — extract the 3rd segment (index 2)
   const codePart = quote.code.split('-')[2] ?? quote.code
-
-  const clientPart = (quote.client?.name ?? quote.clientId ?? 'AVULSO')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '')
 
   const created = new Date(quote.createdAt)
   const dd = String(created.getDate()).padStart(2, '0')
   const mm = String(created.getMonth() + 1).padStart(2, '0')
   const yyyy = created.getFullYear()
   const rev = String(quote.revision).padStart(4, '0')
+  const modeSuffix = mode === 'client' ? 'CLIENTE' : 'INTERNO'
 
-  // ORC-{CODE}_{REVISION}_{CLIENT}-{DD-MM-YYYY}.pdf
-  return `ORC-${codePart}_${rev}_${clientPart}-${dd}-${mm}-${yyyy}.pdf`
+  // ORC-{CODE}_{REVISION}_{MODE}-{DD-MM-YYYY}.pdf
+  return `ORC-${codePart}_${rev}_${modeSuffix}-${dd}-${mm}-${yyyy}.pdf`
 }
 
 type JsPDFWithTable = jsPDF & { lastAutoTable: { finalY: number } }
 
-export function buildQuotePdf(quote: QuoteDTO): { blob: Blob; filename: string } {
+export function buildQuotePdf(quote: QuoteDTO, mode: 'internal' | 'client' = 'internal'): { blob: Blob; filename: string } {
+  const isClientMode = mode === 'client'
+  const isSale = quote.quoteType === 'SALE'
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' }) as JsPDFWithTable
   const pageWidth = doc.internal.pageSize.getWidth()
   const marginL = 14
@@ -151,55 +148,74 @@ export function buildQuotePdf(quote: QuoteDTO): { blob: Blob; filename: string }
 
   for (const item of items) {
     const partNum = item.partNumber
-    bodyRows.push([
-      String(partNum),
-      ITEM_KIND_LABEL[item.itemKind] ?? item.itemKind,
-      item.materialName + (item.isMaterialProvidedByClient ? ' *' : ''),
-      `${item.thickness} mm`,
-      itemDimensions(item),
-      `${item.cuttingTimeMinutes} min`,
-      item.isMaterialProvidedByClient
-        ? `(${fmtCurrency(item.materialCost)})`
-        : fmtCurrency(item.materialCharged),
-      fmtCurrency(item.servicesCost),
-      fmtCurrency(item.totalItemCost),
-    ])
-    rowMeta.push({ isService: false })
+    if (isClientMode && isSale) {
+      // Client mode: no cost columns — show #, kind, material, thickness, dimensions only
+      bodyRows.push([
+        String(partNum),
+        ITEM_KIND_LABEL[item.itemKind] ?? item.itemKind,
+        item.materialName,
+        `${item.thickness} mm`,
+        itemDimensions(item),
+      ])
+      rowMeta.push({ isService: false })
+    } else {
+      bodyRows.push([
+        String(partNum),
+        ITEM_KIND_LABEL[item.itemKind] ?? item.itemKind,
+        item.materialName + (item.isMaterialProvidedByClient ? ' *' : ''),
+        `${item.thickness} mm`,
+        itemDimensions(item),
+        item.chargeMinimumCutting ? '—' : `${item.cuttingTimeMinutes} min`,
+        item.isMaterialProvidedByClient
+          ? `(${fmtCurrency(item.materialCost)})`
+          : fmtCurrency(item.materialCharged),
+        fmtCurrency(item.servicesCost),
+        fmtCurrency(item.totalItemCost),
+      ])
+      rowMeta.push({ isService: false })
 
-      ; (item.services ?? []).forEach((svc, svcIdx) => {
-        const label = svc.serviceName ?? `Servico (${svc.serviceId.slice(0, 6)})`
-        const unitLabel = svc.unitLabel ? ` ${svc.unitLabel}` : ''
-        const subNum = `${partNum}.${svcIdx + 1}`
-        // col 0: subNum | col 1-2 merged: label (colSpan 2) | col 3: '' | col 4: qty | col 5: '' | col 6: '' | col 7: price×qty | col 8: total
-        bodyRows.push([
-          '',
-          { content: subNum, styles: { fontStyle: 'italic', textColor: [100, 100, 100] } },
-          { content: label, colSpan: 2, styles: { fontStyle: 'italic', textColor: [50, 50, 50] } },
-          `${svc.quantity}${unitLabel}`,
-          '',
-          '',
-          { content: `${fmtCurrency(svc.unitPrice)} x ${svc.quantity}`, styles: { textColor: [80, 80, 80] } },
-          { content: fmtCurrency(svc.totalPrice), styles: { fontStyle: 'italic' } },
-        ])
-        rowMeta.push({ isService: true })
-      })
+        ; (item.services ?? []).forEach((svc, svcIdx) => {
+          const label = svc.serviceName ?? `Servico (${svc.serviceId.slice(0, 6)})`
+          const unitLabel = svc.unitLabel ? ` ${svc.unitLabel}` : ''
+          const subNum = `${partNum}.${svcIdx + 1}`
+          bodyRows.push([
+            '',
+            { content: subNum, styles: { fontStyle: 'italic', textColor: [100, 100, 100] } },
+            { content: label, colSpan: 2, styles: { fontStyle: 'italic', textColor: [50, 50, 50] } },
+            `${svc.quantity}${unitLabel}`,
+            '',
+            '',
+            { content: `${fmtCurrency(svc.unitPrice)} x ${svc.quantity}`, styles: { textColor: [80, 80, 80] } },
+            { content: fmtCurrency(svc.totalPrice), styles: { fontStyle: 'italic' } },
+          ])
+          rowMeta.push({ isService: true })
+        })
+    }
   }
 
-  autoTable(doc, {
-    startY: y,
-    margin: { left: marginL, right: marginL },
-    head: [['#', 'Tipo', 'Material', 'Esp.', 'Dimensões / Qtd', 'T. corte', 'Mat. cobrado', 'Serviços', 'Total']],
-    body: bodyRows,
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [30, 30, 30], fontSize: 8, fontStyle: 'bold' },
-    columnStyles: {
+  const head = isClientMode && isSale
+    ? [['#', 'Tipo', 'Material', 'Esp.', 'Dimensões / Qtd']]
+    : [['#', 'Tipo', 'Material', 'Esp.', 'Dimensões / Qtd', 'T. corte', 'Mat. cobrado', 'Serviços', 'Total']]
+
+  const columnStyles = isClientMode && isSale
+    ? { 0: { cellWidth: 8 }, 3: { cellWidth: 14 } }
+    : {
       0: { cellWidth: 8 },
       3: { cellWidth: 14 },
       5: { cellWidth: 18 },
       6: { cellWidth: 24 },
       7: { cellWidth: 20 },
       8: { cellWidth: 24 },
-    },
+    }
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: marginL, right: marginL },
+    head,
+    body: bodyRows,
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [30, 30, 30], fontSize: 8, fontStyle: 'bold' },
+    columnStyles,
     didParseCell(data) {
       if (rowMeta[data.row.index]?.isService) {
         // Fixed light-blue tint — overrides alternating stripe
@@ -225,23 +241,41 @@ export function buildQuotePdf(quote: QuoteDTO): { blob: Blob; filename: string }
   doc.setFont('helvetica', 'bold')
   doc.text('Resumo Financeiro', marginL, summaryY)
 
-  const rows: [string, string][] = [
-    ['Material', fmtCurrency(quote.totalMaterial)],
-    ['Corte', fmtCurrency(quote.totalCutting)],
-    ['Setup', fmtCurrency(quote.totalSetup)],
-    ['Serviços', fmtCurrency(quote.totalServices)],
-    ['Subtotal', fmtCurrency(quote.subtotalQuote)],
-  ]
+  const rows: [string, string][] = []
 
-  if (quote.discountAmount > 0) {
-    const label =
-      quote.discountType === 'PERCENT'
-        ? `Desconto (${quote.discountValue}%)`
-        : 'Desconto'
-    rows.push([label, `- ${fmtCurrency(quote.discountAmount)}`])
+  if (isClientMode && isSale) {
+    // Client mode for SALE: only show "Total" = totalSale
+    rows.push(['TOTAL', fmtCurrency(quote.totalSale ?? quote.totalQuote)])
+  } else {
+    rows.push(
+      ['Material', fmtCurrency(quote.totalMaterial)],
+      ['Corte', fmtCurrency(quote.totalCutting)],
+      ['Setup', fmtCurrency(quote.totalSetup)],
+      ['Serviços', fmtCurrency(quote.totalServices)],
+      ['Subtotal', fmtCurrency(quote.subtotalQuote)],
+    )
+
+    if (quote.discountAmount > 0) {
+      const label =
+        quote.discountType === 'PERCENT'
+          ? `Desconto (${quote.discountValue}%)`
+          : 'Desconto'
+      rows.push([label, `- ${fmtCurrency(quote.discountAmount)}`])
+    }
+
+    if (isSale) {
+      rows.push([`Custo Total`, fmtCurrency(quote.totalQuote)])
+      if ((quote.saleMarkupAmount ?? 0) > 0) {
+        const markupLabel = quote.saleMarkupType === 'PERCENT' && quote.saleMarkupValue
+          ? `Markup (${quote.saleMarkupValue}%)`
+          : 'Markup'
+        rows.push([markupLabel, `+ ${fmtCurrency(quote.saleMarkupAmount)}`])
+      }
+      rows.push(['PREÇO DE VENDA', fmtCurrency(quote.totalSale ?? quote.totalQuote)])
+    } else {
+      rows.push(['TOTAL', fmtCurrency(quote.totalQuote)])
+    }
   }
-
-  rows.push(['TOTAL', fmtCurrency(quote.totalQuote)])
 
   let sy = summaryY + 6
   doc.setFontSize(9)
@@ -292,6 +326,6 @@ export function buildQuotePdf(quote: QuoteDTO): { blob: Blob; filename: string }
   }
 
   const blob = doc.output('blob')
-  const filename = buildQuotePdfFilename(quote)
+  const filename = buildQuotePdfFilename(quote, mode)
   return { blob, filename }
 }

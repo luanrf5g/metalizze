@@ -63,7 +63,7 @@ import {
   deleteQuoteItem,
 } from '@/lib/quotes-api'
 import { formatCurrency, formatDate } from '@/lib/formatters'
-import type { QuoteDTO, QuoteItemDTO, QuoteStatus, DiscountType } from '@/types/quote'
+import type { QuoteDTO, QuoteItemDTO, QuoteStatus, DiscountType, QuoteType } from '@/types/quote'
 
 const ITEM_KIND_LABEL: Record<string, string> = {
   SHEET: 'Chapa',
@@ -93,6 +93,9 @@ export default function QuoteDetailPage() {
   const [headerValidUntil, setHeaderValidUntil] = useState('')
   const [headerDiscountType, setHeaderDiscountType] = useState<DiscountType | ''>('')
   const [headerDiscountValue, setHeaderDiscountValue] = useState('')
+  const [headerQuoteType, setHeaderQuoteType] = useState<QuoteType>('CUTTING')
+  const [headerMarkupType, setHeaderMarkupType] = useState<DiscountType | ''>('')
+  const [headerMarkupValue, setHeaderMarkupValue] = useState('')
   const [isSavingHeader, setIsSavingHeader] = useState(false)
 
   // status transition state
@@ -110,7 +113,7 @@ export default function QuoteDetailPage() {
     setQuote(updated)
   }
 
-  async function handleExportPdf(share = false) {
+  async function handleExportPdf(share = false, mode: 'internal' | 'client' = 'internal') {
     if (!quote) return
     setIsPdfGenerating(true)
     try {
@@ -119,7 +122,7 @@ export default function QuoteDetailPage() {
 
       // Dynamic import to keep jspdf out of SSR bundle
       const { buildQuotePdf } = await import('@/lib/quote-pdf')
-      const { blob, filename } = buildQuotePdf(fullQuote)
+      const { blob, filename } = buildQuotePdf(fullQuote, mode)
 
       if (share && typeof navigator.share === 'function') {
         try {
@@ -166,6 +169,9 @@ export default function QuoteDetailPage() {
       setHeaderValidUntil(data.validUntil ? data.validUntil.slice(0, 10) : '')
       setHeaderDiscountType(data.discountType ?? '')
       setHeaderDiscountValue(data.discountValue != null ? String(data.discountValue) : '')
+      setHeaderQuoteType(data.quoteType ?? 'CUTTING')
+      setHeaderMarkupType(data.saleMarkupType ?? '')
+      setHeaderMarkupValue(data.saleMarkupValue != null ? String(data.saleMarkupValue) : '')
     } catch {
       toast.error('Erro ao carregar orçamento.')
       setHasError(true)
@@ -185,6 +191,9 @@ export default function QuoteDetailPage() {
         validUntil: headerValidUntil || undefined,
         discountType: (headerDiscountType as DiscountType) || undefined,
         discountValue: headerDiscountValue ? Number(headerDiscountValue) : undefined,
+        quoteType: headerQuoteType,
+        saleMarkupType: headerQuoteType === 'SALE' ? ((headerMarkupType as DiscountType) || null) : null,
+        saleMarkupValue: headerQuoteType === 'SALE' && headerMarkupValue ? Number(headerMarkupValue) : null,
       })
       applyUpdate(updated)
       toast.success('Orçamento atualizado.')
@@ -226,6 +235,30 @@ export default function QuoteDetailPage() {
 
   const isDraft = quote?.status === 'DRAFT'
   const isSent = quote?.status === 'SENT'
+
+  // ── Live preview for financial summary ───────────────────────────
+  // In DRAFT mode, derive display values from the header form state so the
+  // user sees markup reflected immediately — even before clicking "Salvar".
+  const displayQuoteType = isDraft ? headerQuoteType : (quote?.quoteType ?? 'CUTTING')
+  const displayMarkupType = isDraft ? headerMarkupType : (quote?.saleMarkupType ?? '')
+  const displayMarkupValue = isDraft && headerMarkupValue
+    ? Number(headerMarkupValue)
+    : (quote?.saleMarkupValue ?? null)
+
+  const displayMarkupAmount = displayQuoteType === 'SALE'
+    ? (() => {
+        const base = quote?.totalQuote ?? 0
+        if (displayMarkupType === 'PERCENT' && displayMarkupValue != null && displayMarkupValue > 0) {
+          return base * (displayMarkupValue / 100)
+        }
+        if (displayMarkupType === 'AMOUNT' && displayMarkupValue != null) {
+          return displayMarkupValue
+        }
+        return 0
+      })()
+    : 0
+
+  const displayTotalSale = (quote?.totalQuote ?? 0) + displayMarkupAmount
 
   if (isLoading) {
     return (
@@ -329,27 +362,51 @@ export default function QuoteDetailPage() {
         )}
 
         {/* PDF export — always visible */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isPdfGenerating}
-            onClick={() => handleExportPdf(false)}
-          >
-            {isPdfGenerating
-              ? <Loader2Icon className="size-4 animate-spin" />
-              : <DownloadIcon className="size-4" />}
-            Baixar PDF
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isPdfGenerating}
-            onClick={() => handleExportPdf(true)}
-          >
-            <ShareIcon className="size-4" />
-            Compartilhar
-          </Button>
+        <div className="flex gap-2 flex-wrap">
+          {quote.quoteType === 'SALE' ? (            <>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isPdfGenerating}
+                onClick={() => handleExportPdf(false, 'internal')}
+                title="PDF com custos e markup (uso interno)"
+              >
+                {isPdfGenerating ? <Loader2Icon className="size-4 animate-spin" /> : <DownloadIcon className="size-4" />}
+                PDF Interno
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isPdfGenerating}
+                onClick={() => handleExportPdf(false, 'client')}
+                title="PDF para o cliente (mostra apenas preço de venda)"
+              >
+                {isPdfGenerating ? <Loader2Icon className="size-4 animate-spin" /> : <ShareIcon className="size-4" />}
+                PDF Cliente
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isPdfGenerating}
+                onClick={() => handleExportPdf(false, 'internal')}
+              >
+                {isPdfGenerating ? <Loader2Icon className="size-4 animate-spin" /> : <DownloadIcon className="size-4" />}
+                Baixar PDF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isPdfGenerating}
+                onClick={() => handleExportPdf(true, 'internal')}
+              >
+                <ShareIcon className="size-4" />
+                Compartilhar
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -380,6 +437,21 @@ export default function QuoteDetailPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
+              <Label>Tipo de Orçamento</Label>
+              <Select
+                value={headerQuoteType}
+                onValueChange={(v) => setHeaderQuoteType(v as QuoteType)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CUTTING">Orçamento de Corte</SelectItem>
+                  <SelectItem value="SALE">Orçamento de Venda</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
               <Label>Desconto</Label>
               <div className="flex gap-2">
                 <Select
@@ -404,6 +476,33 @@ export default function QuoteDetailPage() {
                 />
               </div>
             </div>
+            {headerQuoteType === 'SALE' && (
+              <div className="flex flex-col gap-1.5">
+                <Label>Markup de Venda</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={headerMarkupType}
+                    onValueChange={(v) => setHeaderMarkupType(v as DiscountType)}
+                  >
+                    <SelectTrigger className="w-28 shrink-0">
+                      <SelectValue placeholder="Tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PERCENT">%</SelectItem>
+                      <SelectItem value="AMOUNT">R$</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={headerMarkupValue}
+                    onChange={(e) => setHeaderMarkupValue(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSaveHeader} disabled={isSavingHeader} size="sm">
@@ -468,6 +567,11 @@ export default function QuoteDetailPage() {
                       {item.isMaterialProvidedByClient && (
                         <Badge variant="outline" className="ml-2 text-xs font-normal text-green-600 border-green-500">
                           Fornecido pelo cliente
+                        </Badge>
+                      )}
+                      {item.chargeMinimumCutting && (
+                        <Badge variant="outline" className="ml-2 text-xs font-normal text-amber-600 border-amber-500">
+                          Corte mínimo (15 min)
                         </Badge>
                       )}
                     </TableCell>
@@ -589,9 +693,28 @@ export default function QuoteDetailPage() {
         )}
         <Separator className="my-1" />
         <div className="flex justify-between font-bold text-base">
-          <span>Total</span>
+          <span>{displayQuoteType === 'SALE' ? 'Custo Total' : 'Total'}</span>
           <span>{formatCurrency(quote.totalQuote)}</span>
         </div>
+        {displayQuoteType === 'SALE' && (
+          <>
+            {displayMarkupAmount > 0 && (
+              <div className="flex justify-between text-sm text-blue-600 dark:text-blue-400">
+                <span>
+                  Markup{displayMarkupType === 'PERCENT' && displayMarkupValue
+                    ? ` (${displayMarkupValue}%)`
+                    : ''}
+                </span>
+                <span>+ {formatCurrency(displayMarkupAmount)}</span>
+              </div>
+            )}
+            <Separator className="my-1" />
+            <div className="flex justify-between font-bold text-base text-green-600 dark:text-green-400">
+              <span>Preço de Venda</span>
+              <span>{formatCurrency(displayTotalSale)}</span>
+            </div>
+          </>
+        )}
       </div>
       </div>{/* end right column */}
 

@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   fetchCuttingGases,
   fetchSetupRates,
@@ -67,6 +68,7 @@ type FormState = {
   scrapNotes: string
   cuttingGasId: string
   cuttingTimeMinutes: string
+  chargeMinimumCutting: boolean
   cutWidth: string
   cutHeight: string
   cutLength: string
@@ -108,6 +110,7 @@ function defaultForm(item?: QuoteItemDTO | null): FormState {
       scrapNotes: item.scrapNotes ?? '',
       cuttingGasId: item.cuttingGasId,
       cuttingTimeMinutes: String(item.cuttingTimeMinutes),
+      chargeMinimumCutting: item.chargeMinimumCutting ?? false,
       cutWidth: item.cutWidth != null ? String(item.cutWidth) : '',
       cutHeight: item.cutHeight != null ? String(item.cutHeight) : '',
       cutLength: item.cutLength != null ? String(item.cutLength) : '',
@@ -147,6 +150,7 @@ function defaultForm(item?: QuoteItemDTO | null): FormState {
     scrapNotes: '',
     cuttingGasId: '',
     cuttingTimeMinutes: '',
+    chargeMinimumCutting: false,
     cutWidth: '',
     cutHeight: '',
     cutLength: '',
@@ -246,6 +250,7 @@ export function AddEditQuoteItemModal({
         }),
         cuttingGasId: form.cuttingGasId,
         cuttingTimeMinutes: parseFloat(form.cuttingTimeMinutes),
+        chargeMinimumCutting: form.chargeMinimumCutting,
         cutWidth: form.itemKind === 'SHEET' && form.materialCalcMode === 'SIMPLE_CUT' && form.cutWidth ? parseFloat(form.cutWidth) : null,
         cutHeight: form.itemKind === 'SHEET' && form.materialCalcMode === 'SIMPLE_CUT' && form.cutHeight ? parseFloat(form.cutHeight) : null,
         cutLength: form.itemKind === 'PROFILE' && form.materialCalcMode === 'SIMPLE_CUT' && form.cutLength ? parseFloat(form.cutLength) : null,
@@ -808,6 +813,21 @@ export function AddEditQuoteItemModal({
                 onChange={(e) => update('cuttingTimeMinutes', e.target.value)}
                 required
               />
+              <div className="flex items-center gap-2 pt-1">
+                <Checkbox
+                  id="chargeMinimumCutting"
+                  checked={form.chargeMinimumCutting}
+                  onCheckedChange={(checked) => update('chargeMinimumCutting', checked === true)}
+                />
+                <Label htmlFor="chargeMinimumCutting" className="text-sm font-normal cursor-pointer">
+                  Cobrar corte mínimo (15 min)
+                </Label>
+              </div>
+              {form.chargeMinimumCutting && (
+                <p className="text-xs text-muted-foreground">
+                  O tempo real permanece salvo, mas o valor do corte será calculado com 15 min.
+                </p>
+              )}
             </div>
           </div>
 
