@@ -44,6 +44,7 @@ interface UpdateQuoteItemUseCaseRequest {
   usagePercentage?: number | null
   cuttingGasId?: string
   cuttingTimeMinutes?: number
+  chargeMinimumCutting?: boolean
   cutWidth?: number | null
   cutHeight?: number | null
   cutLength?: number | null
@@ -198,6 +199,7 @@ export class UpdateQuoteItemUseCase {
     const cutHeight = request.cutHeight !== undefined ? request.cutHeight : existingItem.cutHeight
     const cutLength = request.cutLength !== undefined ? request.cutLength : existingItem.cutLength
     const cuttingTimeMinutes = request.cuttingTimeMinutes ?? existingItem.cuttingTimeMinutes
+    const chargeMinimumCutting = request.chargeMinimumCutting ?? existingItem.chargeMinimumCutting
     const setupTimeMinutes = request.setupTimeMinutes ?? existingItem.setupTimeMinutes
     const setupPricePerHour = request.setupPricePerHour ?? existingItem.setupPricePerHour
     const finishingPrice = request.finishingPrice ?? existingItem.finishingPrice
@@ -230,7 +232,8 @@ export class UpdateQuoteItemUseCase {
     }
 
     const materialCharged = isMaterialProvidedByClient ? 0 : materialCost
-    const cuttingCost = (cuttingTimeMinutes / 60) * cuttingGas.pricePerHour
+    const effectiveCuttingTimeMinutes = chargeMinimumCutting ? 15 : cuttingTimeMinutes
+    const cuttingCost = (effectiveCuttingTimeMinutes / 60) * cuttingGas.pricePerHour
     const setupCost = (setupTimeMinutes / 60) * setupPricePerHour
     const subtotalItemCost = materialCharged + cuttingCost + setupCost + existingItem.servicesCost + finishingPrice
 
@@ -276,6 +279,7 @@ export class UpdateQuoteItemUseCase {
         isMaterialProvidedByClient,
         cuttingGasId: new UniqueEntityId(cuttingGasIdStr),
         cuttingTimeMinutes,
+        chargeMinimumCutting,
         cutWidth,
         cutHeight,
         cutLength,

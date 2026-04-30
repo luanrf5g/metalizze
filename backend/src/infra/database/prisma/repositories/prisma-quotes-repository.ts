@@ -129,6 +129,7 @@ export class PrismaQuotesRepository implements QuotesRepository {
       clientId,
       createdById,
       status,
+      quoteType,
       code,
       from,
       to,
@@ -138,6 +139,7 @@ export class PrismaQuotesRepository implements QuotesRepository {
       ...(clientId != null ? { clientId } : {}),
       ...(createdById != null ? { createdById } : {}),
       ...(status != null && status.length > 0 ? { status: { in: status } } : {}),
+      ...(quoteType != null ? { quoteType } : {}),
       ...(code != null ? { code: { contains: code, mode: 'insensitive' as const } } : {}),
       ...(from != null || to != null
         ? {

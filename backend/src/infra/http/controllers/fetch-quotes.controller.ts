@@ -3,9 +3,10 @@ import { BadRequestException, Controller, Get, Query } from '@nestjs/common'
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe'
 import { FetchQuotesUseCase } from '@/domain/application/use-cases/fetch-quotes'
 import { QuotePresenter } from '../presenters/quote-presenter'
-import { QuoteStatus } from '@/domain/enterprise/entities/quote'
+import { QuoteStatus, QuoteType } from '@/domain/enterprise/entities/quote'
 
 const VALID_STATUSES = ['DRAFT', 'SENT', 'APPROVED', 'REJECTED', 'EXPIRED'] as const
+const VALID_QUOTE_TYPES = ['CUTTING', 'SALE'] as const
 
 const fetchQuotesQuerySchema = z.object({
   page: z
@@ -38,6 +39,16 @@ const fetchQuotesQuerySchema = z.object({
       }
       return parts as QuoteStatus[]
     }),
+  quoteType: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (!v) return null
+      if (!VALID_QUOTE_TYPES.includes(v as typeof VALID_QUOTE_TYPES[number])) {
+        throw new Error(`Invalid quoteType value: ${v}`)
+      }
+      return v as QuoteType
+    }),
   clientId: z.string().uuid().optional().transform((v) => v ?? null),
   createdById: z.string().uuid().optional().transform((v) => v ?? null),
   code: z.string().optional().transform((v) => v ?? null),
@@ -55,7 +66,7 @@ export class FetchQuotesController {
 
   @Get()
   async handle(@Query(queryValidationPipe) query: FetchQuotesQuerySchema) {
-    const { page, perPage, sortBy, sortOrder, status, clientId, createdById, code, from, to } =
+    const { page, perPage, sortBy, sortOrder, status, quoteType, clientId, createdById, code, from, to } =
       query
 
     const result = await this.fetchQuotes.execute({
@@ -64,6 +75,7 @@ export class FetchQuotesController {
       sortBy,
       sortOrder,
       status: status ?? null,
+      quoteType: quoteType ?? null,
       clientId: clientId ?? null,
       createdById: createdById ?? null,
       code: code ?? null,

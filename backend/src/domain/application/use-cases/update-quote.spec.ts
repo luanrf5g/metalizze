@@ -132,6 +132,56 @@ describe('Update Quote Use Case', () => {
     expect(result.value).toBeInstanceOf(ResourceNotFoundError)
   })
 
+  it('should calculate saleMarkupAmount and totalSale for SALE quote with PERCENT markup', async () => {
+    const quote = makeQuote({ status: 'DRAFT' })
+    await quotesRepository.create(quote)
+
+    // Set the quote total so we can test markup calculation
+    quote.totalQuote = 100
+
+    const result = await sut.execute({
+      quoteId: quote.id.toString(),
+      quoteType: 'SALE',
+      saleMarkupType: 'PERCENT',
+      saleMarkupValue: 70,
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const updated = result.value.quote
+      expect(updated.quoteType).toBe('SALE')
+      expect(updated.saleMarkupType).toBe('PERCENT')
+      expect(updated.saleMarkupValue).toBe(70)
+      expect(updated.totalCost).toBe(updated.totalQuote)
+      expect(updated.saleMarkupAmount).toBeCloseTo(updated.totalQuote * 0.7, 5)
+      expect(updated.totalSale).toBeCloseTo(updated.totalQuote * 1.7, 5)
+    }
+  })
+
+  it('should clear saleMarkup fields when switching back to CUTTING', async () => {
+    const quote = makeQuote({
+      status: 'DRAFT',
+      quoteType: 'SALE',
+      saleMarkupType: 'PERCENT',
+      saleMarkupValue: 50,
+    })
+    await quotesRepository.create(quote)
+
+    const result = await sut.execute({
+      quoteId: quote.id.toString(),
+      quoteType: 'CUTTING',
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const updated = result.value.quote
+      expect(updated.quoteType).toBe('CUTTING')
+      expect(updated.saleMarkupType).toBeNull()
+      expect(updated.saleMarkupValue).toBeNull()
+      expect(updated.saleMarkupAmount).toBe(0)
+    }
+  })
+
   it('should return QuoteNotEditableError for non-DRAFT statuses', async () => {
     for (const status of ['SENT', 'APPROVED', 'REJECTED', 'EXPIRED'] as const) {
       const quote = makeQuote({ status })

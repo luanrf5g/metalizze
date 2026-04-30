@@ -4,10 +4,14 @@ import { Optional } from "@/core/types/optional";
 
 export type QuoteStatus = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED' | 'EXPIRED'
 export type DiscountType = 'PERCENT' | 'AMOUNT'
+export type QuoteType = 'CUTTING' | 'SALE'
 
 export interface QuoteProps {
   code: string
   status: QuoteStatus
+  quoteType: QuoteType
+  saleMarkupType?: DiscountType | null
+  saleMarkupValue?: number | null
   clientId?: UniqueEntityId | null
   notes?: string | null
   validUntil?: Date | null
@@ -33,6 +37,9 @@ export interface QuoteProps {
 export class Quote extends Entity<QuoteProps> {
   get code() { return this.props.code }
   get status() { return this.props.status }
+  get quoteType() { return this.props.quoteType }
+  get saleMarkupType() { return this.props.saleMarkupType ?? null }
+  get saleMarkupValue() { return this.props.saleMarkupValue ?? null }
   get clientId() { return this.props.clientId ?? null }
   get notes() { return this.props.notes ?? null }
   get validUntil() { return this.props.validUntil ?? null }
@@ -45,6 +52,20 @@ export class Quote extends Entity<QuoteProps> {
   get discountValue() { return this.props.discountValue ?? null }
   get discountAmount() { return this.props.discountAmount }
   get totalQuote() { return this.props.totalQuote }
+  /** Alias: custo interno = totalQuote */
+  get totalCost() { return this.props.totalQuote }
+  get saleMarkupAmount(): number {
+    if (this.props.quoteType !== 'SALE') return 0
+    const base = this.props.totalQuote
+    if (this.props.saleMarkupType === 'PERCENT' && this.props.saleMarkupValue != null) {
+      return base * (this.props.saleMarkupValue / 100)
+    }
+    if (this.props.saleMarkupType === 'AMOUNT' && this.props.saleMarkupValue != null) {
+      return this.props.saleMarkupValue
+    }
+    return 0
+  }
+  get totalSale(): number { return this.props.totalQuote + this.saleMarkupAmount }
   get revision() { return this.props.revision }
   get sentAt() { return this.props.sentAt ?? null }
   get approvedAt() { return this.props.approvedAt ?? null }
@@ -55,6 +76,9 @@ export class Quote extends Entity<QuoteProps> {
   get updatedAt() { return this.props.updatedAt }
 
   set status(v: QuoteStatus) { this.props.status = v; this.touch() }
+  set quoteType(v: QuoteType) { this.props.quoteType = v; this.touch() }
+  set saleMarkupType(v: DiscountType | null) { this.props.saleMarkupType = v; this.touch() }
+  set saleMarkupValue(v: number | null) { this.props.saleMarkupValue = v; this.touch() }
   set notes(v: string | null) { this.props.notes = v; this.touch() }
   set validUntil(v: Date | null) { this.props.validUntil = v; this.touch() }
   set totalMaterial(v: number) { this.props.totalMaterial = v; this.touch() }
@@ -80,6 +104,7 @@ export class Quote extends Entity<QuoteProps> {
       QuoteProps,
       | 'createdAt'
       | 'status'
+      | 'quoteType'
       | 'totalMaterial'
       | 'totalCutting'
       | 'totalSetup'
@@ -95,6 +120,7 @@ export class Quote extends Entity<QuoteProps> {
       {
         ...props,
         status: props.status ?? 'DRAFT',
+        quoteType: props.quoteType ?? 'CUTTING',
         totalMaterial: props.totalMaterial ?? 0,
         totalCutting: props.totalCutting ?? 0,
         totalSetup: props.totalSetup ?? 0,

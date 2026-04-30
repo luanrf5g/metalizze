@@ -66,6 +66,11 @@ enum UserRole {
   VIEWER
 }
 
+enum QuoteType {
+  CUTTING
+  SALE
+}
+
 model User {
   id       String @id @default(uuid())
   name     String
@@ -246,6 +251,10 @@ model Quote {
   code   String      @unique // código do orçamento, ex.: "QT-2024-0001"
   status QuoteStatus @default(DRAFT)
 
+  quoteType      QuoteType    @default(CUTTING) @map("quote_type")
+  saleMarkupType DiscountType? @map("sale_markup_type")
+  saleMarkupValue Float?       @map("sale_markup_value")
+
   clientId String? @map("client_id")
   client   Client? @relation(fields: [clientId], references: [id])
 
@@ -342,9 +351,10 @@ model QuoteItem {
   isMaterialProvidedByClient Boolean @default(false) @map("is_material_provided_by_client") // material fornecido pelo cliente (custo não entra no total)
 
   // Dados do Corte
-  cuttingGasId       String     @map("cutting_gas_id")
-  cuttingGas         CuttingGas @relation(fields: [cuttingGasId], references: [id])
-  cuttingTimeMinutes Float      @map("cutting_time_minutes") // tempo de corte estimado em minutos
+  cuttingGasId         String     @map("cutting_gas_id")
+  cuttingGas           CuttingGas @relation(fields: [cuttingGasId], references: [id])
+  cuttingTimeMinutes   Float      @map("cutting_time_minutes") // tempo de corte REAL estimado em minutos
+  chargeMinimumCutting Boolean    @default(false) @map("charge_minimum_cutting") // cobra corte mínimo de 15 min independente do tempo real
 
   // Dimensões do “corte total” para chapa
   cutWidth  Float? @map("cut_width")

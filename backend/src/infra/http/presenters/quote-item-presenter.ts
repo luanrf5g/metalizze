@@ -40,6 +40,8 @@ export class QuoteItemPresenter {
       isMaterialProvidedByClient: item.isMaterialProvidedByClient,
       cuttingGasId: item.cuttingGasId.toString(),
       cuttingTimeMinutes: item.cuttingTimeMinutes,
+      chargeMinimumCutting: item.chargeMinimumCutting,
+      effectiveCuttingTimeMinutes: item.effectiveCuttingTimeMinutes,
       cutWidth: item.cutWidth,
       cutHeight: item.cutHeight,
       cutLength: item.cutLength,

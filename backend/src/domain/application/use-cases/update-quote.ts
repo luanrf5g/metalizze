@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Either, left, right } from "@/core/logic/Either";
 import { QuotesRepository } from "../repositories/quotes-repository";
 import { ClientsRepository } from "../repositories/clients-repository";
-import { Quote, DiscountType } from "@/domain/enterprise/entities/quote";
+import { Quote, DiscountType, QuoteType } from "@/domain/enterprise/entities/quote";
 import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { QuoteNotEditableError } from "./errors/quote-not-editable-error";
@@ -15,6 +15,9 @@ interface UpdateQuoteUseCaseRequest {
   validUntil?: Date | null
   discountType?: DiscountType | null
   discountValue?: number | null
+  quoteType?: QuoteType
+  saleMarkupType?: DiscountType | null
+  saleMarkupValue?: number | null
 }
 
 type UpdateQuoteUseCaseResponse = Either<
@@ -37,6 +40,9 @@ export class UpdateQuoteUseCase {
     validUntil,
     discountType,
     discountValue,
+    quoteType,
+    saleMarkupType,
+    saleMarkupValue,
   }: UpdateQuoteUseCaseRequest): Promise<UpdateQuoteUseCaseResponse> {
     const quote = await this.quotesRepository.findById(quoteId)
     if (!quote) return left(new ResourceNotFoundError())
@@ -60,6 +66,16 @@ export class UpdateQuoteUseCase {
     if (validUntil !== undefined) quote.validUntil = validUntil ?? null
     if (discountType !== undefined) quote.discountType = discountType ?? null
     if (discountValue !== undefined) quote.discountValue = discountValue ?? null
+    if (quoteType !== undefined) {
+      quote.quoteType = quoteType
+      // If switching to CUTTING, clear markup fields
+      if (quoteType === 'CUTTING') {
+        quote.saleMarkupType = null
+        quote.saleMarkupValue = null
+      }
+    }
+    if (saleMarkupType !== undefined) quote.saleMarkupType = saleMarkupType ?? null
+    if (saleMarkupValue !== undefined) quote.saleMarkupValue = saleMarkupValue ?? null
 
     await this.quotesRepository.save(quote)
     await this.calculateQuoteTotals.execute({ quoteId })

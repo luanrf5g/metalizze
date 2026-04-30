@@ -39,6 +39,7 @@ export interface QuoteItemProps {
   isMaterialProvidedByClient: boolean
   cuttingGasId: UniqueEntityId
   cuttingTimeMinutes: number
+  chargeMinimumCutting: boolean
   cutWidth?: number | null
   cutHeight?: number | null
   cutLength?: number | null
@@ -93,6 +94,8 @@ export class QuoteItem extends Entity<QuoteItemProps> {
   get materialCharged() { return this.props.isMaterialProvidedByClient ? 0 : this.props.materialCost }
   get cuttingGasId() { return this.props.cuttingGasId }
   get cuttingTimeMinutes() { return this.props.cuttingTimeMinutes }
+  get chargeMinimumCutting() { return this.props.chargeMinimumCutting }
+  get effectiveCuttingTimeMinutes() { return this.props.chargeMinimumCutting ? 15 : this.props.cuttingTimeMinutes }
   get cutWidth() { return this.props.cutWidth ?? null }
   get cutHeight() { return this.props.cutHeight ?? null }
   get cutLength() { return this.props.cutLength ?? null }
@@ -129,6 +132,7 @@ export class QuoteItem extends Entity<QuoteItemProps> {
       | 'chargeFullLastProfileBar'
       | 'computedProfileBarUnits'
       | 'isMaterialProvidedByClient'
+      | 'chargeMinimumCutting'
       | 'setupTimeMinutes'
       | 'setupPricePerHour'
       | 'finishingPrice'
@@ -157,6 +161,7 @@ export class QuoteItem extends Entity<QuoteItemProps> {
         chargeFullLastProfileBar: props.chargeFullLastProfileBar ?? false,
         computedProfileBarUnits: props.computedProfileBarUnits ?? 1,
         isMaterialProvidedByClient: props.isMaterialProvidedByClient ?? false,
+        chargeMinimumCutting: props.chargeMinimumCutting ?? false,
         setupTimeMinutes: props.setupTimeMinutes ?? 0,
         setupPricePerHour: props.setupPricePerHour ?? 0,
         finishingPrice: props.finishingPrice ?? 0,

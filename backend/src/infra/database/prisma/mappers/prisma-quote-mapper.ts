@@ -1,5 +1,5 @@
 import { UniqueEntityId } from "@/core/entities/unique-entity-id";
-import { Quote, QuoteStatus, DiscountType } from "@/domain/enterprise/entities/quote";
+import { Quote, QuoteStatus, DiscountType, QuoteType } from "@/domain/enterprise/entities/quote";
 import { Prisma, Quote as PrismaQuote } from "@prisma/client";
 
 export class PrismaQuoteMapper {
@@ -8,6 +8,9 @@ export class PrismaQuoteMapper {
       {
         code: raw.code,
         status: raw.status as QuoteStatus,
+        quoteType: raw.quoteType as QuoteType,
+        saleMarkupType: raw.saleMarkupType as DiscountType | null,
+        saleMarkupValue: raw.saleMarkupValue,
         clientId: raw.clientId ? new UniqueEntityId(raw.clientId) : null,
         notes: raw.notes,
         validUntil: raw.validUntil,
@@ -38,6 +41,9 @@ export class PrismaQuoteMapper {
       id: quote.id.toString(),
       code: quote.code,
       status: quote.status,
+      quoteType: quote.quoteType,
+      saleMarkupType: quote.saleMarkupType ?? null,
+      saleMarkupValue: quote.saleMarkupValue,
       clientId: quote.clientId?.toString() ?? null,
       notes: quote.notes,
       validUntil: quote.validUntil,

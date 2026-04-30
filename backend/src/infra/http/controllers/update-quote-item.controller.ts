@@ -50,6 +50,7 @@ const updateQuoteItemBodySchema = z.object({
   usagePercentage: z.number().min(0).max(100).optional().nullable(),
   cuttingGasId: z.uuid().optional(),
   cuttingTimeMinutes: z.number().min(0).optional(),
+  chargeMinimumCutting: z.boolean().optional(),
   cutWidth: z.number().positive().optional().nullable(),
   cutHeight: z.number().positive().optional().nullable(),
   cutLength: z.number().positive().optional().nullable(),
@@ -71,7 +72,7 @@ export class UpdateQuoteItemController {
   constructor(
     private updateQuoteItem: UpdateQuoteItemUseCase,
     private getQuoteById: GetQuoteByIdUseCase,
-  ) {}
+  ) { }
 
   @Patch()
   async handle(

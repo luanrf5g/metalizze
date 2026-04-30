@@ -621,4 +621,46 @@ describe('Quotes (E2E)', () => {
       expect(res.statusCode).toBe(400)
     })
   })
+
+  it('chargeMinimumCutting: should charge 15 min cost even when real time is 5 min', async () => {
+    const cuttingGas = await cuttingGasFactory.makePrismaCuttingGas({
+      name: 'Gás Mínimo Test',
+      pricePerHour: 120, // R$ 2/min
+    })
+
+    const createRes = await request(app.getHttpServer())
+      .post('/quotes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({})
+
+    expect(createRes.statusCode).toBe(201)
+    const quoteId: string = createRes.body.quote.id
+
+    const addRes = await request(app.getHttpServer())
+      .post(`/quotes/${quoteId}/items`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        itemKind: 'SHEET',
+        materialName: 'Aço Test',
+        thickness: 3,
+        baseMaterialPrice: 0,
+        isFullMaterial: true,
+        cuttingGasId: cuttingGas.id.toString(),
+        cuttingTimeMinutes: 5,
+        chargeMinimumCutting: true,
+        services: [],
+      })
+
+    expect(addRes.statusCode).toBe(201)
+    const addedItem = addRes.body.quote.items[0]
+
+    // real time is preserved
+    expect(addedItem.cuttingTimeMinutes).toBe(5)
+    // effective time is 15 (minimum)
+    expect(addedItem.effectiveCuttingTimeMinutes).toBe(15)
+    // cuttingCost = 120 * (15/60) = 30
+    expect(addedItem.cuttingCost).toBe(30)
+    // flag is persisted
+    expect(addedItem.chargeMinimumCutting).toBe(true)
+  })
 })

@@ -89,6 +89,7 @@ export class InMemoryQuotesRepository implements QuotesRepository {
       clientId,
       createdById,
       status,
+      quoteType,
       code,
       from,
       to,
@@ -98,6 +99,7 @@ export class InMemoryQuotesRepository implements QuotesRepository {
       if (clientId != null && quote.clientId?.toString() !== clientId) return false
       if (createdById != null && quote.createdById.toString() !== createdById) return false
       if (status != null && status.length > 0 && !status.includes(quote.status)) return false
+      if (quoteType != null && quote.quoteType !== quoteType) return false
       if (code != null && !quote.code.toLowerCase().includes(code.toLowerCase())) return false
       if (from != null && quote.createdAt < from) return false
       if (to != null && quote.createdAt > to) return false

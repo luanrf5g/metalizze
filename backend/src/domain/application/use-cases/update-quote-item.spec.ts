@@ -225,4 +225,47 @@ describe('Update Quote Item Use Case', () => {
     expect(result.isLeft()).toBe(true)
     expect(result.value).toBeInstanceOf(ResourceNotFoundError)
   })
+
+  it('should apply minimum cutting cost (15 min) when chargeMinimumCutting=true', async () => {
+    const cuttingGas = makeCuttingGas({ pricePerHour: 120 })
+    await cuttingGasRepository.create(cuttingGas)
+
+    const quote = makeQuote({ status: 'DRAFT' })
+    await quotesRepository.create(quote)
+
+    const item = makeQuoteItem({
+      quoteId: quote.id,
+      cuttingGasId: cuttingGas.id,
+      baseMaterialPrice: 0,
+      isFullMaterial: true,
+      cuttingTimeMinutes: 30,
+      chargeMinimumCutting: false,
+      cuttingCost: 60,
+      materialCost: 0,
+      setupCost: 0,
+      servicesCost: 0,
+      subtotalItemCost: 60,
+      discountAmount: 0,
+      totalItemCost: 60,
+    })
+    quotesRepository.quoteItems.push(item)
+
+    const result = await sut.execute({
+      quoteId: quote.id.toString(),
+      itemId: item.id.toString(),
+      cuttingTimeMinutes: 5,
+      chargeMinimumCutting: true,
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const { item: updatedItem } = result.value
+      // real time is preserved
+      expect(updatedItem.cuttingTimeMinutes).toBe(5)
+      // effective time is 15 (minimum)
+      expect(updatedItem.effectiveCuttingTimeMinutes).toBe(15)
+      // cuttingCost = 120 * (15/60) = 30
+      expect(updatedItem.cuttingCost).toBe(30)
+    }
+  })
 })

@@ -1,4 +1,4 @@
-import { Quote, QuoteStatus } from "@/domain/enterprise/entities/quote";
+import { Quote, QuoteStatus, QuoteType } from "@/domain/enterprise/entities/quote";
 import { QuoteItem } from "@/domain/enterprise/entities/quote-item";
 import { QuoteItemService } from "@/domain/enterprise/entities/quote-item-service";
 import { QuoteWithItems } from "@/domain/enterprise/value-objects/quote-with-items";
@@ -13,6 +13,7 @@ export interface FetchQuotesParams {
   sortBy?: QuotesSortBy
   sortOrder?: QuotesSortOrder
   status?: QuoteStatus[] | null
+  quoteType?: QuoteType | null
   clientId?: string | null
   createdById?: string | null
   code?: string | null

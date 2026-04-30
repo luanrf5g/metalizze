@@ -21,6 +21,9 @@ const updateQuoteBodySchema = z.object({
   validUntil: z.coerce.date().optional().nullable(),
   discountType: z.enum(['PERCENT', 'AMOUNT']).optional().nullable(),
   discountValue: z.number().min(0).optional().nullable(),
+  quoteType: z.enum(['CUTTING', 'SALE']).optional(),
+  saleMarkupType: z.enum(['PERCENT', 'AMOUNT']).optional().nullable(),
+  saleMarkupValue: z.number().min(0).max(1000).optional().nullable(),
 })
 
 type UpdateQuoteBodySchema = z.infer<typeof updateQuoteBodySchema>
@@ -39,7 +42,7 @@ export class UpdateQuoteController {
     @Param('id') quoteId: string,
     @Body(bodyValidationPipe) body: UpdateQuoteBodySchema,
   ) {
-    const { clientId, notes, validUntil, discountType, discountValue } = body
+    const { clientId, notes, validUntil, discountType, discountValue, quoteType, saleMarkupType, saleMarkupValue } = body
 
     const result = await this.updateQuote.execute({
       quoteId,
@@ -48,6 +51,9 @@ export class UpdateQuoteController {
       validUntil,
       discountType,
       discountValue,
+      quoteType,
+      saleMarkupType,
+      saleMarkupValue,
     })
 
     if (result.isLeft()) {

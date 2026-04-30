@@ -750,4 +750,64 @@ describe('Add Quote Item – PROFILE items', () => {
       expect(item.subtotalItemCost).toBe(0)
     }
   })
+
+  it('should apply minimum cutting cost (15 min) when chargeMinimumCutting=true', async () => {
+    const cuttingGas = makeCuttingGas({ pricePerHour: 120 })
+    await cuttingGasRepository.create(cuttingGas)
+
+    const quote = makeQuote()
+    await quotesRepository.create(quote)
+
+    const result = await sut.execute({
+      quoteId: quote.id.toString(),
+      itemKind: 'SHEET',
+      materialName: 'Aço',
+      thickness: 3,
+      baseMaterialPrice: 0,
+      isFullMaterial: true,
+      cuttingGasId: cuttingGas.id.toString(),
+      cuttingTimeMinutes: 5,
+      chargeMinimumCutting: true,
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const { item } = result.value
+      // real time stays 5
+      expect(item.cuttingTimeMinutes).toBe(5)
+      // effective time is 15 (minimum)
+      expect(item.effectiveCuttingTimeMinutes).toBe(15)
+      // cuttingCost = 120 * (15/60) = 30
+      expect(item.cuttingCost).toBe(30)
+    }
+  })
+
+  it('should use real cutting time when chargeMinimumCutting=false', async () => {
+    const cuttingGas = makeCuttingGas({ pricePerHour: 120 })
+    await cuttingGasRepository.create(cuttingGas)
+
+    const quote = makeQuote()
+    await quotesRepository.create(quote)
+
+    const result = await sut.execute({
+      quoteId: quote.id.toString(),
+      itemKind: 'SHEET',
+      materialName: 'Aço',
+      thickness: 3,
+      baseMaterialPrice: 0,
+      isFullMaterial: true,
+      cuttingGasId: cuttingGas.id.toString(),
+      cuttingTimeMinutes: 5,
+      chargeMinimumCutting: false,
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const { item } = result.value
+      expect(item.cuttingTimeMinutes).toBe(5)
+      expect(item.effectiveCuttingTimeMinutes).toBe(5)
+      // cuttingCost = 120 * (5/60) = 10
+      expect(item.cuttingCost).toBe(10)
+    }
+  })
 })
