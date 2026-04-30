@@ -18,6 +18,9 @@ export class PrismaSheetWithDetailsMapper {
         name: raw.material.name,
         slug: raw.material.slug
       },
+      width: raw.width,
+      height: raw.height,
+      thickness: raw.thickness,
       quantity: raw.quantity,
       price: raw.price ?? 0,
       type: raw.type,

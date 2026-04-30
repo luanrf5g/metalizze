@@ -3,9 +3,15 @@ import { Sheet, SheetType } from "@/domain/enterprise/entities/sheet";
 import { SheetWithDetails } from "@/domain/enterprise/value-objects/sheet-with-details";
 
 export interface FindManySheetsParams extends PaginationParams {
+  perPage?: number | null,
   materialId?: string | null,
   clientId?: string | null,
-  type?: 'STANDARD' | 'SCRAP' | null
+  type?: 'STANDARD' | 'SCRAP' | null,
+  search?: string | null,
+  materials?: string[] | null,
+  thicknesses?: number[] | null,
+  sortBy?: 'createdAt' | 'updatedAt' | 'quantity' | 'thickness' | null,
+  sortOrder?: 'asc' | 'desc' | null,
 }
 
 export abstract class SheetsRepository {
